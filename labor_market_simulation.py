@@ -19,11 +19,12 @@ class Worker:
             T (int): max number of failed negotiations a worker is willing to tolerate from MVPT.
             firm (Firm): instance of Firm that is Worker's initial employer.
         '''
-        self.fairness_uncertainty = gen.beta(a=2,b=5) # fairness uncertainty salience, left skewed distribution
+        self.fairness_uncertainty = gen.beta(a=4,b=5) # fairness uncertainty salience, slightly left skewed distribution
         self.productivity = q
         self.s1 = s1
         self.s2 = s2
         self.num_failures = 0 # counter to track failed negotiations
+        self.num_successes = 0 # counter to track successful negotiations
         self.failure_threshold = T
         self.employer = None # initially unemployed
         self.wage = None # initially unemployed
@@ -37,13 +38,16 @@ class Worker:
         '''
         if self.num_failures == -1:
             mvpt.remove_worker(self) # make sure worker is not in next data pool
+            return # do not seek info
 
-        p_seek_info = self.fairness_uncertainty * self.employer.transparency_multiplier
+        p_seek_info = (self.fairness_uncertainty + self.employer.transparency_multiplier)/2 # average instead of multiplication to prevent too small of probabilities
         seek_info = gen.choice([0,1],p=[1-p_seek_info, p_seek_info])
 
         if seek_info and self.num_failures>=0: # self.num_failures = -1 if worker decides to never share data again
             mvpt.add_worker(self) # share data (if not in data pool already)
             self.belief_update(m_hat = mvpt.m_hat) # (view m_hat and update median pay belief)
+        else:
+            mvpt.remove_worker(self) # try removing worker if they don't actively share
         
 
     def belief_update(self,anchor=0.01,m_hat = None):
@@ -110,42 +114,41 @@ class MVPT:
             worker_data_pool (Set[Worker]): pool of initial workers who are sharing their wage information
             sigma_e (float): standard deviation parameter of error term of median calculation. positively correlated with len(worker_data_pool).
         '''
-        self.data_pool = worker_data_pool
-        self.sigma_e = sigma_e
+        self.data_pool = worker_data_pool # to generate median 
+        self.sigma_e = sigma_e # to generate error
         self.error = 0
         self.m_hat = 0
 
     
     def add_worker(self, worker):
-        '''adds specified Worker object to data pool. decreases sigma_e by 1/2. 
+        '''adds specified Worker object to data pool. decreases sigma_e by a small amount. 
 
         params
             worker (Worker): Worker object to add. 
         '''
         if worker not in self.data_pool:
             self.data_pool.add(worker)
-            self.sigma_e = self.sigma_e * 1/2
-        else:
-            print("Warning: worker already in data pool.")
+            self.sigma_e = max(self.sigma_e - 1e3,0) # arbitrary decrease / floor for now
+
     
     def remove_worker(self, worker):
-        '''removes specified Worker object from data pool. increases sigma_e by 1/2.
+        '''removes specified Worker object from data pool. increases sigma_e by a small amount.
 
         params
             worker (Worker): Worker object to remove. 
         '''
         if worker in self.data_pool:
             self.data_pool.remove(worker)
-            self.sigma_e = self.sigma_e * 2
-        else:
-            print("Warning: worker not in data pool.")
+            self.sigma_e = min(self.sigma_e + 1e3,1) # arbitrary increase / cap for now
 
     def update_m_hat(self):
         '''updates m_hat prediction based on current data pool and sigma_e 
         '''
         error = gen.normal(0,self.sigma_e) # regenerate error each time tool is updated
-        self.error = abs(error) # know magnitude of error in either direction
+        self.error = abs(error) # record magnitude of error in either direction to report
         self.m_hat = np.median([w.wage for w in self.data_pool]) + error
+        self.m_hat = min(self.m_hat,1)
+        self.m_hat = max(self.m_hat,0)
 
 class Market:
     '''Market class is used to create a single market instance to keep track of the connections between firms and workers and MVPT. Additionally, carries out each phase of the market evolution.'''
@@ -159,7 +162,6 @@ class Market:
         self.benchmark_cost = b
         self.benchmark_proportion = b_k
 
-        
         self.firms = [Firm(t_f_m, C,b) for i in range(int(N_f / 2))] + [Firm(1-t_f_m,C,b) for i in range(int(N_f / 2))] # half firms transparent and half not
         self.workers = [Worker(q,s1,s2,T) for i in range(N_w)] # all identical workers to start
 
@@ -181,11 +183,11 @@ class Market:
                 sigma_f = 0.5
                 if f.transparency_multiplier == t_f_m:
                     sigma_f = 0.05           
-                wage = gen.normal(w.productivity,sigma_f)
+                wage = gen.normal(0.5,sigma_f)
                 
                 # enforce constraints:
                 wage = max(wage,0)
-                wage = min (wage,1)
+                wage = min(wage,1)
 
                 w.wage = wage
 
@@ -256,23 +258,23 @@ class Market:
     def negotiation_and_belief_update(self):
         '''
         '''
-        def _bargaining_outcome(o1, a_t_1, a_t_2, o2, c_a_t, benchmarked):
+        def _bargaining_outcome(o1, at1, at2, o2, at1_c, benchmarked):
             '''bargaining outcomes parameterized by initial offers by workers (o1), immediate acceptance cap(a_t_1), counter offer cap (a_t_2), '''
             if benchmarked:
-                if o1 <= a_t_1:
+                if o1 <= at1: # opening offer lower than firm's median belief, accept
                     return o1
-                elif o1 <= a_t_2 and o2 >= c_a_t:
+                elif o1 <= at2 and o2 >= at1_c: # opening offer lower than firm's upper belief, worker accepts reduced counteroffer
                     return o2
                 else:
                     return -1
             else:
-                if o2 >= c_a_t:
+                if o2 >= at1_c: # worker accepts error-corrected mvpt offer if it is at least their belief lower bound
                     return o2
                 else:
                     return -1
 
         m_hat = self.mvpt.m_hat
-        error = self.mvpt.sigma_e
+        error = self.mvpt.error
 
         for w in gen.permutation(self.workers): # randomize sequence of negotiations to prevent small group of workers consistently switching
             
@@ -284,7 +286,7 @@ class Market:
             if firm == w.employer: # renegotiation
                 
                 if firm.bought_benchmark:
-                    outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1], firm.market_pay_belief[2], (w.market_pay_belief[1] +firm.market_pay_belief[1]) / 2,w.market_pay_belief[0],1)
+                    outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1], firm.market_pay_belief[2], (w.market_pay_belief[1] + firm.market_pay_belief[1]) / 2,w.market_pay_belief[0],1)
                 else:
                     outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1], firm.market_pay_belief[2], w.market_pay_belief[1] - error,w.market_pay_belief[0],0)
                 
@@ -295,6 +297,7 @@ class Market:
                         w.num_failures = -1 # will be removed from data pool next time step
                 else:
                     w.wage = outcome
+                    w.num_successes = w.num_successes + 1
 
             else: # negotiation with a new firm
 
@@ -303,10 +306,12 @@ class Market:
                     continue # firm already at capacity
                 
                 if len(firm.workers) == 0:
+                    # print("SWITCH")
                     w.wage = w.market_pay_belief[1] # accept any wage offer 
                     w.employer.workers.remove(w) # remove from previous firm 
                     w.employer = firm # worker has firm as employer
                     firm.workers.add(w) # firm has worker as employee
+                    w.num_successes = w.num_successes + 1
 
                 if firm.bought_benchmark:
                     outcome = outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1],firm.market_pay_belief[2], (w.market_pay_belief[1] +firm.market_pay_belief[1]) / 2,w.market_pay_belief[0],1)
@@ -319,10 +324,12 @@ class Market:
                     if stop_sharing:
                         w.num_failures = -1 # will be removed from data pool next time step
                 else:
+                    # print("SWITCH")
                     w.wage = outcome
                     w.employer.workers.remove(w) # remove from previous firm 
                     w.employer = firm # worker has firm as employer
                     firm.workers.add(w) # firm has worker as employee
+                    w.num_successes = w.num_successes + 1
 
             # worker updates beliefs
             w.belief_update() 
@@ -332,16 +339,27 @@ class Market:
             f.belief_update()
 
 
-    
-
-def plot_wage_distribution_within_firm(firm):
-    
+def get_wage_distribution_within_firm(firm):
     wages = []
     
     for w in firm.workers:
         wages.append(w.wage)
-    counts, bins = np.histogram(wages)
+    counts, bins = np.histogram(wages, range=(0,1))
+
+    return counts, bins
+
+def plot_attribute_distribution_within_firm(f_idx,firm,attr, extra_counts = None, extra_bins = None):
+    
+    attribute_values = []
+    
+    for w in firm.workers:
+        attribute_values.append(getattr(w,attr))
+    counts, bins = np.histogram(attribute_values,range=(0,1))
     plt.stairs(counts,bins)
+    if extra_counts is not None:
+        plt.stairs(extra_counts, extra_bins, color="red",linestyle="dashed")
+    plt.title(f"Distribution of {attr} of Workers at Firm {firm}")
+    plt.savefig(f"opt_in_simulation_results/distribution_of_{attr}_at_firm_{f_idx}_seed={seed}")
     plt.show()
 
 def print_wage_distribution_within_firm(firm):
@@ -366,12 +384,12 @@ if __name__ == "__main__":
 
     # labor market parameters
     N_firms = 10
-    N_workers = 50 # evenly split among firms initially
-    firm_capacity = 10 # total number of employees a firm can have
-    worker_productivity =  0.5 # "quality" of worker -- ASSUME wages in [0,1]
+    N_workers = 100 # evenly split among firms initially
+    firm_capacity = 20 # total number of employees a firm can have
+    worker_productivity =  1 # "quality" of worker -- ASSUME wages in [0,1], assume wages always below productivity
     failure_threshold = 10 # tolerance of workers for number of failed negotiations
-    s1 = 0.25 # threshold for workers to renegotiate with their current firm
-    s2 = 0.75 # threshold for workers to seek out a new firm 
+    s1 = 0.05 # threshold for workers to renegotiate with their current firm
+    s2 = 0.1 # threshold for workers to seek out a new firm 
     transparent_firm_multiplier = 0.1 # relatively reduces the chance of workers in transparent firms of sharing data
     benchmark_cost = 0 # cost of high quality benchmark, possibly leave it cost free
     benchmark_proportion = 0.6 # proportion of firms that get added to random sample
@@ -380,23 +398,48 @@ if __name__ == "__main__":
 
     # run simulation
     market = Market(N_f = N_firms, N_w=N_workers,C=firm_capacity,q=worker_productivity, T=failure_threshold, s1=s1,s2=s2, t_f_m = transparent_firm_multiplier,b=benchmark_cost,b_k = benchmark_proportion,s_e=sigma_e)
-
-    for t in range(5):
-        market.market_time_step()
-        print(f"TIME STEP {t}")
-        for f in market.firms:
-            print_wage_distribution_within_firm(f)
-        print("******************")
-
-    for f in market.firms:
-        plot_wage_distribution_within_firm(f)
-        
-    # analyze results 
     
-    # code for visualizing distirbutions easily
-    # uncertainties = []
-    # for w in market.workers:
-    #     uncertainties.append(w.fairness_uncertainty)
-    # counts, bins = np.histogram(uncertainties)
-    # plt.stairs(counts,bins)
-    # plt.show()
+    initial_counts_bins = [get_wage_distribution_within_firm(firm) for firm in market.firms]
+    m_hat_over_time = [market.mvpt.m_hat]
+    mvpt_pool_size = [len(market.mvpt.data_pool)]
+
+    for t in tqdm(range(1000)):
+        market.market_time_step()
+        m_hat_over_time.append(market.mvpt.m_hat)
+        mvpt_pool_size.append(len(market.mvpt.data_pool))
+        if t % 100 == 0:
+            print(f"m_hat error: {market.mvpt.error}")
+            print(f"benchmark choices: {[f.bought_benchmark for f in market.firms]}")
+
+    # analyze results 
+    plt.plot(m_hat_over_time)
+    plt.title("m_hat values over time")
+    plt.savefig(f"opt_in_simulation_results/m_hat_over_time_seed={seed}")
+    plt.show()
+    plt.plot(mvpt_pool_size)
+    plt.title("data pool size of mvpt")
+    plt.savefig(f"opt_in_simulation_results/mvpt_pool_size_seed={seed}")
+    plt.show()
+    print(f"Final m_hat value: {market.mvpt.m_hat}")
+ 
+    for i,f in enumerate(market.firms):
+        print(f"Firm id: {f}")
+        print(f"number of workers: {len(f.workers)}")
+        print(f"market pay beliefs: {f.market_pay_belief}")
+        plot_attribute_distribution_within_firm(i,f,"fairness_uncertainty")
+        plot_attribute_distribution_within_firm(i,f,"wage",initial_counts_bins[i][0],initial_counts_bins[i][1])
+        
+    num_failures = []
+    num_successes = []
+    for w in market.workers:
+        num_failures.append(w.num_failures)
+        num_successes.append(w.num_successes)
+
+
+    plt.bar(range(len(market.workers)), num_successes,color="blue")
+    plt.bar(range(len(market.workers)), num_failures,color="red")
+    plt.title("number of failed (red) and successful (blue) negotiations by worker index")
+    plt.savefig(f"opt_in_simulation_results/failed_and_successful_negotiations_seed={seed}")
+    plt.show()
+        
+    
