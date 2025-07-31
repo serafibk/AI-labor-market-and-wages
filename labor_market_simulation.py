@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm 
 
-seed = 8#707202508312025 # use for reproducibility of initial simulations to debug 
+seed = 16#707202508312025 # use for reproducibility of initial simulations to debug 
 gen = np.random.default_rng(seed=seed)
 
 # agents and market running functions (which can be moved to a separate file)
@@ -444,11 +444,11 @@ if __name__ == "__main__":
     worker_productivity =  1 # "quality" of worker -- ASSUME wages in [0,1], assume wages always below productivity
     failure_threshold = 0.2 # tolerance of workers to stop using mvpt
     acceptance_threshold = 0.9 # tolerance of workers to always use mvpt
-    search_threshold = 0.05 # threshold for workers to renegotiate with their current firm or seek out new firm, i.e., if they could make 1.s x their curent pay
+    search_threshold = 0.75 # threshold for workers to renegotiate with their current firm or seek out new firm, i.e., if they could make 1.s x their curent pay
     restrictive_firm_multiplier = 0.7 # relatively increases the chance of workers in restrictive firms of sharing data
-    benchmark_proportion =  1# proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
+    benchmark_proportion =  0.5# proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
     sigma_e = 0.1
-    initial_pool_proportion = 1
+    initial_pool_proportion = 0.02
 
 
     # run simulation
