@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm 
 
-seed = 16#707202508312025 # use for reproducibility of initial simulations to debug 
-gen = np.random.default_rng()
+seed = 22#707202508312025 # use for reproducibility of initial simulations to debug 
+gen = np.random.default_rng(seed=seed)
 
 # agents and market running functions (which can be moved to a separate file)
 
@@ -33,7 +33,9 @@ class Worker:
         self.num_info_seeking = 0 # for debugging, tracking that workers do in fact track whether interacting with the tool was a success or not
         self.num_failures = 0 # counter to track failed negotiations
         self.num_successes = 0 # counter to track successful negotiations
-        self.mvpt_confidence = gen.beta(a=1,b=1) # how much mvpt tool is weighted compared to current wage, start with a beta distribution and then posterior updating based on number of successes/failurs. 1,1 to start since failure and success are both possible.
+        self.alpha = 1
+        self.beta = 1
+        self.mvpt_confidence = gen.beta(a=self.alpha,b=self.beta) # how much mvpt tool is weighted compared to current wage, start with a beta distribution and then posterior updating based on number of successes/failurs. 1,1 to start since failure and success are both possible.
        
         # flags used in updates
         self.in_initial_pool = 0
@@ -88,7 +90,7 @@ class Worker:
             return
 
         # confidence in mvpt updated first based on past successes / failures, using expected value of posterior distribution now 
-        self.mvpt_confidence = (1+self.num_successes) / (2 + self.num_successes + self.num_failures)
+        self.mvpt_confidence = (self.alpha+self.num_successes) / (self.alpha+self.beta + self.num_successes + self.num_failures)
        
         self.stop_sharing = (self.mvpt_confidence <= self.failure_threshold) # if and only if 
         self.always_share = (self.mvpt_confidence >= self.acceptance_threshold) # if and only if
@@ -229,7 +231,13 @@ class Market:
         self.mvpt = MVPT(initial_worker_pool,N_w,s_e)
         self.mvpt.update_mvpt()
 
-        self.num_negotiations = [] # track how many negotiations occur at each time step
+        # self.num_negotiations = [] # track how many negotiations occur at each time step
+        self.num_successful_negotiations = []
+        self.num_failed_negotiations = []
+
+        # track successful/failed info seeking outside of negotiations
+        self.mvpt_reasonable = []
+        self.mvpt_unreasonable = []
         
     
     def _hire_initial_workers(self, worker_assignment):
@@ -249,7 +257,9 @@ class Market:
 
                 w.wage = wage
                 # if w.wage >=0.5:
-                #     w.mvpt_confidence = gen.beta(2,1) # optimistic in tool to increase wages
+                #     w.alpha = 2
+                #     w.beta = 1
+                #     w.mvpt_confidence = gen.beta(w.alpha,w.beta) # optimistic in tool to increase wages
 
                 # link worker and employee together
                 w.employer = f
@@ -278,7 +288,11 @@ class Market:
         ''''''
         # sample firms
         number_firms_to_check = int(self.benchmark_proportion * len(self.firms))
-        sampled_firms = gen.choice(self.firms,number_firms_to_check)
+        sampled_firms = gen.choice(self.firms,number_firms_to_check,replace=False)
+
+
+        # for f in self.firms:
+        #     assert(f in sampled_firms)
 
         # compute summary statistics
         all_wages = []
@@ -291,7 +305,9 @@ class Market:
     def information_seeking(self):
         '''
         '''
-        new_applicants = [[] for i in self.firms] # tracking which workers are trying to negotiate with new firms
+        # new_applicants = [[] for i in self.firms] # tracking which workers are trying to negotiate with new firms
+        mvpt_success = 0
+        mvpt_fail = 0
 
         # worker seeking
         for w in self.workers:
@@ -300,16 +316,23 @@ class Market:
             # no search cost to start
             if w.market_pay_belief[1] > (1+w.search_threshold)*w.wage: # requires m_hat to be  >  wage
                 new_firm = gen.choice(self.firms,1)[0] # randomly choose a firm (possibly including current firm)
-                new_applicants[self.firms.index(new_firm)].append(w)
+                # new_applicants[self.firms.index(new_firm)].append(w)
                 w.negotiating_with = new_firm
             elif w.market_pay_belief[1] >= w.wage and w.sought_info: #< (1+w.search_threshold)*w.wage and w.market_pay_belief[1] >= w.wage and w.sought_info:
+                assert(w.market_pay_belief[1] == w.wage)
                 w.num_successes = w.num_successes + 1 # success in the sense of your confidence in the tool?
                 w.negotiating_with = None
+                mvpt_success = mvpt_success + 1
             elif w.market_pay_belief[1] < w.wage: #* (1-0.01): # testing tolerance 
                 w.num_failures = w.num_failures + 1    
                 w.negotiating_with = None
+                mvpt_fail = mvpt_fail +1 
             else: # median belief not based on mvpt, w.sought_info == 0
                 w.negotiating_with = None
+
+
+        market.mvpt_reasonable.append(mvpt_success)
+        market.mvpt_unreasonable.append(mvpt_fail)
         
         # firms always get benchmark
         for i,f in enumerate(self.firms):
@@ -328,7 +351,16 @@ class Market:
             else: # opening offer too high or counter offer too low, reject
                 return -1
 
-        num_negotiations = 0
+        # num_negotiations = 0
+        num_successful_negotiations = 0
+        num_failed_negotiations = 0
+
+        # for i,f in enumerate(market.firms):
+        #     print(f"Firm id: {f}")
+        #     print(f"number of workers: {len(f.workers)}")
+        #     print(f"market pay beliefs: {f.market_pay_belief}")
+        
+        # print(f"mhat: {self.mvpt.m_hat}")
 
         for w in gen.permutation(self.workers): # randomize sequence of negotiations so that the same workers are not getting consistenly filtered out due to capacity
             
@@ -339,7 +371,7 @@ class Market:
 
             # special cases
             if len(firm.workers)>= firm.capacity:
-                num_negotiations = num_negotiations+ 1 # failure to negotiate, but still attempted
+                num_failed_negotiations = num_failed_negotiations+ 1 # failure to negotiate, but still attempted
                 continue # firm already at capacity, not really a success or failure of the tool 
             
             if len(firm.workers) == 0:
@@ -348,21 +380,21 @@ class Market:
                 w.employer = firm # worker has firm as employer
                 firm.workers.add(w) # firm has worker as employee
                 w.num_successes = w.num_successes + 1
-                num_negotiations = num_negotiations+ 1
+                num_successful_negotiations = num_successful_negotiations+ 1
                 continue # successful switch
 
             outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1],firm.market_pay_belief[2], w.market_pay_belief[1] - self.mvpt.error,w.market_pay_belief[0])
             
             if outcome == -1:
                 w.num_failures = w.num_failures + 1
-                num_negotiations = num_negotiations+ 1
+                num_failed_negotiations = num_failed_negotiations+ 1
             else:
                 w.wage = outcome
                 w.employer.workers.remove(w) # remove from previous firm 
                 w.employer = firm # worker has firm as employer
                 firm.workers.add(w) # firm has worker as employee
                 w.num_successes = w.num_successes + 1
-                num_negotiations = num_negotiations + 1
+                num_successful_negotiations = num_successful_negotiations + 1
         
         # workers update beliefs after all negotiations done
         for w in self.workers:
@@ -372,14 +404,16 @@ class Market:
         for f in self.firms:
             f.belief_update()
         
-        self.num_negotiations.append(num_negotiations) # tracking how many attempted negotiations there were, 0=> wage stability 
+        # self.num_negotiations.append(num_negotiations) # tracking how many attempted negotiations there were, 0=> wage stability 
+        self.num_successful_negotiations.append(num_successful_negotiations)
+        self.num_failed_negotiations.append(num_failed_negotiations)
 
 def get_wage_distribution_within_firm(firm):
     wages = []
     for w in firm.workers:
         wages.append(w.wage)
 
-    counts, bins = np.histogram(wages,range=(0,1))
+    counts, bins = np.histogram(wages,bins=100,range=(0,1))
 
     return counts, bins
 
@@ -388,18 +422,18 @@ def get_wage_distribution_market(firm):
     for w in market.workers:
         wages.append(w.wage)
 
-    counts, bins = np.histogram(wages,range=(0,1))
+    counts, bins = np.histogram(wages,bins=100,range=(0,1))
 
     return counts, bins
 
 
-def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None):
+def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None,initial_pool_proportion=1,seed=0,save=False,n=0):
     
     attribute_values = []
     
     for w in market.workers:
         attribute_values.append(getattr(w,attr))
-    counts, bins = np.histogram(attribute_values,range=(0,1))
+    counts, bins = np.histogram(attribute_values,bins=100,range=(0,1))
     plt.stairs(counts,bins,label=f"Final {attr} distribution")
     if extra_counts is not None:
         plt.stairs(extra_counts, extra_bins, color="red",linestyle="dashed",label=f"Initial {attr} distribution")
@@ -408,17 +442,18 @@ def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extr
     plt.ylim((0,c))
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value throughout market")
-    # plt.savefig(f"simulation_results/seed={seed}/distribution_of_{attr}_at_firm_{f_idx}")
+    if save:
+        plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_market")
     plt.show()
 
 
-def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None):
+def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None,initial_pool_proportion=1,seed=0,save=False,n=0):
     
     attribute_values = []
     
     for w in firm.workers:
         attribute_values.append(getattr(w,attr))
-    counts, bins = np.histogram(attribute_values,range=(0,1))
+    counts, bins = np.histogram(attribute_values,bins=100,range=(0,1))
     plt.stairs(counts,bins,label=f"Final {attr} distribution")
     if extra_counts is not None:
         plt.stairs(extra_counts, extra_bins, color="red",linestyle="dashed",label=f"Initial {attr} distribution")
@@ -427,7 +462,8 @@ def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = N
     plt.ylim((0,c))
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value at Firm {f_idx}")
-    # plt.savefig(f"simulation_results/seed={seed}/distribution_of_{attr}_at_firm_{f_idx}")
+    if save:
+        plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_at_firm_{f_idx}")
     plt.show()
 
 def print_wage_distribution_within_firm(firm):
@@ -452,22 +488,23 @@ def check_convergence(market, failure_threshold, acceptance_threshold, reject_th
         num_stop_sharing = num_stop_sharing + w.stop_sharing
         num_acceptance = num_acceptance + (w.always_share)
 
+    num_negotiations = [s+f for s,f in zip(market.num_successful_negotiations, market.num_failed_negotiations)]
     
     if num_stop_sharing >= int(reject_threshold*len(market.workers)):
         print(f"At least {reject_threshold} proportion of workers have less than {failure_threshold*100}% confidence in mvpt, tool too unreliable.")
-        return True
+        return 2
     if num_acceptance >= int(accept_threshold*len(market.workers)):
         print(f"At least {accept_threshold} proportion of workers have at least {acceptance_threshold*100}% confidence in mvpt, tool is credible.")
-        return True
+        return 1
 
-    if len(market.num_negotiations) >= negotiations_threshold and all([s == 0 for s in market.num_negotiations[-negotiations_threshold:]]):
+    if len(num_negotiations) >= negotiations_threshold and all([s == 0 for s in num_negotiations[-negotiations_threshold:]]):
         print(num_acceptance)
         print(num_stop_sharing)
         print(len(market.workers))
         print(f"No negotiations for {negotiations_threshold} time steps.")
-        return True
+        return 3
     
-    return False
+    return -1
 
 
 
@@ -484,9 +521,9 @@ if __name__ == "__main__":
     N_workers = 90 # evenly split among firms initially
     firm_capacity = 20 # total number of employees a firm can have
     search_threshold = 0 # threshold for workers to renegotiate with their current firm or seek out new firm, i.e., if they could make more than (1+s) times their curent pay
-    benchmark_proportion =  1 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
+    benchmark_proportion =  0.6 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
     sigma_e = 0.1 # variance cap 
-    initial_pool_proportion = 0.8
+    initial_pool_proportion = 0.2
     dispersions = [0.01]*int(N_firms/3) + [0.4]*int(N_firms/3) + [1]*int(N_firms/3)
     
 
@@ -495,12 +532,22 @@ if __name__ == "__main__":
     acceptance_threshold = 0.75 # tolerance of workers to always use mvpt
 
     N = 10 # number of simualations to run with the above parameters
+    save = False # save plots?
+
+
     # run simulation
+    final_accept_m_hats = []
     for n in range(N):
-        market = Market(N_f = N_firms, N_w=N_workers,D =dispersions,C=firm_capacity, f=failure_threshold, a=acceptance_threshold, s=search_threshold,b_k = benchmark_proportion,s_e=sigma_e,i_p=initial_pool_proportion)
+        if n == 0 or n ==1:
+            save = True
+        else:
+            save = False
+
+        market = Market(N_f = N_firms, N_w=N_workers,D=dispersions,C=firm_capacity, f=failure_threshold, a=acceptance_threshold, s=search_threshold,b_k = benchmark_proportion,s_e=sigma_e,i_p=initial_pool_proportion)
     
         initial_counts_bins = [get_wage_distribution_within_firm(firm) for firm in market.firms]
         initial_counts_bins_market = get_wage_distribution_market(market)
+        initial_wages = [w.wage for w in market.workers]
         m_hat_over_time = [market.mvpt.m_hat]
         l_hat_over_time = [market.mvpt.l_hat]
         u_hat_over_time = [market.mvpt.u_hat]
@@ -515,81 +562,75 @@ if __name__ == "__main__":
             mvpt_pool_size.append(len(market.mvpt.data_pool)) 
             for i in range(N_workers):
                 worker_mvpt_confidence[i].append(market.workers[i].mvpt_confidence)
-            if check_convergence(market,failure_threshold, acceptance_threshold, 0.51,0.5, 10000):
+            conv = check_convergence(market,failure_threshold, acceptance_threshold, 0.51,0.50, 20000)
+            if conv > 0:
+                if conv == 1:
+                    final_accept_m_hats.append(market.mvpt.m_hat)
                 break
+        
+        # analyze results 
+        plt.bar(range(len(market.mvpt_reasonable)), market.mvpt_reasonable, color= "blue", label="Num. m_hat >= wage / time step")
+        plt.bar(range(len(market.mvpt_unreasonable)),[-1*u for u in market.mvpt_unreasonable], color ="red", label = "Num. m_hat < wage / time step")
+        plt.xlabel("Time")
+        plt.ylabel("Count of m_hat vs. wage type (+:m_hat >= wage, -:m_hat <wage)")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_data_sharing_no_negotiation")
+        plt.show()
 
+        plt.bar(range(len(market.num_successful_negotiations)), market.num_successful_negotiations, color= "blue", label="Num. successful negotiations / time step")
+        plt.bar(range(len(market.num_failed_negotiations)),[-1*f for f in market.num_failed_negotiations], color ="red", label = "Num. failed negotiations / time step")
+        plt.xlabel("Time")
+        plt.ylabel("Count of negotiation type (+:success, -:failed)")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_negotiations")
+        plt.show()
+    
+        for k in range(0,90,5):
+            for i in range(k,k+5):
+                plt.plot(worker_mvpt_confidence[i],label=f"{market.workers[i].wage - initial_wages[i]}")
+            plt.legend(title="Worker wage delta")
+            plt.xlabel("Time")
+            plt.ylabel("Confidence in MVPT")
+            plt.title(f"Worker confidence in MVPT over time, worker indices {k} to {k+4}")
+            plt.ylim((0,1))
+            if save:
+                plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_confidence_worker_group_k={k}")
+            plt.show()
 
-    # analyze results 
-
-
-    # print("fairness uncertainty")
-    # for k in range(0,N_workers-5,5):
-    #     for i in range(k,k+5):
-    #         plt.plot(worker_mvpt_confidence[i],label=f"{market.workers[i].fairness_uncertainty}")
-    #     plt.legend()
-    #     plt.show()
-    # print("final wage")
-        # for k in range(0,100,5):
-        #     for i in range(k,k+5):
-        #         plt.plot(worker_mvpt_confidence[i],label=f"{i}")
-        #     plt.legend(title="Worker index")
-        #     plt.xlabel("Time")
-        #     plt.ylabel("Confidence in MVPT")
-        #     plt.title(f"Worker confidence in MVPT over time, worker indices {k} to {k+4}")
-        #     plt.ylim((0,1))
-        #     # plt.savefig(f"simulation_results/seed={seed}/mvpt_confidence_worker_group_k={k}")
-        #     plt.show()
-
-    # num_ambiguity = []
-    # for w in market.workers:
-    #     num_ambiguity.append(w.ambiguous_outcomes)
-    # plt.bar(len(market.workers),num_ambiguity, color="purple")
-    # plt.show()
-    # print("num_failures")
-    # for k in range(0,N_workers-5,5):
-    #     for i in range(k,k+5):
-    #         plt.plot(worker_mvpt_confidence[i],label=f"{market.workers[i].num_failures}")
-    #     plt.legend()
-    #     plt.show()
-
-        # plt.plot(m_hat_over_time, label="m_hat value (median + error)")
-        # plt.plot(l_hat_over_time, color="red",label="Max value in data pool")
-        # plt.plot(u_hat_over_time, color="purple",label="Min value in data pool")
-        # plt.ylim((0,1))
-        # plt.title("MVPT summary statistics values over time")
-        # plt.xlabel("Time")
-        # plt.ylabel("MVPT summary statistics values")
-        # plt.legend()
-        # # plt.savefig(f"simulation_results/seed={seed}/mvpt_values_over_time")
-        # plt.show()
-        # plt.plot(mvpt_pool_size)
-        # plt.ylim((0,N_workers))
-        # plt.title("data pool size of mvpt")
-        # # plt.savefig(f"simulation_results/seed={seed}/mvpt_pool_size")
-        # plt.show()
+        plt.plot(m_hat_over_time, label="m_hat value (median + error)")
+        plt.plot(l_hat_over_time, color="red",label="Min value in data pool")
+        plt.plot(u_hat_over_time, color="purple",label="Max value in data pool")
+        plt.ylim((0,1))
+        plt.title("MVPT summary statistics values over time")
+        plt.xlabel("Time")
+        plt.ylabel("MVPT summary statistics values")
+        plt.legend()
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_values_over_time")
+        plt.show()
+        plt.plot(mvpt_pool_size)
+        plt.ylim((0,N_workers))
+        plt.title("data pool size of mvpt")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_pool_size")
+        plt.show()
         print(f"Final m_hat value: {market.mvpt.m_hat}")
+        print(f"Lower bound: {market.mvpt.l_hat}")
 
         # plot total wage distribution
-        plot_attribute_distribution_market(market,"wage",N_workers,initial_counts_bins_market[0],initial_counts_bins_market[1])
+        plot_attribute_distribution_market(market,"wage",N_workers,initial_counts_bins_market[0],initial_counts_bins_market[1],initial_pool_proportion,seed,save,n)
 
-        # for i,f in enumerate(market.firms):
-        #     print(f"Firm id: {f}")
-        #     print(f"number of workers: {len(f.workers)}")
-        #     print(f"market pay beliefs: {f.market_pay_belief}")
-        #     # plot_attribute_distribution_within_firm(i,f,"fairness_uncertainty",firm_capacity)
-        #     plot_attribute_distribution_within_firm(i,f,"wage",firm_capacity,initial_counts_bins[i][0],initial_counts_bins[i][1])
+        for i,f in enumerate(market.firms):
+            print(f"Firm id: {f}")
+            print(f"number of workers: {len(f.workers)}")
+            print(f"market pay beliefs: {f.market_pay_belief}")
+            plot_attribute_distribution_within_firm(i,f,"wage",firm_capacity,initial_counts_bins[i][0],initial_counts_bins[i][1],initial_pool_proportion,seed,save,n)
         
-    # num_failures = []
-    # num_successes = []
-    # for w in market.workers:
-    #     num_failures.append(w.num_failures)
-    #     num_successes.append(w.num_successes)
-
-
-    # plt.bar(range(len(market.workers)), num_failures,color="red")
-    # plt.bar(range(len(market.workers)), num_successes,color="blue")
-    # plt.title("number of failed (red) and successful (blue) negotiations by worker index")
-    # plt.savefig(f"simulation_results/seed={seed}/failed_and_successful_negotiations")
-    # plt.show()
+    # print out statistics of converged wage
+    if len(final_accept_m_hats)>0:
+        print(f"average value of accepted m_hat: {np.mean(final_accept_m_hats)}")
+        print(f"max value of accepted m_hat: {np.max(final_accept_m_hats)}")
+        print(f"min value of accepted m_hat: {np.min(final_accept_m_hats)}")
         
-    
+            
+        
