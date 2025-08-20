@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm 
 
-seed = 37#707202508312025 # use for reproducibility of initial simulations to debug 
+seed = 63#707202508312025 # use for reproducibility of initial simulations to debug 
 gen = np.random.default_rng(seed=seed)
 
 # agents and market running functions (which can be moved to a separate file)
@@ -63,11 +63,13 @@ class Worker:
             self.belief_update(m_hat = mvpt.m_hat)
             return # done
 
+        
         # everyone else gets to check upper bounds for perceived usefulness (lower than lower bound means you still want to check)
         if self.wage > mvpt.u_hat: # if you don't see any possible improvement, don't use the tool
             self.num_failures = self.num_failures + 1
             mvpt.remove_worker(self)
             return # do not seek more info
+
          
         # otherwise seek info w.p. < 1
         p_seek_info = self.fairness_uncertainty #* self.employer.restrictiveness_multiplier (bring back in once transparency is meaningful)
@@ -106,7 +108,7 @@ class Worker:
 
 class Firm:
 
-    def __init__(self,d,C):
+    def __init__(self,d,C,c_t):
         '''initialization of Firm agent
 
         params
@@ -117,6 +119,7 @@ class Firm:
         self.capacity = C
         self.workers = set([]) # list of employed workers
         self.market_pay_belief = [0, 0, 0]
+        self.counter_type = c_t # competitive (0) or conservative (1)
        
   
     def information_seeking(self, benchmark):
@@ -219,13 +222,15 @@ class Market:
         '''
         self.benchmark_proportion = b_k
 
-        self.firms = [Firm(d, C) for d in D] # firms identical up to initial wage dispersion
+        self.firms = [Firm(d, C,1) for d in D] # firms identical up to initial wage dispersion
+        for i in range(int(len(D)/2)):
+            self.firms[i].counter_type = 0 # half the firms competitive and half conservative
         self.workers = [Worker(s,f,a) for i in range(N_w)] # workers identical up to initial wage and fairness uncertainty
 
         # initial matching of firms and workers (which sets their initial beliefs)
         self._hire_initial_workers(np.split(np.asarray(self.workers), N_f))
 
-        initial_worker_pool = set(gen.permutation(self.workers)[:int(N_w * i_p)]) # grab i_p proportion of initial workers randomly for MVPT,could correlate with pay distribution of current market
+        initial_worker_pool = set(gen.permutation([w for w in self.workers if w.wage < 0.2])[:int(N_w * i_p)]) # grab i_p proportion of initial workers randomly for MVPT,could correlate with pay distribution of current market
         for w in initial_worker_pool:
             w.in_initial_pool = 1 # mark that they always share data (unless they lose confidence from enough failed negotiations when sharing)
         self.mvpt = MVPT(initial_worker_pool,N_w,s_e)
@@ -244,14 +249,17 @@ class Market:
         '''
         '''
         for i,f in enumerate(self.firms):
-            for w in worker_assignment[i]:
+            for j,w in enumerate(worker_assignment[i]):
                 # generate initial wage
                 if f.dispersion == 1: # indicates draw from uniform distribution instead
                     wage = gen.uniform(0,1)
                 elif f.dispersion == 'b':
-                    wage = gen.beta(a=2,b=1) # slightly skewed towards 1 
+                    wage = gen.beta(a=1,b=10) # mostly skewed towards 1 
                 else:
                     wage = gen.normal(0.5,f.dispersion)
+
+                if i == 7 and j ==0:
+                    wage = 1
                     
                 
                 # enforce constraints:
@@ -311,7 +319,7 @@ class Market:
 
             # no search cost to start
             if w.market_pay_belief[1] > (1+w.search_threshold)*w.wage: # requires m_hat to be  >  wage
-                new_firm = gen.choice(self.firms,1)[0] # randomly choose a firm (possibly including current firm)
+                new_firm = gen.choice([f for f in self.firms if len(f.workers) < f.capacity],1)[0] # randomly choose a firm (possibly including current firm) that has vacancies
                 # new_applicants[self.firms.index(new_firm)].append(w)
                 w.negotiating_with = new_firm
             elif w.market_pay_belief[1] >= w.wage and w.sought_info: #< (1+w.search_threshold)*w.wage and w.market_pay_belief[1] >= w.wage and w.sought_info:
@@ -338,11 +346,11 @@ class Market:
         '''
         '''
         def _bargaining_outcome(o1, at1, at2, o2, at1_c):
-            '''bargaining outcomes parameterized by initial offers by workers (o1), immediate acceptance cap(a_t_1), counter offer cap (a_t_2), '''
+            '''bargaining outcomes parameterized by initial offers by workers (o1), immediate acceptance cap(at1), counter offer cap (at2),  counter offer (o2), worker counter offer acceptance threshold (at1_c)'''
             if o1 <= at1: # opening offer lower than firm's median belief, accept
                 return o1
-            elif (o1 <= at2) and (o2 >= at1_c): # opening offer lower than firm's upper belief, worker accepts reduced counteroffer if it is above their lower bound belief
-                return o2 
+            elif (o1 <= at2) and (o2 > at1_c): # opening offer lower than firm's upper belief, worker accepts reduced counteroffer if it is above their lower bound belief
+                return o2  ## when adding back in SEARCH COSTS reevaluate this decision
             else: # opening offer too high or counter offer too low, reject
                 return -1
 
@@ -371,10 +379,17 @@ class Market:
                 continue # successful switch
             
             # counter offer, can be generous or strict
-            firm_counter =  (1/2)*(firm.market_pay_belief[2] + w.market_pay_belief[1]) #firm.market_pay_belief[1], None - just accept
+            if firm.counter_type == 0:
+                firm_counter = (1/2) *(firm.market_pay_belief[2]) + (1/2) * (w.market_pay_belief[1]) # shade up
+            elif firm.counter_type == 1:
+                firm_counter = (1/2) *(firm.market_pay_belief[0]) + (1/2) * (w.market_pay_belief[1]) # shade down
+            else:
+                firm_counter = firm.market_pay_belief[1] # median
+
+            # print(firm_counter - w.market_pay_belief[1])
 
             # bargaining outcome
-            outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[1],firm.market_pay_belief[2], firm_counter, w.market_pay_belief[0])
+            outcome = _bargaining_outcome(w.market_pay_belief[1], firm.market_pay_belief[0],firm.market_pay_belief[2], firm_counter, w.market_pay_belief[0])
             
             if outcome == -1:
                 w.num_failures = w.num_failures + 1
@@ -435,7 +450,7 @@ def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extr
     plt.ylabel(f"Density of {attr} value throughout market")
     if save:
         plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_market")
-    plt.clf()#plt.show()
+    plt.show()
 
 
 def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None,initial_pool_proportion=1,seed=0,save=False,n=0):
@@ -455,7 +470,7 @@ def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = N
     plt.ylabel(f"Density of {attr} value at Firm {f_idx}")
     if save:
         plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_at_firm_{f_idx}")
-    plt.clf()#plt.show()
+    plt.show()
 
 def print_wage_distribution_within_firm(firm):
     
@@ -512,9 +527,9 @@ if __name__ == "__main__":
     N_workers = 100 # evenly split among firms initially
     firm_capacity = 20 # total number of employees a firm can have
     search_threshold = 0 # threshold for workers to renegotiate with their current firm or seek out new firm, i.e., if they could make more than (1+s) times their curent pay
-    benchmark_proportion =  1 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
+    benchmark_proportion =  0.5 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
     sigma_e = 0.1 # variance cap 
-    initial_pool_proportion = 0.02
+    initial_pool_proportion = 0.2
     dispersions = ['b']*N_firms#[0.1]*N_firms #[0.01]*int(N_firms/3) + [0.4]*int(N_firms/3) + [1]*int(N_firms/3)
     
 
@@ -522,7 +537,7 @@ if __name__ == "__main__":
     failure_threshold = 0.05 # tolerance of workers to stop using mvpt
     acceptance_threshold = 0.90 # tolerance of workers to always use mvpt
 
-    N = 20 # number of simualations to run with the above parameters
+    N = 2 # number of simualations to run with the above parameters
     save = False # save plots?
 
 
@@ -530,7 +545,7 @@ if __name__ == "__main__":
     final_accept_m_hats = []
     for n in range(N):
 
-        if n == 10:
+        if n == -1:
             save = True # just save 1 run 
         else:
             save = False
@@ -575,7 +590,7 @@ if __name__ == "__main__":
         plt.ylabel("Count of negotiation type (+:success, -:failed)")
         if save:
             plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_negotiations")
-        plt.clf()#plt.show()
+        plt.show()
     
         for k in range(0,100,5):
             for i in range(k,k+5):
@@ -587,7 +602,7 @@ if __name__ == "__main__":
             plt.ylim((0,1))
             if save:
                 plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_confidence_worker_group_k={k}")
-            plt.clf()#plt.show()
+            plt.show()
 
         plt.plot(m_hat_over_time, label="m_hat value (median + error)")
         plt.plot(l_hat_over_time, color="red",label="Min value in data pool")
@@ -599,13 +614,13 @@ if __name__ == "__main__":
         plt.legend()
         if save:
             plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_values_over_time")
-        plt.clf()# plt.show()
+        plt.show()
         plt.plot(mvpt_pool_size)
         plt.ylim((0,N_workers))
         plt.title("data pool size of mvpt")
         if save:
             plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_pool_size")
-        plt.clf()#plt.show()
+        plt.show()
         print(f"Final m_hat value: {market.mvpt.m_hat}")
         print(f"Lower bound: {market.mvpt.l_hat}, Upper bound: {market.mvpt.u_hat}")
 
