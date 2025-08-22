@@ -1,6 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 from tqdm import tqdm 
+import math
 
 from labor_market_classes import Market
 from market_outcome_analysis import get_wage_distribution_within_firm, get_wage_distribution_market, plot_attribute_distribution_market, plot_attribute_distribution_within_firm, print_wage_distribution_within_firm
@@ -17,7 +18,7 @@ def check_convergence(market, failure_threshold, acceptance_threshold, reject_th
         num_stop_sharing = num_stop_sharing + w.stop_sharing
         num_acceptance = num_acceptance + (w.always_share)
 
-    num_negotiations = [s+f for s,f in zip(market.num_successful_negotiations, market.num_failed_negotiations)]
+    num_negotiations = [s+f for s,f in zip(market.num_successful_mvpt_negotiations, market.num_failed_mvpt_negotiations)]
     
     if num_stop_sharing >= int(reject_threshold*len(market.workers)):
         print(f"At least {reject_threshold} proportion of workers have less than {failure_threshold*100}% confidence in mvpt, tool too unreliable.")
@@ -37,13 +38,14 @@ def check_convergence(market, failure_threshold, acceptance_threshold, reject_th
 if __name__ == "__main__":
 
     # labor market attributes
-    T = 5000 # total number of time steps in one simulation run
+    T = 2000 # total number of time steps in one simulation run
     benchmark_proportion =  1 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
     J = 10 # max number of job switches the workers can do 
-    lam_high = 200 / T # rate of job offers per simulation run
-    lam_low = 5 / T # rate of job offers per simulation run 
-    outside_offer_cutoff = 0.7 # cutoff where workers switch from L type to H type 
-    p_mrpl = 0.01 
+    lam_high = 70 / T # rate of job offers per simulation run
+    lam_low = 2 / T # rate of job offers per simulation run 
+    print(f"p(k>= 2| lam_H) * 2000 = {(1-np.exp(-1 *lam_high) * sum([lam_high**i  / math.factorial(i) for i in range(2)]))*2000}")
+    print(f"p(k>= 2| lam_L) * 2000 = {(1-np.exp(-1 *lam_low) * sum([lam_low**i  / math.factorial(i) for i in range(2)]))*2000}")
+    outside_offer_cutoff = 0.9 # cutoff where workers switch from L type to H type 
     
     # firm attributes
     N_firms = 100
@@ -54,11 +56,11 @@ if __name__ == "__main__":
     N_workers = 1000 # evenly split among firms initially
     search_threshold = 0 # threshold for workers to renegotiate with their current firm or seek out new firm, i.e., if they could make more than (1+s) times their curent pay
     failure_threshold = 0.05 # tolerance of workers to stop using mvpt
-    acceptance_threshold = 0.90 # tolerance of workers to always use mvpt
+    acceptance_threshold = 0.51 # tolerance of workers to always use mvpt
 
     # mvpt attributes
     sd_cap = 0.1 # standard deviation cap 
-    initial_pool_proportion = 0.5
+    initial_pool_proportion = 0.2
     
 
     N = 1 # number of simualations to run with the above parameters
@@ -74,7 +76,7 @@ if __name__ == "__main__":
         else:
             save = False
 
-        market = Market(N_f = N_firms, N_w=N_workers,counter_t=counter_t,C=firm_capacity, f=failure_threshold, a=acceptance_threshold, s=search_threshold,b_k = benchmark_proportion,sd_cap=sd_cap,i_p=initial_pool_proportion,o_o_c=outside_offer_cutoff, lam_H=lam_high, lam_L=lam_low, J=J, p_mrpl=p_mrpl)
+        market = Market(N_f = N_firms, N_w=N_workers,counter_t=counter_t,C=firm_capacity, f=failure_threshold, a=acceptance_threshold, s=search_threshold,b_k = benchmark_proportion,sd_cap=sd_cap,i_p=initial_pool_proportion,o_o_c=outside_offer_cutoff, lam_H=lam_high, lam_L=lam_low, J=J)
 
         # data points to track during market evolution
         initial_counts_bins = [get_wage_distribution_within_firm(firm) for firm in market.firms]
@@ -101,34 +103,54 @@ if __name__ == "__main__":
             for i in range(N_workers):
                 worker_mvpt_confidence[i].append(market.workers[i].mvpt_confidence)
             
-            # check for convergence 
-            conv = check_convergence(market,failure_threshold, acceptance_threshold, 0.51,1, 5000)
-            if conv > 0:
-                if conv == 1 or conv == 3:
-                    final_accept_m_hats.append(market.mvpt.m_hat)
-                break
+            # # check for convergence 
+            # conv = check_convergence(market,failure_threshold, acceptance_threshold, 0.51,1, 5000)
+            # if conv > 0:
+            #     if conv == 1 or conv == 3:
+            #         final_accept_m_hats.append(market.mvpt.m_hat)
+            #     break
         
         # Analyze Results 
 
-        # plt.bar(range(len(market.num_successful_negotiations)), market.num_successful_negotiations, color= "blue", label="Num. successful negotiations / time step")
-        # plt.bar(range(len(market.num_failed_negotiations)),[-1*f for f in market.num_failed_negotiations], color ="red", label = "Num. failed negotiations / time step")
-        # plt.xlabel("Time")
-        # plt.ylabel("Count of negotiation type (+:success, -:failed)")
-        # if save:
-        #     plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_negotiations")
-        # plt.show()
+        plt.bar(range(len(market.num_successful_mvpt_negotiations)), market.num_successful_mvpt_negotiations, color= "blue", label="Num. successful negotiations / time step")
+        plt.bar(range(len(market.num_failed_mvpt_negotiations)),[-1*f for f in market.num_failed_mvpt_negotiations], color ="red", label = "Num. failed negotiations / time step")
+        plt.xlabel("Time")
+        plt.ylabel("Count of negotiation type (+:success, -:failed)")
+        plt.title("Successful vs. Failed negotiations with MVPT over time")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_mvpt_negotiations")
+        plt.show()
+
+        plt.bar(range(len(market.num_successful_outside_negotiations)), market.num_successful_outside_negotiations, color= "blue", label="Num. successful negotiations / time step")
+        plt.bar(range(len(market.num_failed_outside_negotiations)),[-1*f for f in market.num_failed_outside_negotiations], color ="red", label = "Num. failed negotiations / time step")
+        plt.xlabel("Time")
+        plt.ylabel("Count of negotiation type (+:success, -:failed)")
+        plt.title("Successful vs. Failed negotiations with outside options over time")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/successful_vs_failed_outside_negotiations")
+        plt.show()
+
+        plt.bar(range(len(market.num_better_to_wait_H)), market.num_better_to_wait_H, color= "blue", label="Num. type H workers waiting / time step")
+        plt.bar(range(len(market.num_better_to_wait_L)),[-1*f for f in market.num_better_to_wait_L], color ="red", label = "Num. type L workers waiting / time step")
+        plt.xlabel("Time")
+        plt.ylabel("Count of negotiation type (+:success, -:failed)")
+        plt.title("Number of type H workers vs. type L workers that choose to wait over time")
+        if save:
+            plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/type_H_vs_type_L_waiting")
+        plt.show()
+
     
-        # for k in range(0,100,5):
-        #     for i in range(k,k+5):
-        #         plt.plot(worker_mvpt_confidence[i],label=f"{market.workers[i].wage - initial_wages[i]}")
-        #     plt.legend(title="Worker wage delta")
-        #     plt.xlabel("Time")
-        #     plt.ylabel("Confidence in MVPT")
-        #     plt.title(f"Worker confidence in MVPT over time, worker indices {k} to {k+4}")
-        #     plt.ylim((0,1))
-        #     if save:
-        #         plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_confidence_worker_group_k={k}")
-        #     plt.show()
+        for k in range(0,100,5):
+            for i in range(k,k+5):
+                plt.plot(worker_mvpt_confidence[i],label=f"{market.workers[i].wage - initial_wages[i]}")
+            plt.legend(title="Worker wage delta")
+            plt.xlabel("Time")
+            plt.ylabel("Confidence in MVPT")
+            plt.title(f"Worker confidence in MVPT over time, worker indices {k} to {k+4}")
+            plt.ylim((0,1))
+            if save:
+                plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/mvpt_confidence_worker_group_k={k}")
+            plt.show()
 
         plt.plot(prop_H)
         plt.title("Proportion of high value outside option workers over time")

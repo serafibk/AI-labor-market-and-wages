@@ -1,4 +1,5 @@
 import numpy as np
+import math
 
 seed = 63 # use for reproducibility of initial simulations to debug 
 gen = np.random.default_rng(seed=seed)
@@ -43,7 +44,7 @@ class Worker:
         self.stop_sharing = 0 # track if they ever stop sharing
     
 
-    def mvpt_information_seeking(self,mvpt):
+    def mvpt_information_seeking(self,mvpt,max_switches):
         '''
         Worker possibly shares wage data and seeks information from the MVPT to possibly initiate a negotiation.
 
@@ -53,8 +54,9 @@ class Worker:
         self.sought_info = 0 # tracking whether worker sought info 
 
         # do not share if confidence below failure threshold
-        if self.stop_sharing == 1:
+        if self.stop_sharing == 1 or self.job_switches >= max_switches:
             mvpt.remove_worker(self) # worker leaves data pool
+            self.belief_update() # offer is none
             return # do not seek info
 
         # if in the initial pool or confidence exceeds acceptance threshold, share w.p. 1
@@ -69,6 +71,7 @@ class Worker:
         if self.wage > mvpt.u_hat: # if you don't see any possible improvement, don't use the tool
             self.num_failures = self.num_failures + 1 # and the tool has failed to work for this worker
             mvpt.remove_worker(self)
+            self.belief_update() # offer is none
             return # do not seek more info
 
         # otherwise seek info w.p. proportional to fairness uncertainty
@@ -79,8 +82,9 @@ class Worker:
             self.sought_info = 1
             mvpt.add_worker(self) # share data 
             self.belief_update(m_hat = mvpt.m_hat) # update belief based on mvpt information
-        else: # don't share data, no belief update
+        else: # don't share data
             mvpt.remove_worker(self) 
+            self.belief_update() # offer is none
         
 
     def belief_update(self,m_hat = None):
@@ -103,6 +107,8 @@ class Worker:
         if m_hat is not None and m_hat > self.reservation_wage: 
             # create an offer using mvpt only if it exceeds reservation wage
             self.offer = self.mvpt_confidence*m_hat + (1-self.mvpt_confidence)*self.reservation_wage
+        else:
+            self.offer = None # make sure offers are not re-used when not seeking 
 
 
 class Firm:
@@ -198,7 +204,7 @@ class Market:
      Additionally, carries out each phase of the market evolution.
     '''
 
-    def __init__(self, N_f, N_w, counter_t, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J, p_mrpl):
+    def __init__(self, N_f, N_w, counter_t, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J):
         '''initializaiton of the market
 
         Parameters
@@ -216,7 +222,6 @@ class Market:
             lam_H (float): rate of high wage offers from firms for high wage workers
             lam_L (float): rate of high wage offers from firms for low wage workers
             J (int):  total number of job switches each worker can make
-            p_mrpl (float): probability that a high wage offer is the result of perfect Bertrand competition and a worker receives the MRPL.
         '''
         # market attributes 
         self.benchmark_proportion = b_k
@@ -224,7 +229,6 @@ class Market:
         self.high_lambda = lam_H
         self.low_lambda = lam_L
         self.max_switches = J
-        self.p_mrpl = p_mrpl # probability a true outside offer for a worker comes from 2 firms simultaneously and Bertrand competition ensues
 
         # create Firms and Workers
         self.firms = [Firm(C,c_t) for c_t in counter_t] # firms identical up to default counter offer type 
@@ -241,8 +245,15 @@ class Market:
         self.mvpt.update_mvpt()
 
         # tracking data points during market evolution for analysis 
-        self.num_successful_negotiations = []
-        self.num_failed_negotiations = []
+        self.num_successful_mvpt_negotiations = []
+        self.num_failed_mvpt_negotiations = []
+
+        self.num_successful_outside_negotiations = []
+        self.num_failed_outside_negotiations = []
+
+        self.num_better_to_wait_H = []
+        self.num_better_to_wait_L = []
+
 
     
     def _hire_initial_workers(self, worker_assignment):
@@ -331,10 +342,18 @@ class Market:
     def information_seeking(self, T, t):
         '''
         '''
+        num_successful_outside = 0
+        num_failed_outside = 0
+
+        waiting_low = 0
+        waiting_high = 0
+
         def _outside_offer_check(w):
             
             # Workers receive a true outside option according to a Poisson distribution parameterized by their rate
             outside_option = gen.poisson(w.outside_opp_rate) # 0 or 1 or >= 2 
+
+            failed = 2
         
             if outside_option > 0: # anything non-zero counts as an outside option opportunity (can change this to binomial or can count 2 or more arrivals as the bertrand competition chance)
                 # randomly sample a firm with a vacancy
@@ -345,33 +364,52 @@ class Market:
                 if outside_option >= 2: # perfect Bertrand competition with multiple firms giving offers 
                     offer = 1 # mrpl attained!
                 else:
-                    offer = gen.uniform(firm.market_pay_belief[1], firm.market_pay_belief[2])
+                    offer = gen.uniform(firm.market_pay_belief[1], firm.market_pay_belief[2]) # something in the upper end, but exclusive of upper end (strictly less than mrpl) 
 
                 # worker accepts iff offer is > wage + search costs 
                 if offer > w.reservation_wage and w.job_switches < self.max_switches:
                     self._job_switch(offer, firm, w)
                     w.negotiating_with = None
-                    return 0 # only don't use MVPT if switch with true outside option already happened
-            return 1
+                    failed = 0
+                    return 0, failed # only don't use MVPT if switch with true outside option already happened
+                elif offer <= w.reservation_wage: # don't count at max switches as fail
+                    failed = 1
+            return 1, failed
 
         # worker seeking
         for w in self.workers:
-            seek_mvpt = _outside_offer_check(w) # 1 if no outside offer, else 0
+            seek_mvpt, failed = _outside_offer_check(w) # 1 if no outside offer, else 0
+
+            if failed < 2:
+                num_successful_outside = num_successful_outside + (not failed)
+                num_failed_outside = num_failed_outside + failed
 
             if seek_mvpt:
-                w.mvpt_information_seeking(self.mvpt)
+                w.mvpt_information_seeking(self.mvpt, self.max_switches)
 
                 # check if worker has enough switches left to make it to MRPL 
-                cdf_le_1 = lambda lam: np.exp(-1 *lam) * sum([lam**i  / np.math.factorial(i) for i in range(2)])
+                p_ge_2 = 1-np.exp(-1 *w.outside_opp_rate) * sum([w.outside_opp_rate**i  / math.factorial(i) for i in range(2)]) # P(k>=2) for k opportunities in the next time step 
+                better_to_wait =  p_ge_2*(T-t) >= 1 # only wait if you expect at least one chance to get MRPL
 
-                better_to_wait =  cdf_le_1(w.outside_opp_rate) * (T-t) >= 1 # only wait if you expect at least one chance to get MRPL
 
-                if not better_to_wait: # only attempt negotiation if it seems not worth it to wait for true outside option
-                    if w.offer is not None and w.offer > w.reservation_wage and w.job_switches < self.max_switches: 
-                        new_firm = gen.choice([f for f in self.firms if len(f.workers) < f.capacity],1)[0] # randomly choose a firm (possibly including current firm) that has vacancies
-                        w.negotiating_with = new_firm
-                    else:
-                        w.negotiating_with = None
+                # only attempt negotiation if it seems not worth it to wait for true outside option
+                if (not better_to_wait) and (w.offer is not None) and (w.job_switches < self.max_switches): # and w.offer > w.reservation_wage, should already be guaranteed
+                    new_firm = gen.choice([f for f in self.firms if len(f.workers) < f.capacity],1)[0] # randomly choose a firm (possibly including current firm) that has vacancies
+                    w.negotiating_with = new_firm
+                elif better_to_wait and w.outside_opp_rate == self.high_lambda:
+                    waiting_high = waiting_high + 1
+                    w.negotiating_with = None
+                elif better_to_wait and w.outside_opp_rate == self.low_lambda:
+                    waiting_low = waiting_low + 1
+                    w.negotiating_with = None
+                else:
+                    w.negotiating_with = None
+        
+        self.num_successful_outside_negotiations.append(num_successful_outside)
+        self.num_failed_outside_negotiations.append(num_failed_outside)
+
+        self.num_better_to_wait_H.append(waiting_high)
+        self.num_better_to_wait_L.append(waiting_low)
                             
         # firms always see benchmark
         for i,f in enumerate(self.firms):
@@ -390,8 +428,8 @@ class Market:
             else: # opening offer too high or counter offer too low, reject
                 return -1
 
-        num_successful_negotiations = 0
-        num_failed_negotiations = 0
+        successful_mvpt_negotiations = 0
+        failed_mvpt_negotiations = 0
 
         for w in gen.permutation(self.workers): # randomize sequence of negotiations so that the same workers are not getting consistenly filtered out due to capacity
             
@@ -402,20 +440,21 @@ class Market:
 
             # special cases
             if len(firm.workers)>= firm.capacity:
-                num_failed_negotiations = num_failed_negotiations + 1 # failure to negotiate, but still attempted
+                # failed_mvpt_negotiations = failed_mvpt_negotiations + 1 # failure to negotiate, but still attempted
                 continue # firm already at capacity, not really a success or failure of the tool 
             
             if len(firm.workers) == 0:
                 self._job_switch(w.offer, firm, w)
                 w.num_successes = w.num_successes + 1
-                num_successful_negotiations = num_successful_negotiations+ 1
+                successful_mvpt_negotiations = successful_mvpt_negotiations+ 1
                 continue # successful switch
             
             # counter offer, can be generous or strict, NOW DEPENDS ON PROBABILITY OF BEING A LOW OUTSIDE OFFER TYPE OR NOT
 
             if self.high_lambda > 0: # flags if there are outside opportunities in the market
-                p_type_H = min(w.time_since_last_switch * self.high_lambda, 1) # probability is 1 if t >= 1/self.high_lambda, o.w. proportional, too simple? not proper belief updating? 
-                compete = gen.binomial(1, p_type_H)
+                ## FLAGGING: this could be changed to be less of a threshold, but want to convey that firms are more certain a high wage worker is offering if it has been longer since their last switch
+                p_type_H = min(w.time_since_last_switch * self.high_lambda, 1) # probability is 1 if t >= 1/self.high_lambda, o.w. proportional
+                compete = gen.binomial(1, p_type_H) # bernoulli 
             else: # else, rely on firm's default counter type
                 compete = firm.counter_type
 
@@ -429,11 +468,11 @@ class Market:
             
             if outcome == -1:
                 w.num_failures = w.num_failures + 1
-                num_failed_negotiations = num_failed_negotiations+ 1
+                failed_mvpt_negotiations = failed_mvpt_negotiations+ 1
             else:
                 self._job_switch(outcome, firm, w)
                 w.num_successes = w.num_successes + 1
-                num_successful_negotiations = num_successful_negotiations + 1
+                successful_mvpt_negotiations = successful_mvpt_negotiations + 1
         
         # workers update beliefs after all negotiations done and time since last switch 
         for w in self.workers:
@@ -445,8 +484,8 @@ class Market:
             f.belief_update()
         
         # tracking how many attempted negotiations there were, 0=> wage stability 
-        self.num_successful_negotiations.append(num_successful_negotiations)
-        self.num_failed_negotiations.append(num_failed_negotiations)
+        self.num_successful_mvpt_negotiations.append(successful_mvpt_negotiations)
+        self.num_failed_mvpt_negotiations.append(failed_mvpt_negotiations)
 
 
 
