@@ -22,7 +22,7 @@ def get_wage_distribution_market(market):
     return counts, bins
 
 
-def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None,initial_pool_proportion=1,seed=0,save=False,n=0):
+def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1,o_o_c=None,f_t=None,l_H=None,l_L=None):
     
     attribute_values = []
     
@@ -38,11 +38,11 @@ def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extr
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value throughout market")
     if save:
-        plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_market")
-    plt.show()
+        plt.savefig(f"simulation_results/setting_2/seed={seed}_additional_settings_market_wage_distribution_graphs/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.png")
+    plt.clf()
 
 
-def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None,initial_pool_proportion=1,seed=0,save=False,n=0):
+def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1):
     
     attribute_values = []
     
@@ -58,8 +58,8 @@ def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = N
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value at Firm {f_idx}")
     if save:
-        plt.savefig(f"simulation_results/seed={seed}_i_p_{initial_pool_proportion}_{n}/distribution_of_{attr}_at_firm_{f_idx}")
-    plt.show()
+        plt.savefig(f"simulation_results/seed={seed}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_{n}/distribution_of_{attr}_at_firm_{f_idx}")
+    plt.clf()
 
 def print_wage_distribution_within_firm(firm):
     

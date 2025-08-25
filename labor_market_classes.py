@@ -1,7 +1,7 @@
 import numpy as np
 import math
 
-seed = 63 # use for reproducibility of initial simulations to debug 
+seed = 1 # use for reproducibility of initial simulations to debug 
 gen = np.random.default_rng(seed=seed)
 
 class Worker:
@@ -204,7 +204,7 @@ class Market:
      Additionally, carries out each phase of the market evolution.
     '''
 
-    def __init__(self, N_f, N_w, counter_t, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J):
+    def __init__(self, N_f, N_w, counter_t, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J,i_p_w_c):
         '''initializaiton of the market
 
         Parameters
@@ -222,6 +222,7 @@ class Market:
             lam_H (float): rate of high wage offers from firms for high wage workers
             lam_L (float): rate of high wage offers from firms for low wage workers
             J (int):  total number of job switches each worker can make
+            i_p_w_c (float): wage cap on workers in the initial pool
         '''
         # market attributes 
         self.benchmark_proportion = b_k
@@ -238,7 +239,7 @@ class Market:
         self._hire_initial_workers(np.split(np.asarray(self.workers), N_f)) # evenly split workers into firms
 
         # initializing mvpt after workers have an initial wage
-        initial_worker_pool = set(gen.permutation([w for w in self.workers])[:int(N_w * i_p)]) # grab i_p proportion of initial workers randomly for MVPT,could correlate with pay distribution of current market (if w.wage < 0.2)
+        initial_worker_pool = set(gen.permutation([w for w in self.workers if w.wage <= i_p_w_c])[:int(N_w * i_p)]) # grab i_p proportion of initial workers randomly for MVPT,could correlate with pay distribution of current market
         for w in initial_worker_pool:
             w.in_initial_pool = 1 # connect workers to be in the initial pool
         self.mvpt = MVPT(initial_worker_pool,N_w,sd_cap)
@@ -348,6 +349,11 @@ class Market:
         waiting_low = 0
         waiting_high = 0
 
+        # firms always see benchmark first
+        for i,f in enumerate(self.firms):
+            benchmark_for_f = self._perform_benchmark()
+            f.belief_update(benchmark_for_f)
+
         def _outside_offer_check(w):
             
             # Workers receive a true outside option according to a Poisson distribution parameterized by their rate
@@ -359,11 +365,12 @@ class Market:
                 # randomly sample a firm with a vacancy
                 firm = gen.choice([f for f in self.firms if len(f.workers) < f.capacity],1)[0] 
 
-                # randomply sample an offer from that firm in the high end of their belief range
-                # mrpl = gen.binomial(1,self.p_mrpl)
                 if outside_option >= 2: # perfect Bertrand competition with multiple firms giving offers 
                     offer = 1 # mrpl attained!
                 else:
+                    # print(f"[{firm.market_pay_belief[1]}, {firm.market_pay_belief[2]}]")
+                    # o = gen.beta(a=1,b=2) # left skewed
+                    # offer = (1-o)*firm.market_pay_belief[1]  + o*firm.market_pay_belief[2] 
                     offer = gen.uniform(firm.market_pay_belief[1], firm.market_pay_belief[2]) # something in the upper end, but exclusive of upper end (strictly less than mrpl) 
 
                 # worker accepts iff offer is > wage + search costs 
@@ -384,37 +391,36 @@ class Market:
                 num_successful_outside = num_successful_outside + (not failed)
                 num_failed_outside = num_failed_outside + failed
 
-            if seek_mvpt:
+            # check if worker has enough switches left to make it to MRPL BEFORE checking mvpt
+            p_ge_2 = 1-np.exp(-1 *w.outside_opp_rate) * sum([w.outside_opp_rate**i  / math.factorial(i) for i in range(2)]) # P(k>=2) for k opportunities in the next time step 
+            better_to_wait =  p_ge_2*(T-t) >= 1 # only wait if you expect at least one chance to get MRPL
+            if better_to_wait:
+                self.mvpt.remove_worker(w) # THIS IS CRUCIAL 
+
+            if seek_mvpt and (not better_to_wait):
                 w.mvpt_information_seeking(self.mvpt, self.max_switches)
-
-                # check if worker has enough switches left to make it to MRPL 
-                p_ge_2 = 1-np.exp(-1 *w.outside_opp_rate) * sum([w.outside_opp_rate**i  / math.factorial(i) for i in range(2)]) # P(k>=2) for k opportunities in the next time step 
-                better_to_wait =  p_ge_2*(T-t) >= 1 # only wait if you expect at least one chance to get MRPL
-
-
                 # only attempt negotiation if it seems not worth it to wait for true outside option
-                if (not better_to_wait) and (w.offer is not None) and (w.job_switches < self.max_switches): # and w.offer > w.reservation_wage, should already be guaranteed
+                if (w.offer is not None) and (w.job_switches < self.max_switches): # and w.offer > w.reservation_wage, should already be guaranteed
                     new_firm = gen.choice([f for f in self.firms if len(f.workers) < f.capacity],1)[0] # randomly choose a firm (possibly including current firm) that has vacancies
                     w.negotiating_with = new_firm
-                elif better_to_wait and w.outside_opp_rate == self.high_lambda:
-                    waiting_high = waiting_high + 1
-                    w.negotiating_with = None
-                elif better_to_wait and w.outside_opp_rate == self.low_lambda:
-                    waiting_low = waiting_low + 1
-                    w.negotiating_with = None
                 else:
                     w.negotiating_with = None
-        
+            elif better_to_wait and w.outside_opp_rate == self.high_lambda:
+                waiting_high = waiting_high + 1
+                w.negotiating_with = None
+            elif better_to_wait and w.outside_opp_rate == self.low_lambda:
+                waiting_low = waiting_low + 1
+                w.negotiating_with = None
+            else:
+                w.negotiating_with = None
+            
+    
         self.num_successful_outside_negotiations.append(num_successful_outside)
         self.num_failed_outside_negotiations.append(num_failed_outside)
 
         self.num_better_to_wait_H.append(waiting_high)
         self.num_better_to_wait_L.append(waiting_low)
-                            
-        # firms always see benchmark
-        for i,f in enumerate(self.firms):
-            benchmark_for_f = self._perform_benchmark()
-            f.belief_update(benchmark_for_f)
+                        
 
     def negotiation_and_belief_update(self):
         '''
