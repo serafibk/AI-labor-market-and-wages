@@ -1,4 +1,5 @@
 import matplotlib.pyplot as plt
+from matplotlib import animation
 import numpy as np
 
 
@@ -21,8 +22,22 @@ def get_wage_distribution_market(market):
 
     return counts, bins
 
+def get_wage_distribution_market_split_workers(market,lam_H = None):
+    wages_H = []
+    wages_L = []
+    for w in market.workers:
+        if w.outside_opp_rate == lam_H:
+            wages_H.append(w.wage)
+        else:
+            wages_L.append(w.wage)
 
-def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1,o_o_c=None,f_t=None,l_H=None,l_L=None):
+    counts_H, bins_H = np.histogram(wages_H,bins=100,range=(0,1))
+    counts_L, bins_L = np.histogram(wages_L,bins=100,range=(0,1))
+
+    return (counts_H, bins_H), (counts_L, bins_L)
+
+
+def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1,o_o_c=None,f_t=None,l_H=None,l_L=None,J=None,c_b_H=None,c_b_L=None):
     
     attribute_values = []
     
@@ -38,7 +53,24 @@ def plot_attribute_distribution_market(market,attr, c, extra_counts = None, extr
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value throughout market")
     if save:
-        plt.savefig(f"simulation_results/setting_2/seed={seed}_additional_settings_market_wage_distribution_graphs/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.png")
+        # plt.savefig(f"simulation_results/setting_2/seed={seed}_additional_settings_market_wage_distribution_graphs/job_switches_{J}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.png")
+        # plt.clf()
+
+        fig, ax = plt.subplots(1, 1, figsize = (6, 6))
+        def animate(t):
+            ax.cla() # clear the previous image
+            # ax.set_title(f"Proposer initial={get_support(beta_f,S_f)}, Responder initial={get_support(beta_c,S_c)}, M={M}, T={T}")
+            # ax.plot(S_c,all_cdfs[t], label="Responder",color="blue")
+            # ax.stairs()
+            ax.stairs(c_b_H[t][0],c_b_H[t][1], label="Lam_H",color="blue")
+            ax.stairs(c_b_L[t][0],c_b_L[t][1], label="Lam_L",color="red",linestyle="dashed") # 0 == Accept condition
+            ax.set_title(f"Wage distribution of all workers at time {t}")
+            # ax.scatter([proposer_final_most_mass], [1], label=f"NE point: {proposer_final_most_mass}", color="black")
+            ax.legend()
+
+        anim = animation.FuncAnimation(fig, animate, frames = 2000, interval = 5, blit = False)
+        anim.save(f'simulation_results/setting_2/seed={seed}_market_wages_animations_job_switches_{J}/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.gif', writer='Pillow', fps=30)
+        plt.clf()
     plt.clf()
 
 

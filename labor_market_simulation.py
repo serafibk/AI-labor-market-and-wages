@@ -4,7 +4,7 @@ from tqdm import tqdm
 import math
 
 from labor_market_classes import Market
-from market_outcome_analysis import get_wage_distribution_within_firm, get_wage_distribution_market, plot_attribute_distribution_market, plot_attribute_distribution_within_firm, print_wage_distribution_within_firm
+from market_outcome_analysis import get_wage_distribution_within_firm, get_wage_distribution_market, plot_attribute_distribution_market, plot_attribute_distribution_within_firm, print_wage_distribution_within_firm, get_wage_distribution_market_split_workers
 
 seed = 1 # use for reproducibility of initial simulations to debug 
 
@@ -40,13 +40,13 @@ if __name__ == "__main__":
     # labor market attributes
     T = 2000 # total number of time steps in one simulation run
     benchmark_proportion =  1 # proportion of firms that get added to random sample, 1=> firms perfectly know wage distributions in market, shared beliefs
-    J = 150 # max number of job switches the workers can do 
+    J = 1000 # max number of job switches the workers can do 
     lam_high = 200 / T # rate of job offers per simulation run
     lam_low = 150 / T # rate of job offers per simulation run 
-    print(f"p(k>= 2| lam_H) * 2000 = {(1-np.exp(-1 *lam_high) * sum([lam_high**i  / math.factorial(i) for i in range(2)]))*2000}")
-    print(f"p(k>= 2| lam_L) * 2000 = {(1-np.exp(-1 *lam_low) * sum([lam_low**i  / math.factorial(i) for i in range(2)]))*2000}")
+    # print(f"p(k>= 2| lam_H) * 2000 = {(1-np.exp(-1 *lam_high) * sum([lam_high**i  / math.factorial(i) for i in range(2)]))*2000}")
+    # print(f"p(k>= 2| lam_L) * 2000 = {(1-np.exp(-1 *lam_low) * sum([lam_low**i  / math.factorial(i) for i in range(2)]))*2000}")
     outside_offer_cutoff = [0.9] # cutoff where workers switch from L type to H type 
-    lambdas = [(300 / T, 1/ T), (250/T, 5/T), (200/T,2/T)]
+    lambdas = [(300 / T, 1/ T)]#, (250/T, 5/T), (200/T,2/T)]
 
 
     # firm attributes
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     # mvpt attributes
     sd_cap = 0.1 # standard deviation cap 
-    initial_pool_proportion = [0.75,0.25]
+    initial_pool_proportion = [0.75]#,0.25]
     initial_pool_max_wage_cap = [0.4,0.6,0.7,0.8]
     
     for i_p_p in initial_pool_proportion:
@@ -72,8 +72,8 @@ if __name__ == "__main__":
                     for l_H, l_L in lambdas:
                         print(f"p(k>= 2| lam_H) * 2000 = {(1-np.exp(-1 *l_H) * sum([l_H**i  / math.factorial(i) for i in range(2)]))*2000}")
                         print(f"p(k>= 2| lam_L) * 2000 = {(1-np.exp(-1 *l_L) * sum([l_L**i  / math.factorial(i) for i in range(2)]))*2000}")
-                        N = 3 # number of simualations to run with the above parameters
-                        save = False # save plots?
+                        N = 1 # number of simualations to run with the above parameters
+                        save = True # save plots?
 
                         # run simulation
                         final_accept_m_hats = []
@@ -90,6 +90,15 @@ if __name__ == "__main__":
                             initial_counts_bins = [get_wage_distribution_within_firm(firm) for firm in market.firms]
                             initial_counts_bins_market = get_wage_distribution_market(market)
                             initial_wages = [w.wage for w in market.workers]
+
+                            c_b_H = []
+                            c_b_L = []
+
+                            counts_bins_H, counts_bins_L = get_wage_distribution_market_split_workers(market,l_H)
+                            c_b_H.append(counts_bins_H)
+                            c_b_L.append(counts_bins_L)
+                            
+
                             m_hat_over_time = [market.mvpt.m_hat]
                             l_hat_over_time = [market.mvpt.l_hat]
                             u_hat_over_time = [market.mvpt.u_hat]
@@ -103,13 +112,17 @@ if __name__ == "__main__":
                                 market.market_time_step(T, t)
 
                                 # track data points
-                                m_hat_over_time.append(market.mvpt.m_hat)
-                                l_hat_over_time.append(market.mvpt.l_hat)
-                                u_hat_over_time.append(market.mvpt.u_hat)
-                                mvpt_pool_size.append(len(market.mvpt.data_pool)) 
+                                counts_bins_H, counts_bins_L = get_wage_distribution_market_split_workers(market,l_H)
+                                c_b_H.append(counts_bins_H)
+                                c_b_L.append(counts_bins_L)
+
+                                # m_hat_over_time.append(market.mvpt.m_hat)
+                                # l_hat_over_time.append(market.mvpt.l_hat)
+                                # u_hat_over_time.append(market.mvpt.u_hat)
+                                # mvpt_pool_size.append(len(market.mvpt.data_pool)) 
                                 # prop_H.append(sum([1 for w in market.workers if w.outside_opp_rate == lam_high])/N_workers)
-                                for i in range(N_workers):
-                                    worker_mvpt_confidence[i].append(market.workers[i].mvpt_confidence)
+                                # for i in range(N_workers):
+                                #     worker_mvpt_confidence[i].append(market.workers[i].mvpt_confidence)
                                 
                                 # # check for convergence 
                                 # conv = check_convergence(market,failure_threshold, acceptance_threshold, 0.51,1, 5000)
@@ -126,7 +139,7 @@ if __name__ == "__main__":
                             # plt.ylabel("Count of negotiation type (+:success, -:failed)")
                             # plt.title("Successful vs. Failed negotiations with MVPT over time")
                             # if save:
-                            #     plt.savefig(f"simulation_results/seed={seed}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_{n}/successful_vs_failed_mvpt_negotiations")
+                            #     plt.savefig(f"simulation_results/setting_2/seed={seed}_market_wages_animations_job_switches_{J}/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}_mvpt_negotiations.png")
                             # plt.clf()
 
                             # plt.bar(range(len(market.num_successful_outside_negotiations)), market.num_successful_outside_negotiations, color= "blue", label="Num. successful negotiations / time step")
@@ -143,9 +156,9 @@ if __name__ == "__main__":
                             # plt.xlabel("Time")
                             # plt.ylabel("Count of negotiation type (+:success, -:failed)")
                             # plt.title("Number of type H workers vs. type L workers that choose to wait over time")
-                            # if save:
-                            #     plt.savefig(f"simulation_results/seed={seed}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_{n}/type_H_vs_type_L_waiting")
-                            # plt.clf()
+                            # # if save:
+                            # #     plt.savefig(f"simulation_results/seed={seed}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_{n}/type_H_vs_type_L_waiting")
+                            # plt.show()
 
                         
                             # for k in range(0,100,5):
@@ -188,7 +201,7 @@ if __name__ == "__main__":
                             # print(f"Lower bound: {market.mvpt.l_hat}, Upper bound: {market.mvpt.u_hat}")
 
                             # plot total wage distribution
-                            plot_attribute_distribution_market(market,"wage",N_workers,initial_counts_bins_market[0],initial_counts_bins_market[1],i_p_p,seed,True,n,i_p_w_c,o_o_c,f_t,l_H,l_L)
+                            plot_attribute_distribution_market(market,"wage",N_workers,initial_counts_bins_market[0],initial_counts_bins_market[1],i_p_p,seed,True,n,i_p_w_c,o_o_c,f_t,l_H,l_L,J,c_b_H,c_b_L)
 
                             # for i,f in enumerate(market.firms):
                             #     # print(f"Firm id: {f}")
