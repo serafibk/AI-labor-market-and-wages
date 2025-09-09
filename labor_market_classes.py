@@ -2,20 +2,22 @@ import numpy as np
 import math
 
 seed = 1 # use for reproducibility of initial simulations to debug 
-gen = np.random.default_rng(seed=seed)
+gen = np.random.default_rng()
 
 class Worker:
 
-    def __init__(self,s,f,a):
+    def __init__(self,s,f,a,u,mass_le_m_hat, mass_g_m_hat, mass_ambiguous):
         '''initialization of Worker agent 
 
         Parameters 
             s (float): search threshold for worker such that they will renegotiate their pay with own firm or another firm if their median pay belief is >(1+s)*current wage. s>=0.
             f (float): confidence level, in range [0,1], in mvpt at which worker stops sharing data for all future time steps
             a (float): confidence level, in range [0,1], in mvpt at and above which worker shares data and uses mvpt tool w.p. 1
-        '''
+            u (float): fairness uncertainty salience in range [0,1] which determines how likely they are to share data regardless of the perceived utiltiy of the tool 
+            c (float): initial confidence in MVPT
+         '''
         # worker attributes: fairness uncertainty and outside opp rate possibly heterogenous, search threshold and failure/acceptance threshold homogenous
-        self.fairness_uncertainty = gen.beta(a=4,b=5) # fairness uncertainty salience, slightly left skewed distribution
+        self.fairness_uncertainty = u # gen.beta(a=4,b=5) # fairness uncertainty salience, slightly left skewed distribution
         self.outside_opp_rate = None # initialized after worker gets initial wage
         self.search_threshold = s # premium over current wage required for woker to negotiate and switch
         self.failure_threshold = f # discard the tool when mvpt confidence falls below this threshold
@@ -32,17 +34,86 @@ class Worker:
         self.reservation_wage = None # wage + search threshold 
         self.offer = None # wage offer that worker opens with 
 
-        # counters for tool confidence
-        self.sought_info = 0 # track whether median belief set via mvpt or not
-        self.num_failures = 0 # counter to track failed negotiations
-        self.num_successes = 0 # counter to track successful negotiations
-        self.mvpt_confidence = gen.beta(a=1,b=1) # how much mvpt tool is weighted compared to current wage, start with a beta distribution and then posterior updating based on number of successes/failurs. 1,1 to start since failure and success are both possible.
+        # counters for  mass of different outcomes
+        self.mass_mvpt_useful = mass_le_m_hat # initial mass
+        self.mass_mvpt_not_useful = mass_g_m_hat # initial mass
+        self.mass_mvpt_ambiguous = mass_ambiguous # initial mass
+        self.n_seeks = 0
+        # self.seek_mvpt_mass = [self.i_w_le_m_hat, self.i_w_g_m_hat,self.i_w_ambiguous]
+        # self.mass_successful_negotiations = mass_successful_negotiation
+        # self.mass_failed_negotiations = mass_failed_negotiation
+        # self.n_negotiations = 0
+        # self.use_mvpt_mass = [self.i_successful_negotiations,self.i_failed_negotiaions]
        
-        # flags used in updates
-        self.in_initial_pool = 0 # whether worker is in initial data pool or not, always share data if so 
-        self.always_share = 0 # track if they should share data deterministically
-        self.stop_sharing = 0 # track if they ever stop sharing
+        # # flags used in updates
+        # self.in_initial_pool = 0 # whether worker is in initial data pool or not, always share data if so 
+        # self.always_share = 0 # track if they should share data deterministically
+        # self.stop_sharing = 0 # track if they ever stop sharing
+        self.optimistic = 0
+        self.pessimistic = 0
     
+    def _p_seek_info(self):
+        '''P(seek info) = 1-P(certain m_hat < wage)
+        '''
+        if self.optimistic == 1: # count ambiguous mass towards usefulness of the tool
+            return 1-((self.mass_mvpt_not_useful)/(self.mass_mvpt_useful  + self.mass_mvpt_not_useful + self.mass_mvpt_ambiguous))
+        else: # count ambiguous mass towards tool not being useful
+            return 1-((self.mass_mvpt_not_useful+self.mass_mvpt_ambiguous)/(self.mass_mvpt_useful  + self.mass_mvpt_not_useful + self.mass_mvpt_ambiguous))
+
+    def _p_trust_m_hat(self):
+        ''' offer = p(success)*m_hat + (1-p(success))*(wage+s.c.) ARCHIVED'''
+
+        return self.mass_successful_negotiations / (self.mass_successful_negotiations + self.mass_failed_negotiations)
+    
+    def _use_mvpt_mass_unbiased_update(self, evidence):
+        '''evidence = success or fail ARCHIVED
+        '''
+
+        self.n_negotiations = self.n_negotiations + 1
+
+        if evidence == "success":
+            self.mass_successful_negotiations = (self.n_negotiations*self.mass_successful_negotiations + 1) / (self.n_negotiations + 1)
+            self.mass_failed_negotiations = (self.n_negotiations*self.mass_failed_negotiations + 0) / (self.n_negotiations + 1)
+        elif evidence == "fail":
+            self.mass_successful_negotiations = (self.n_negotiations*self.mass_successful_negotiations + 0) / (self.n_negotiations + 1)
+            self.mass_failed_negotiations = (self.n_negotiations*self.mass_failed_negotiations + 1) / (self.n_negotiations + 1)
+        else:
+            print(f"Error: unknown evidence {evidence}")
+            return 
+    
+    
+    
+    def _seek_mass_biased_update(self, evidence):
+        '''evidence = not useful, useful, or ambiguous
+        '''
+        self.n_seeks = self.n_seeks + 1 # tracks 't'
+
+        if evidence == "not useful":
+            self.mass_mvpt_not_useful = (self.n_seeks*self.mass_mvpt_not_useful + 1) / (self.n_seeks + 1)
+            self.mass_mvpt_useful = (self.n_seeks*self.mass_mvpt_useful + 0) / (self.n_seeks + 1)
+            self.mass_mvpt_ambiguous = (self.n_seeks*self.mass_mvpt_ambiguous  + 0) / (self.n_seeks + 1)
+        elif evidence == "useful":
+            self.mass_mvpt_useful = (self.n_seeks*self.mass_mvpt_useful + 1) / (self.n_seeks + 1)
+            self.mass_mvpt_not_useful = (self.n_seeks*self.mass_mvpt_not_useful + 0) / (self.n_seeks + 1)
+            self.mass_mvpt_ambiguous = (self.n_seeks*self.mass_mvpt_ambiguous  + 0) / (self.n_seeks + 1)
+        elif evidence == "ambiguous":
+            self.mass_mvpt_not_useful = (self.n_seeks * self.mass_mvpt_not_useful + self.mass_mvpt_not_useful*(1-self.mass_mvpt_ambiguous ))/(self.n_seeks + 1)
+            self.mass_mvpt_useful = (self.n_seeks * self.mass_mvpt_useful + self.mass_mvpt_useful*(1-self.mass_mvpt_ambiguous ))/(self.n_seeks + 1)
+            self.mass_mvpt_ambiguous = self.mass_mvpt_ambiguous  * (self.n_seeks + 2 - self.mass_mvpt_ambiguous)/(self.n_seeks+1)
+        else:
+            print(f"Error: unknown evidence {evidence}")
+            return
+
+
+    def _seek_mass_distributed_update(self, evidence):
+        '''TODO -- other kinds of updates'''
+        pass 
+
+    def _seek_mass_unbiased_update(self, evidence):
+        '''TODO -- other kinds of updates'''
+        pass 
+
+        
 
     def mvpt_information_seeking(self,mvpt,max_switches):
         '''
@@ -51,43 +122,39 @@ class Worker:
         Parameters
             mvpt (MVPT): instance of mvpt for worker to possibly share data with and seek data from.
         '''
-        self.sought_info = 0 # tracking whether worker sought info 
 
-        # do not share if confidence below failure threshold
-        if self.stop_sharing == 1 or self.job_switches >= max_switches:
+        # everyone else gets to check upper bounds for perceived usefulness (lower than lower bound means usefulness of the tool is ambiguous)
+        if self.wage >= mvpt.u_hat: # if you don't see any possible improvement, tool is definitely not useful
+            self._seek_mass_biased_update("not useful")
+        else:
+            ## wage > l_hat and <= u_hat 
+            self._seek_mass_biased_update("ambiguous")
+
+        p_share = self._p_seek_info() # sharing is totally tied to belief in usefulness now, cleaned up edge cases
+
+         # do not share if confidence below failure threshold (reasonable buffer for creating deterministic behavior)
+        if p_share <= self.failure_threshold: # or self.job_switches >= max_switches:
             mvpt.remove_worker(self) # worker leaves data pool
-            self.belief_update() # offer is none
+            self.offer_update() # offer is none
             return # do not seek info
 
         # if in the initial pool or confidence exceeds acceptance threshold, share w.p. 1
-        if self.always_share == 1 or self.in_initial_pool == 1: 
-            self.sought_info = 1
+        if p_share >= self.acceptance_threshold: #or self.in_initial_pool == 1: 
             mvpt.add_worker(self)
-            self.belief_update(m_hat = mvpt.m_hat)
+            self.offer_update(m_hat = mvpt.m_hat)
             return # done
 
-        
-        # everyone else gets to check upper bounds for perceived usefulness (lower than lower bound means you still want to check)
-        if self.wage > mvpt.u_hat: # if you don't see any possible improvement, don't use the tool
-            self.num_failures = self.num_failures + 1 # and the tool has failed to work for this worker
-            mvpt.remove_worker(self)
-            self.belief_update() # offer is none
-            return # do not seek more info
-
-        # otherwise seek info w.p. proportional to fairness uncertainty
-        p_seek_info = self.fairness_uncertainty 
-        seek_info = gen.choice([0,1],p=[1-p_seek_info, p_seek_info])
+        seek_info = gen.choice([0,1],p=[1-p_share, p_share])
 
         if seek_info: # share data, belief update
-            self.sought_info = 1
             mvpt.add_worker(self) # share data 
-            self.belief_update(m_hat = mvpt.m_hat) # update belief based on mvpt information
+            self.offer_update(m_hat = mvpt.m_hat) # update belief based on mvpt information
         else: # don't share data
             mvpt.remove_worker(self) 
-            self.belief_update() # offer is none
+            self.offer_update() # offer is none
         
 
-    def belief_update(self,m_hat = None):
+    def offer_update(self,m_hat = None):
         '''
         Worker updates belief about reservation wage, mvpt confidence, and offer if they have mvpt m_hat information 
 
@@ -97,36 +164,32 @@ class Worker:
         # set reservation wage
         self.reservation_wage = (1+self.search_threshold)*self.wage
 
-        # confidence in mvpt updated first based on past successes / failures, using expected value of posterior distribution now 
-        self.mvpt_confidence = (1+self.num_successes) / (2 + self.num_successes + self.num_failures)
-
-        # set flags for sharing behavior based on confidence
-        self.stop_sharing = (self.mvpt_confidence <= self.failure_threshold) # if and only if 
-        self.always_share = (self.mvpt_confidence >= self.acceptance_threshold) # if and only if
+        mvpt_trust = 1 #self._p_trust_m_hat() -- I think this just creates unnecessary noise
 
         if m_hat is not None and m_hat > self.reservation_wage: 
             # create an offer using mvpt only if it exceeds reservation wage
-            self.offer = self.mvpt_confidence*m_hat + (1-self.mvpt_confidence)*self.reservation_wage
+            self.offer = mvpt_trust*m_hat + (1-mvpt_trust)*self.reservation_wage
+            self._seek_mass_biased_update("ambiguous") # still not certain your offer will result in a successful negotiation, but looks promising
+        elif m_hat is not None and m_hat <= self.reservation_wage:
+            self._seek_mass_biased_update("not useful") # m_hat certaintly does not increase wage
         else:
-            self.offer = None # make sure offers are not re-used when not seeking 
+            self.offer = None # no offer if m_hat not sought, no further updates to pmf of seeking info 
+
 
 
 class Firm:
 
-    def __init__(self,C,c_t):
+    def __init__(self,C):
         '''initialization of Firm agent
 
         Parameters
             C (int): capacity, maximum number of employees firm can support.
             c_t (int): binary indicator for whether firm counters conservatively and shades down high bids (0) or competitively and accepts high bids (1)
         '''
-        # firm attributes: capacity homogenous, dispersion and counter type possibly heterogenous
+        # firm attributes: capacity homogenous
         self.capacity = C
-        self.counter_type = c_t # conservative (0) or competitive (1) 
-
         self.workers = set([]) # list of employed workers
-            
-        self.market_pay_belief = [0, 0, 0] # min, med, and max pay believed to be in the market
+        self.market_pay_belief = [0, 0, 0] # min, med, and max pay believed to be in the market, set by benchmark + worker pool characteristics
     
 
     def belief_update(self, benchmark=None):
@@ -204,13 +267,12 @@ class Market:
      Additionally, carries out each phase of the market evolution.
     '''
 
-    def __init__(self, N_f, N_w, counter_t, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J,i_p_w_c):
+    def __init__(self, N_f, N_w, C, f, a, s, b_k, sd_cap, i_p,o_o_c, lam_H, lam_L, J,i_p_w_c):
         '''initializaiton of the market
 
         Parameters
             N_f (int): Number of Firms
             N_w (int): Number of Workers
-            counter_t (List[int]): List of indicators of whether firms are competitive or conservative counter offer types
             C (int): capacity of each firm, max. number of workers they can hire
             f (float): failure threshold for worker's confidence in mvpt
             a (float): acceptance threshold for worker's confidence in mvpt
@@ -232,17 +294,25 @@ class Market:
         self.max_switches = J
 
         # create Firms and Workers
-        self.firms = [Firm(C,c_t) for c_t in counter_t] # firms identical up to default counter offer type 
-        self.workers = [Worker(s,f,a) for i in range(N_w)] # workers identical up to initial wage and fairness uncertainty
+        self.firms = [Firm(C) for i in range(N_f)] # firms identical up to default counter offer type 
+        self.workers = [Worker(s,f,a,None,mass_le_m_hat=1, mass_g_m_hat=1, mass_ambiguous=1) for i in range(N_w)] # workers identical up to initial wage and initial optimism (to be set after wage set)
 
         # initial matching of firms and workers (which sets their initial beliefs)
         self._hire_initial_workers(np.split(np.asarray(self.workers), N_f)) # evenly split workers into firms
+        expert_worker_idx = gen.integers(0,N_w)
+        self.workers[expert_worker_idx].wage = 1 # ensure at least one worker starts with MRPL 
 
         # initializing mvpt after workers have an initial wage
-        initial_worker_pool = set(gen.permutation([w for w in self.workers if w.wage <= i_p_w_c])[:int(N_w * i_p)]) # grab i_p proportion of initial workers randomly for MVPT,could correlate with pay distribution of current market
-        for w in initial_worker_pool:
-            w.in_initial_pool = 1 # connect workers to be in the initial pool
-        self.mvpt = MVPT(initial_worker_pool,N_w,sd_cap)
+        optimistic_worker_pool = set(gen.permutation([w for w in self.workers if w.wage <= i_p_w_c])[:int(N_w *i_p)]) # grab i_p proportion of initial workers randomly for MVPT OR all workers with wage less than threshold to possibly depend on wage
+        pessimistic_worker_pool = set(gen.permutation([w for w in self.workers if (w not in optimistic_worker_pool)])) #[:int(N_w * 0.3)]) # rest of the workers pessimistic, could have some neutral
+        for w in optimistic_worker_pool:
+            w.mass_mvpt_useful = 100 # more certain tool will be useful, variable
+            w.optimistic = 1
+        for w in pessimistic_worker_pool:
+            w.mass_mvpt_not_useful = 5 # more certain tool will not be useful, variable
+            w.pessimistic = 1
+        
+        self.mvpt = MVPT(optimistic_worker_pool,N_w,sd_cap) # initial worker pool is exactly the optimistic pool
         self.mvpt.update_mvpt()
 
         # tracking data points during market evolution for analysis 
@@ -283,7 +353,7 @@ class Market:
                 f.workers.add(w)
 
                 # update worker belief to set res. wage 
-                w.belief_update()
+                w.offer_update()
             
             # update firm belief based on initial worker pool
             f.belief_update()
@@ -387,7 +457,7 @@ class Market:
         for w in self.workers:
             seek_mvpt, failed = _outside_offer_check(w) # 1 if no outside offer, else 0
 
-            if failed < 2:
+            if failed < 2: # just tracking statistics for visualization
                 num_successful_outside = num_successful_outside + (not failed)
                 num_failed_outside = num_failed_outside + failed
 
@@ -395,7 +465,7 @@ class Market:
             p_ge_2 = 1-np.exp(-1 *w.outside_opp_rate) * sum([w.outside_opp_rate**i  / math.factorial(i) for i in range(2)]) # P(k>=2) for k opportunities in the next time step 
             better_to_wait =  p_ge_2*(T-t) >= 1 # only wait if you expect at least one chance to get MRPL
             if better_to_wait:
-                self.mvpt.remove_worker(w) # THIS IS CRUCIAL 
+                self.mvpt.remove_worker(w) # worker does not share data, and waits for outside option to arrive 
 
             if seek_mvpt and (not better_to_wait):
                 w.mvpt_information_seeking(self.mvpt, self.max_switches)
@@ -447,47 +517,56 @@ class Market:
             # special cases
             if len(firm.workers)>= firm.capacity:
                 # failed_mvpt_negotiations = failed_mvpt_negotiations + 1 # failure to negotiate, but still attempted
-                continue # firm already at capacity, not really a success or failure of the tool 
+                continue # firm already at capacity, learn nothing about the tool
             
             if len(firm.workers) == 0:
                 self._job_switch(w.offer, firm, w)
-                w.num_successes = w.num_successes + 1
+                # w.num_successes = w.num_successes + 1
+                # w._use_mvpt_mass_unbiased_update("success")
+                w._seek_mass_biased_update("useful")
                 successful_mvpt_negotiations = successful_mvpt_negotiations+ 1
                 continue # successful switch
             
-            # counter offer, can be generous or strict, NOW DEPENDS ON PROBABILITY OF BEING A LOW OUTSIDE OFFER TYPE OR NOT
+            # counter offer, can be generous or strict, ARCHIVED -- fixed firm behavior for both settings 
 
-            if self.high_lambda > 0: # flags if there are outside opportunities in the market
-                ## FLAGGING: this could be changed to be less of a threshold, but want to convey that firms are more certain a high wage worker is offering if it has been longer since their last switch
-                p_type_H = min(w.time_since_last_switch * self.high_lambda, 1) # probability is 1 if t >= 1/self.high_lambda, o.w. proportional
-                compete = gen.binomial(1, p_type_H) # bernoulli 
-            else: # else, rely on firm's default counter type
-                compete = firm.counter_type
+            # if self.high_lambda > 0: # flags if there are outside opportunities in the market
+            #     ## FLAGGING: this could be changed to be less of a threshold, but want to convey that firms are more certain a high wage worker is offering if it has been longer since their last switch
+            #     p_type_H = min(w.time_since_last_switch * self.high_lambda, 1) # probability is 1 if t >= 1/self.high_lambda, o.w. proportional
+            #     compete = gen.binomial(1, p_type_H) # bernoulli 
+            # else: # else, rely on firm's default counter type
+            #     compete = firm.counter_type
 
-            if compete:
+            p_accept_high = 0.1 # some realistic friction for getting high offers accepted #1 - len(self.mvpt.data_pool)/len(self.workers) # accept offers above median with probability proportional to number of workers in data pool
+            accept_high = gen.binomial(1, p_accept_high)
+
+            if accept_high:
                 firm_counter = w.offer # accept offer if above lower end, but below high end of belief
             else:
-                firm_counter = (1/2)*(firm.market_pay_belief[0]) + (1/2)*(w.offer) # shade down offer towards lower end
+                firm_counter = firm.market_pay_belief[1] # counter offer median pay (todo, should this change a worker's belief about the validity of m_hat?)
 
             # bargaining outcome
-            outcome = _bargaining_outcome(w.offer, firm.market_pay_belief[0],firm.market_pay_belief[2], firm_counter, w.reservation_wage)
+            outcome = _bargaining_outcome(w.offer, firm.market_pay_belief[1],firm.market_pay_belief[2], firm_counter, w.reservation_wage)
             
             if outcome == -1:
-                w.num_failures = w.num_failures + 1
+                # w.num_failures = w.num_failures + 1
+                # w._use_mvpt_mass_unbiased_update("fail")
+                w._seek_mass_biased_update("not useful")
                 failed_mvpt_negotiations = failed_mvpt_negotiations+ 1
             else:
                 self._job_switch(outcome, firm, w)
-                w.num_successes = w.num_successes + 1
+                # w.num_successes = w.num_successes + 1
+                # w._use_mvpt_mass_unbiased_update("success")
+                w._seek_mass_biased_update("useful")
                 successful_mvpt_negotiations = successful_mvpt_negotiations + 1
         
         # workers update beliefs after all negotiations done and time since last switch 
-        for w in self.workers:
-            w.time_since_last_switch = w.time_since_last_switch + 1 # those at -1 will be corrected to 0
-            w.belief_update()
+        # for w in self.workers:
+        #     w.time_since_last_switch = w.time_since_last_switch + 1 # those at -1 will be corrected to 0
+        #     w.belief_update()
 
-        # firms update beliefs after all negotiations done
-        for f in self.firms:
-            f.belief_update()
+        # # firms update beliefs after all negotiations done
+        # for f in self.firms:
+        #     f.belief_update()
         
         # tracking how many attempted negotiations there were, 0=> wage stability 
         self.num_successful_mvpt_negotiations.append(successful_mvpt_negotiations)
