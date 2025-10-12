@@ -1,0 +1,11 @@
+distribution: bimodal-slightly-right-skewed
+All workers DID NOT end up at MRPL.
+10th percentile=0.2, P(w_f <1 | w_i<=bot10) = 0.16494845360824742
+25th percentile=0.4, P(w_f <1 | w_i<=bot25) = 0.3024054982817869
+50th percentile=0.6, P(w_f <1 | w_i<=bot50) = 0.8969072164948454
+75th percentile=0.6, P(w_f <1 | w_i<=bot75) = 0.8969072164948454
+90th percentile=0.8, P(w_f <1 | w_i<=bot90) = 0.9656357388316151
+P(w_f <1 | w_i< 1) = 1.0
+
+distribution: bimodal-right-skewed
+All workers DID end up at MRPL.

@@ -72,7 +72,7 @@ def plot_attribute_distribution_market(market,attr, c, k=None,p=None,extra_count
     plt.ylabel(f"Density of {attr} value throughout market")
     if save:
         # plt.savefig(f"simulation_results/seed=101/i_p_{i_p_p}_i_w_l_p_{i_w_l_p}_i_w_u_p_{i_w_u_p}_i_m<{m_u:.2f},{m_n_u:.2f},{m_a:.2f}>_market_wage_distribution_seed={seed}_n={n}.png")
-        plt.savefig(f"q_learning_simulation_results/N={c}_k={k}_initial_distribution=UNIFORM_market_wage_distribution_seed={seed}.png")
+        plt.savefig(f"q_learning_simulation_results/p=0.1_N={c}_k={k}_initial_distribution={p}_market_wage_distribution_seed={seed}.png")
         # plt.savefig(f"simulation_results/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_adj_{o_adj}_p_adj_{p_adj}_{n}_market_wage_distribution_seed={seed}.png")
         # plt.savefig(f"simulation_results/setting_2/seed={seed}_additional_settings_market_wage_distribution_graphs/job_switches_{J}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.png")
     plt.show()
@@ -109,7 +109,7 @@ def plot_attribute_distribution_market(market,attr, c, k=None,p=None,extra_count
         anim = animation.FuncAnimation(fig, animate_H_L, frames = len(c_b_H), interval = 5, blit = False)
         if save:
             anim.save(f'simulation_results/setting_2/seed={seed}_market_wages_animations_job_switches_{J}/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.gif', writer='Pillow', fps=30)
-        plt.show()
+        plt.clf()
 
 
 def plot_attribute_distribution_within_firm(f_idx,firm,attr, c, extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1):

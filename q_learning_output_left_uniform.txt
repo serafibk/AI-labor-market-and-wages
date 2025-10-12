@@ -1,0 +1,26 @@
+distribution: bimodal-left-skewed
+All workers DID NOT end up at MRPL.
+10th percentile=0.0, P(w_f <1 | w_i<=bot10) = 0.7862068965517242
+25th percentile=0.0, P(w_f <1 | w_i<=bot25) = 0.7862068965517242
+50th percentile=0.0, P(w_f <1 | w_i<=bot50) = 0.7862068965517242
+75th percentile=0.0, P(w_f <1 | w_i<=bot75) = 0.7862068965517242
+90th percentile=0.4, P(w_f <1 | w_i<=bot90) = 0.9310344827586207
+P(w_f <1 | w_i< 1) = 1.0
+distribution: bimodal-slightly-left-skewed
+All workers DID NOT end up at MRPL.
+10th percentile=0.0, P(w_f <1 | w_i<=bot10) = 0.49206349206349204
+25th percentile=0.0, P(w_f <1 | w_i<=bot25) = 0.49206349206349204
+50th percentile=0.1, P(w_f <1 | w_i<=bot50) = 0.5555555555555556
+75th percentile=0.6, P(w_f <1 | w_i<=bot75) = 0.8293650793650794
+90th percentile=0.8100000000000023, P(w_f <1 | w_i<=bot90) = 0.9484126984126984
+P(w_f <1 | w_i< 1) = 1.0
+distribution: uniform
+All workers DID end up at MRPL. (seed=37)
+
+All workers DID NOT end up at MRPL. (seed=63)
+10th percentile=0.1, P(w_f <1 | w_i<=bot10) = 0.18867924528301888
+25th percentile=0.3, P(w_f <1 | w_i<=bot25) = 0.44339622641509435
+50th percentile=0.5, P(w_f <1 | w_i<=bot50) = 0.6981132075471698
+75th percentile=0.8, P(w_f <1 | w_i<=bot75) = 0.9150943396226415
+90th percentile=0.9100000000000023, P(w_f <1 | w_i<=bot90) = 1.0
+P(w_f <1 | w_i< 1) = 1.0
