@@ -1,0 +1,174 @@
+distribution: k-l
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+P(w_f <1 | w_i = 0.4) = 1.0
+P(w_f ==1 | w_i = 0.4) = 0.0
+P(w_f <1 | w_i = 0.5) = 1.0
+P(w_f ==1 | w_i = 0.5) = 0.0
+P(w_f <1 | w_i = 0.6) = 1.0
+P(w_f ==1 | w_i = 0.6) = 0.0
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 0.0 and time of last instance 0
+P(m_hat == tm) = 1.0 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: s-k-l
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+P(w_f <1 | w_i = 0.4) = 1.0
+P(w_f ==1 | w_i = 0.4) = 0.0
+P(w_f <1 | w_i = 0.5) = 1.0
+P(w_f ==1 | w_i = 0.5) = 0.0
+P(w_f <1 | w_i = 0.6) = 1.0
+P(w_f ==1 | w_i = 0.6) = 0.0
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 2e-06 and time of last instance 0
+P(m_hat == tm) = 0.999998 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: u
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+P(w_f <1 | w_i = 0.4) = 1.0
+P(w_f ==1 | w_i = 0.4) = 0.0
+P(w_f <1 | w_i = 0.5) = 1.0
+P(w_f ==1 | w_i = 0.5) = 0.0
+P(w_f <1 | w_i = 0.6) = 1.0
+P(w_f ==1 | w_i = 0.6) = 0.0
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 0.0 and time of last instance 0
+P(m_hat == tm) = 1.0 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: s-k-r
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+P(w_f <1 | w_i = 0.4) = 1.0
+P(w_f ==1 | w_i = 0.4) = 0.0
+P(w_f <1 | w_i = 0.5) = 1.0
+P(w_f ==1 | w_i = 0.5) = 0.0
+P(w_f <1 | w_i = 0.6) = 1.0
+P(w_f ==1 | w_i = 0.6) = 0.0
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 0.0 and time of last instance 0
+P(m_hat == tm) = 1.0 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: k-r
+All workers DID end up at MRPL.
+M_hat vs. true median statistics
+P(m_hat < tm) = 0.0 and time of last instance 0
+P(m_hat == tm) = 4e-06 and time of last instance 1
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: b-e
+All workers DID end up at MRPL.
+M_hat vs. true median statistics
+P(m_hat < tm) = 2e-06 and time of last instance 22
+P(m_hat == tm) = 6.4e-05 and time of last instance 64
+P(m_hat > tm) = 6.4e-05 and time of last instance 53
+distribution: b-l
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+No initial wages at 0.4.
+No initial wages at 0.5.
+No initial wages at 0.6.
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 2e-06 and time of last instance 0
+P(m_hat == tm) = 0.999998 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0
+distribution: b-r
+All workers DID NOT end up at MRPL.
+P(w_f <1 | w_i = 0.0) = 1.0
+P(w_f ==1 | w_i = 0.0) = 0.0
+P(w_f <1 | w_i = 0.1) = 1.0
+P(w_f ==1 | w_i = 0.1) = 0.0
+P(w_f <1 | w_i = 0.2) = 1.0
+P(w_f ==1 | w_i = 0.2) = 0.0
+P(w_f <1 | w_i = 0.3) = 1.0
+P(w_f ==1 | w_i = 0.3) = 0.0
+No initial wages at 0.4.
+No initial wages at 0.5.
+No initial wages at 0.6.
+P(w_f <1 | w_i = 0.7) = 1.0
+P(w_f ==1 | w_i = 0.7) = 0.0
+P(w_f <1 | w_i = 0.8) = 1.0
+P(w_f ==1 | w_i = 0.8) = 0.0
+P(w_f <1 | w_i = 0.9) = 1.0
+P(w_f ==1 | w_i = 0.9) = 0.0
+P(w_f <1 | w_i = 1.0) = 0.0
+P(w_f ==1 | w_i = 1.0) = 1.0
+M_hat vs. true median statistics
+P(m_hat < tm) = 0.0 and time of last instance 0
+P(m_hat == tm) = 1.0 and time of last instance 499999
+P(m_hat > tm) = 0.0 and time of last instance 0

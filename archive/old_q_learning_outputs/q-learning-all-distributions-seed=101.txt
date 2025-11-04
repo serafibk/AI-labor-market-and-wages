@@ -1,0 +1,19 @@
+distribution: k-l
+All workers DID NOT end up at MRPL.
+75th percentile=0.0, P(w_f <1 | w_i<=bot75) = 1.0
+P(w_f==1| w_i<=bot75) = 0.0
+90th percentile=0.6, P(w_f <1 | w_i<=bot90) = 1.0
+P(w_f==1| w_i<=bot90) = 0.0
+distribution: s-k-l
+All workers DID NOT end up at MRPL.
+75th percentile=0.5, P(w_f <1 | w_i<=bot75) = 0.6542553191489362
+P(w_f==1| w_i<=bot75) = 0.34574468085106386
+90th percentile=0.9, P(w_f <1 | w_i<=bot90) = 0.6808510638297872
+P(w_f==1| w_i<=bot90) = 0.3191489361702128
+distribution: u
+All workers DID NOT end up at MRPL.
+75th percentile=0.8, P(w_f <1 | w_i<=bot75) = 0.8807785888077859
+P(w_f==1| w_i<=bot75) = 0.1192214111922141
+90th percentile=0.9, P(w_f <1 | w_i<=bot90) = 1.0
+P(w_f==1| w_i<=bot90) = 0.0
+distribution: s-k-r

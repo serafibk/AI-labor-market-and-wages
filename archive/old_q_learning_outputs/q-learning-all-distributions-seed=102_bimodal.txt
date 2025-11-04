@@ -1,0 +1,12 @@
+distribution: b-e
+All workers DID NOT end up at MRPL.
+75th percentile=1.0, P(w_f <1 | w_i<=bot75) = 0.428
+P(w_f==1| w_i<=bot75) = 0.572
+distribution: b-l
+All workers DID NOT end up at MRPL.
+75th percentile=1.0, P(w_f <1 | w_i<=bot75) = 0.634
+P(w_f==1| w_i<=bot75) = 0.366
+distribution: b-r
+All workers DID NOT end up at MRPL.
+75th percentile=1.0, P(w_f <1 | w_i<=bot75) = 0.544
+P(w_f==1| w_i<=bot75) = 0.456
