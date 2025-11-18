@@ -55,7 +55,7 @@ def get_wage_distribution_market_optimistic_vs_pessimistic(market):
     return (counts_O, bins_O), (counts_P, bins_P), (counts_B, bins_B)
 
 
-def plot_attribute_distribution_market(market,attr, c, k=None,p=None,extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1,o_o_c=None,f_t=None,l_H=None,l_L=None,J=None,c_b_H=None,c_b_L=None,c_b_O=None, c_b_P=None, c_b_B=None,m_u=None,m_n_u=None,m_a=None,i_w_l_p=None,i_w_u_p=None):
+def plot_attribute_distribution_market(market,attr, N_w,N_f, k=None,p=None,extra_counts = None, extra_bins = None,i_p_p=1,seed=0,save=False,n=0,i_p_w_c=1,o_o_c=None,f_t=None,l_H=None,l_L=None,J=None,c_b_H=None,c_b_L=None,c_b_O=None, c_b_P=None, c_b_B=None,m_u=None,m_n_u=None,m_a=None,i_w_l_p=None,i_w_u_p=None):
     
     attribute_values = []
     
@@ -67,15 +67,16 @@ def plot_attribute_distribution_market(market,attr, c, k=None,p=None,extra_count
         plt.stairs(extra_counts, extra_bins, color="red",linestyle="dashed",label=f"Initial {attr} distribution")
     plt.title(f"Distribution of {attr} of Workers throughout market")
     plt.legend()
-    plt.ylim((0,c))
+    plt.ylim((0,N_w))
     plt.xlabel(f"{attr} value, between 0 and 1")
     plt.ylabel(f"Density of {attr} value throughout market")
     if save:
         # plt.savefig(f"simulation_results/seed=101/i_p_{i_p_p}_i_w_l_p_{i_w_l_p}_i_w_u_p_{i_w_u_p}_i_m<{m_u:.2f},{m_n_u:.2f},{m_a:.2f}>_market_wage_distribution_seed={seed}_n={n}.png")
-        plt.savefig(f"q_learning_simulation_results/p=0.1_N={c}_k={k}_initial_distribution={p}_market_wage_distribution_seed={seed}.png")
+        # plt.savefig(f"q_learning_simulation_results/p=0.1_N={c}_k={k}_initial_distribution={p}_market_wage_distribution_seed={seed}.png")
+        plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p}_market_wage_distribution_seed={seed}.png")
         # plt.savefig(f"simulation_results/i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_adj_{o_adj}_p_adj_{p_adj}_{n}_market_wage_distribution_seed={seed}.png")
         # plt.savefig(f"simulation_results/setting_2/seed={seed}_additional_settings_market_wage_distribution_graphs/job_switches_{J}_i_p_{i_p_p}_i_p_w_c_{i_p_w_c}_o_o_c_{o_o_c}_f_t_{f_t}_l_H_{l_H}_l_L_{l_L}_{n}.png")
-    plt.show()
+    plt.clf()
 
 
     fig, ax = plt.subplots(1, 1, figsize = (6, 6))

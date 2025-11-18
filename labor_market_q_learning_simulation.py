@@ -9,26 +9,30 @@ import matplotlib.pyplot as plt
 from market_outcome_analysis import get_wage_distribution_market, plot_attribute_distribution_market, get_wage_distribution_market_split_workers
 
 
-seed = 101
+seed = 115
 gen = np.random.default_rng(seed=seed)
+
+update_T = 0 # only if needed
 
 
 class MVPT:
 
-    def __init__(self, worker_data_pool,W):
+    def __init__(self, worker_data_pool,W, N_f):
         '''initialization of market value preictor tool (MVPT)
         
         params
             worker_data_pool (Set[Worker]): pool of initial workers who are sharing their wage information
         '''
         # data / noise parameter for predictions
-        self.data_pool = worker_data_pool # to generate median 
+        self.data_pool = [set() for f in range(N_f)]
+        for w in worker_data_pool:
+            self.data_pool[w.employer].add(w) 
         self.wages = W # possible wages to map onto 
 
         # information tool providees
-        self.m_hat = 0
-        self.u_hat = 0 # max of data pool (no error)
-        self.l_hat = 0 # min of data pool (no error)
+        self.m_hat = 0 # overall 
+        self.u_hat = [set() for f in range(N_f)] # 90th percentile per firm 
+        self.l_hat = [set() for f in range(N_f)] # 10th percentile per firm 
 
     
     def add_worker(self, worker):
@@ -37,7 +41,7 @@ class MVPT:
         params
             worker (Worker): Worker object to add to data set. 
         '''
-        self.data_pool.add(worker)
+        self.data_pool[worker.employer].add(worker) # track wage for their current employer
 
     
     def remove_worker(self, worker):
@@ -46,24 +50,34 @@ class MVPT:
         params
             worker (Worker): Worker object to remove from data set. 
         '''
-        self.data_pool.discard(worker)
+        for dataset in self.data_pool: # they may have a new employer now, so just loop over all since discard doesn't throw an error
+            if worker in dataset:
+                dataset.discard(worker)
+
+    def get_mvpt_range(self, f_idx):
+        '''return 10th and 90th percentile of firm, based on shared data'''
+        return (self.l_hat[f_idx], self.u_hat[f_idx])
+    
+    def get_mvpt_median(self):
+        '''if workers share, then they can see a market-wide median prediction for their role'''
+        return self.m_hat
 
     def update_mvpt(self): # could have workers see some coarser information too to start with 
         '''updates m_hat prediction based on current data pool and sigma_e 
         '''
-        if len(self.data_pool) == 0:
-            # print("Error, data pool empty")
-            return 
 
-        # update accurate u_hat, l_hat
-        self.u_hat = np.max([w.wage for w in self.data_pool])
-        self.l_hat = np.min([w.wage for w in self.data_pool])
+        # update u_hat, l_hat
+        for idx, pool in enumerate(self.data_pool):
+            if len(pool) == 0:
+                continue # can't update this firm 
+            l_hat_f = np.percentile(pool, 10)
+            u_hat_f = np.percentile(pool, 90)
+            self.l_hat[idx] = min(self.wages, key = lambda x:abs(x-l_hat_f)) # map to closest value
+            self.u_hat[idx] = min(self.wages, key = lambda x:abs(x-l_hat_f)) # map to closest value
 
-        # update m_hat within reasonable bounds of data pool
-        noisy_median = np.median([w.wage for w in self.data_pool])
-        self.m_hat = min(self.wages, key = lambda x:abs(x-noisy_median))# mapping to closest value in wage list
-        self.m_hat = min(self.m_hat,self.u_hat) 
-        self.m_hat = max(self.m_hat,self.l_hat)
+        # update m_hat from all of the wages
+        estimated_median = np.percentile([w.wage for dataset in self.data_pool for w in dataset],50)
+        self.m_hat = min(self.wages, key = lambda x:abs(x-estimated_median))# mapping to closest value in wage list
 
 
 class SalaryBenchmark:
@@ -77,15 +91,9 @@ class SalaryBenchmark:
         '''
         # data / noise parameter for predictions
         self.data_pool = firm_data_pool # to generate more granular estimates 
-        self.gov_data =  all_firms
         self.wages = W # possible wages to map onto 
 
-        # coarse information tool providees
-        # self.m_gov = 0 # median from gov data
-        self.u_gov = 0 # upper bound from gov
-        self.l_gov = 0 # lower bound from gov
-
-        # granular information  provided by the tool (could be different from gov. benchmark)
+        # granular information  provided by the tool
         self.data_pool_10 = 0 # 10th percentile
         self.data_pool_50 = 0 # 50th percentile
         self.data_pool_90 = 0 # 90th percentile
@@ -108,27 +116,22 @@ class SalaryBenchmark:
         '''
         self.data_pool.discard(firm)
     
-    def get_gov_data(self):
-        return (float(self.l_gov), float(self.u_gov))
-        #float(self.m_gov),
+    def get_benchmark_range(self):
+        '''just return upper and lower bound'''
+        return (float(self.data_pool_10),float(self.data_pool_90))
     
-    def get_firm_shared_data(self):
-        return (float(self.data_pool_10),float(self.data_pool_50),float(self.data_pool_90))
+    def get_benchmark_median(self):
+        '''return median for those that choose to use the benchmark's range'''
+       return float(self.data_pool_50)
 
-    def update_benchmarks(self): 
-        '''updates gov data benchmark and firm data pool benchmark
+    def update_benchmark(self): 
+        '''updates firm data pool benchmark
         '''
         if len(self.data_pool) == 0:
             # print("Error, data pool empty")
             return 
         elif len([w for f in self.data_pool for w in f.workers]) == 0: # none of the participating firms have workers
             return 
-
-        # update gov benchmark
-        self.u_gov = np.max([w.wage for f in self.gov_data for w in f.workers])
-        self.l_gov = np.min([w.wage for f in self.gov_data for w in f.workers])
-        # self.m_gov = np.percentile([w.wage  for f in self.gov_data for w in f.workers], 50)
-        # self.m_gov = min(self.wages, key = lambda x:abs(x-self.m_gov))# mapping to closest value in wage list
 
         # update firm-shared benchmark 
         dp_10 = np.percentile([w.wage for f in self.data_pool for w in f.workers], 10)
@@ -138,26 +141,31 @@ class SalaryBenchmark:
         dp_90 = np.percentile([w.wage for f in self.data_pool for w in f.workers], 90)
         self.data_pool_90 = min(self.wages, key = lambda x:abs(x-dp_90))# mapping to closest value in wage list
 
-
-
-
-
 class Market:
     '''Market class defines the environment that the workers are learning to share data in (or not). greatly simplified from social learning setting.
     '''
 
-    def __init__(self, N_w, N_f, s_sharing_w, s_negotiation_w, s_sharing_f,s_negotiation_f,a_sharing, a_negotiation_w,a_negotiation_f,W,p,alpha,delta,explore_eps,initial_belief_strength, information_setting = "MVPT"):
+    def __init__(self, N_w, N_f, s_w_sharing, a_w_sharing,s_w_negotiation,a_w_negotiation,s_w_firm_choice, a_w_firm_choice,s_f_benchmark,a_f_benchmark, s_f_negotiation,W,p,alpha,delta,initial_belief_strength, MVPT = False, posting = False, mixed_posts = False):
         '''initializaiton of the market
 
         Parameters
             N_w: number of workers
         '''
+        # setting parameters
+        self.use_mvpt = MVPT  
+        self.post_ranges = posting
+        self.mixed_posts = mixed_posts # mvpt estimated and firm provided ranges
+        self.wages = W   
+
+        # explore epsilon
+        self.beta = 2.76 * 10**(-5)
+        self.explore_epsilon = 1 # start at 1 
 
         # create Workers
         print("Initializing workers...")
-        self.workers = [Worker(s_sharing_w,a_sharing,s_negotiation_w,a_negotiation_w,gen.choice(W,p=p),alpha,explore_eps,delta,initial_belief_strength) for i in range(N_w)] # workers identical up to initial wage so far
+        self.workers = [Worker(s_w_sharing,a_w_sharing,s_w_negotiation,a_w_negotiation,s_w_firm_choice, a_w_firm_choice,gen.choice(self.wages,p=p),alpha,delta,initial_belief_strength) for i in range(N_w)] # workers identical up to initial wage so far
         print("Initializing firms...")
-        self.firms = [Firm(s_sharing_f,a_sharing, s_negotiation_f,a_negotiation_f,alpha,explore_eps,delta,initial_belief_strength) for i in range(N_f)]  ## assuming firms have enough capacity for all workers in our market and all have constant returns to scale from the set of workers that apply 
+        self.firms = [Firm(s_f_benchmark,a_f_benchmark, s_f_negotiation,self.wages,alpha,delta,initial_belief_strength) for i in range(N_f)]  ## assuming firms have enough capacity for all workers in our market and all have constant returns to scale from the set of workers that apply 
         worker_groups = np.split(np.array(self.workers), N_f)
         for i in range(N_f):
             for j in range(len(worker_groups[i])):
@@ -172,68 +180,57 @@ class Market:
         self.workers[expert_worker_idx].wage = float(1) 
         print("Agents initialized.")
 
-        ## initializing information setting of the market
-        # initializing mvpt after workers have an initial wage
-        if information_setting == "MVPT":
-            initial_worker_pool = set()
-            for w in self.workers:
-                if gen.binomial(1,0.5) >= 0.5:
-                    initial_worker_pool.add(w) # initial pool generated with adding in workers uniform iid
-            
-            self.mvpt = MVPT(initial_worker_pool,W) # initial worker pool is random
-            self.mvpt.update_mvpt()
-        # initializing word-of-mouth parameters 
-        elif information_setting == "Word-of-mouth":
-            # TODO -- experiment 2
-            pass
-        # initializing firm-posting parameters
-        else:
-            # TODO -- experiment 3
-            pass
-
-        # initializing salary benchmark
+        # initializing salary benchmark (used in all settings)
         initial_firm_pool = set()
         for f in self.firms:
             if gen.binomial(1,0.5) >= 0.5: # fair coin toss to be in initial pool
                 initial_firm_pool.add(f)
             
-        self.salary_benchmark = SalaryBenchmark(initial_firm_pool, self.firms, W)
-        self.salary_benchmark.update_benchmarks()
+        self.salary_benchmark = SalaryBenchmark(initial_firm_pool, self.firms, self.wages)
+        self.salary_benchmark.update_benchmark()
 
+        # initializing mvpt after workers have an initial wage IF applicable to setting
+        if MVPT:
+            initial_worker_pool = set()
+            for w in self.workers:
+                if gen.binomial(1,0.5) >= 0.5:
+                    initial_worker_pool.add(w) # initial pool generated with adding in workers uniform iid
+            
+            self.mvpt = MVPT(initial_worker_pool,self.wages) # initial worker pool is random
+            self.mvpt.update_mvpt()
 
-        for w in self.workers: # set initial state of all workers
-            first_state = (float(w.wage), float(self.mvpt.l_hat),float(self.mvpt.u_hat))
-            w.state = first_state 
+        # initializing data structure for posted ranges IF applicable to setting
+        if posting:
+            self.posted_ranges = [(0,0) for f in range(N_f)]
         
-        gov_data_state = self.salary_benchmark.get_gov_data()
-        for f in self.firms:
-            f_median = float(min(W, key=lambda x:abs(x-np.median([w.wage for w in f.workers])))) # make sure it stays in W
-            f.state = gov_data_state + (f_median,) # gov data plus true median of firm's worker set
+        for idx,f in enumerate(self.firms):
+            if MVPT:
+                f.state = f.get_individual_range() + self.salary_benchmark.get_benchmark_range() + self.mvpt.get_mvpt_range(idx)
+            else:
+                f.state = f.get_individual_range() + self.salary_benchmark.get_benchmark_range()
         
         # tracking market behavior for output graphs
         self.num_negotiations = []
+        self.num_firms_using_sal_bench = []
     
-    def market_time_step(self):
+    def market_time_step(self,t):
         '''In a market time step, agents first seek information, then perform negotiations and update their beliefs, finally mvpt is updated for next round based on the data pool gathered this round
 
         Parameters
             T (int): total time in the simulation run, used in expectation calculations 
             t (int): current time step, used in expectation calculations
         '''
-        # parameter reset
-        for w in self.workers:
-            w.offer = None # reset offer 
-        for f in self.firms:
-            f.acceptance_threshold = None # reset acceptance threshold
+        # parameter  update
+        self.explore_eps = 1*np.e**(-self.beta * t)
 
         # phase 1 - information seeking
-        self.coarse_information_and_sharing_choice()  # firms and workers decide to share their private info
+        self.coarse_information_and_sharing_choice(t)  # firms and workers decide to share their private info
 
         # phase 2 - setting negotiation strategy
-        self.negotiation_strategy_choice()
+        self.negotiation_strategy_choice(t)
 
         # phase 3 - negotiation and belief updates    
-        self.negotiation_and_state_transition()
+        self.negotiation_and_state_transition(t)
 
     
     
@@ -247,54 +244,137 @@ class Market:
         
         return min(W, key=lambda x:abs(x-np.median(all_wages)))
 
-    def coarse_information_and_sharing_choice(self):
+    def coarse_information_and_sharing_choice(self,t):
+        ''' firms first choose a benchmark, then workers choose a firm to negotiate with 
         '''
-        '''
-
-        # worker seeking
-        for w in self.workers:
-            sharing_decision = w.action_decision(sharing=True) # choose decions eps-greedily
-            if sharing_decision == "share":
-                self.mvpt.add_worker(w) # add to data pool for next round
-                next_state = (float(w.wage), float(self.mvpt.l_hat), float(self.mvpt.m_hat),float(self.mvpt.u_hat))
-                w.update_q_vals(next_state,sharing_decision,sharing=True)
-                w.state = next_state
-            else:
-                self.mvpt.remove_worker(w) # remove worker from data pool for next round
-                # delay reward until we know state after negotiations 
-        
         # fim seeking 
-        for f in self.firms:
-            sharing_decision = f.action_decision(sharing=True)
-            if sharing_decision == "share":
+        using_bench = 0
+        for idx,f in enumerate(self.firms):
+            f.benchmark = f.action_decision(explore_eps=self.explore_eps,benchmark=True)
+            
+            if f.benchmark == "salary_benchmark":
                 self.salary_benchmark.add_firm(f) # for next round
-                next_state = self.salary_benchmark.get_firm_shared_data() + (f.state[-1],) # add in pooled data (from who shared last round, but current wages)
-                f.update_q_vals(next_state,sharing_decision,sharing=True)
+                l_b, u_b= self.salary_benchmark.get_benchmark_range()
+                next_state = (l_b, self.salary_benchmark.get_benchmark_median(), u_b)
+                f.update_q_vals(next_state,f.benchmark,benchmark=True)
                 f.state = next_state
+                using_bench = using_bench + 1
             else:
-                self.salary_benchmark.remove_firm(f) 
-                next_state = f.state + (-1,)
-                f.update_q_vals(next_state,sharing_decision,sharing=True)
+                self.salary_benchmark.remove_firm(f)
+                if f.benchmark == "independent":
+                    l_f, u_f = f.get_individual_range()
+                    next_state = (l_f, f.get_individual_median(),u_f)
+                else:
+                    l_m, u_m = self.mvpt.get_mvpt_range(idx)
+                    next_state = (l_m, f.get_individual_median(),u_m)
+                f.update_q_vals(next_state,f.benchmark,benchmark=True)
                 f.state = next_state
-    
-    def negotiation_strategy_choice(self):
-        '''
-        '''
-        # worker offer decision
-        for w in self.workers:
-            if len(w.state) == 4: # you only get more information if you share
-                w.offer = w.action_decision()
-                if w.offer != "no offer": # only if you make an offer do you get to move on
-                    w.offer = float(w.offer) # cast to float for now
-                    firm_idx = gen.choice(range(len(self.firms)),1)[0] # uniformly at random
-                    self.negotiation_matches[firm_idx].append(w)
-        
-        # firm acceptance threshold decision
-        for f in self.firms:
-            f.acceptance_threshold = float(f.action_decision()) # have to make an acceptance threshold decision no matter what
-    
 
-    def negotiation_and_state_transition(self):
+        self.num_firms_using_sal_bench.append(using_bench)
+
+        # set worker's state with posted ranges 
+        if self.post_ranges:
+            min_val = 1
+            max_val = 0
+            for idx, f in enumerate(self.firms):
+                if (self.use_mvpt and self.mixed_posts) or (not self.use_mvpt and not self.mixed_posts):
+                    self.posted_ranges[idx] = (f.state[0],f.state[2])
+                elif self.use_mvpt:
+                    l_m, u_m = self.mvpt.get_mvpt_range(idx)
+                    self.posted_ranges[idx] = (l_m,u_m)
+                else:
+                    print(f"Error: invalid setting flags self.post_ranges={self.post_ranges}, self.use_mvpt={self.use_mvpt}, self.mixed_posts={self.mixed_posts}.")
+
+                if self.posted_ranges[idx][0] < min_val:
+                    min_val = self.posted_ranges[idx][0]
+                if self.posted_ranges[idx][1] > max_val:
+                    max_val = self.posted_ranges[idx][1]
+            
+            for w in self.workers:
+                if self.use_mvpt: # need to make a sharing decision first
+                    next_state = (float(w.wage), min_val, max_val)
+                else: # straight to firm choice
+                    next_state = ()
+                    for idx in range(len(self.posted_ranges)):
+                        if self.posted_ranges[idx][1] > w.wage:
+                            next_state = next_state + (self.posted_ranges[idx][1]-self.posted_ranges[idx][0],)
+                        else:
+                            next_state = next_state + (-1,) # range not applicable
+
+                if t>0: # need to update q vals from negotiation outcomes after the first time step
+                    w.update_q_vals(next_state,w.offer,bargaining_outcome=w.bargaining_outcome,last_wage = w.last_wage)  
+                    w.bargaining_outcome = None # reset bargaining outcome since it is only set conditional on offer != no offer
+                w.state = next_state
+            
+        else: # no posted ranges, workers have no information 
+            for w in self.workers:
+                next_state = (-1,-1,-1,-1,-1) # state shows that worker knows nothing before choosing a firm  
+        
+                if t>0: # need to update q vals from negotiation outcomes after the first time step
+                    w.update_q_vals(next_state,w.offer,bargaining_outcome=w.bargaining_outcome,last_wage = w.last_wage)
+                    w.bargaining_outcome = None # reset bargaining outcome since it is only set conditional on offer != no offer
+                w.state = next_state
+
+
+        # worker sharing decision if using MVPT 
+        if self.use_mvpt:
+            for w in self.workers:
+                w.share = w.action_decision(explore_eps = self.explore_eps,sharing=True)
+                
+                if w.share == "share":
+                    self.mvpt.add_worker(w) # add to data pool for next round
+                    res_wage = max(w.wage, self.mvpt.m_hat) # learned about m_hat
+                else:
+                    self.mvpt.remove_worker(w) # remove worker from data pool for next round
+                    res_wage = w.wage
+
+                # move to firm choice state
+                next_state = ()
+                for idx in range(len(self.posted_ranges)):
+                    if self.posted_ranges[idx][1] > res_wage:
+                        next_state = next_state + (self.posted_ranges[idx][1]-self.posted_ranges[idx][0],)
+                    else:
+                        next_state = next_state + (-1,) # range not applicable
+                w.update_q_vals(next_state,w.share,sharing=True)
+                w.state = next_state
+    
+    def negotiation_strategy_choice(self,t):
+        '''
+        '''
+        # worker firm choice and offer decision
+        for w in self.workers:
+            # choose a firm to negotiate with based on range of posted wages (+ assumption that -1 => no knowledge or u<=res wage)
+            w.firm_negotiation_choice = int(w.action_decision(firm_choice = True,explore_eps=self.explore_eps))
+
+            # determine next state
+            offer_low = w.wage
+            if self.post_ranges:
+                if self.use_mvpt and w.share == "share":
+                    offer_low = max(w.wage, self.mvpt.m_hat)
+                if self.posted_ranges[w.firm_negotiation_choice][1]>offer_low:
+                    offer_high = self.posted_ranges[w.firm_negotiation_choice][1]
+                else:
+                    offer_high = min(1, offer_low+(self.wages[1]-self.wages[0])) # high offer is one interval up, capped at 1
+            else:
+                offer_high = min(1, offer_low+(self.wages[1]-self.wages[0])) # high offer is one interval up, capped at 1
+            
+            next_state = (offer_low, offer_high)
+            w.update_q_vals(next_state, w.firm_negotiation_choice, firm_choice=True)
+            w.state = next_state
+
+            # offer decision
+            w.offer = w.action_decision(explore_eps=self.explore_eps)
+            if w.offer != "no offer": # only if you make an offer do you get to move on
+                w.offer = float(w.offer) # cast to float now
+                self.negotiation_matches[w.firm_negotiation_choice].append(w)
+        
+        
+        # firm acceptance threshold decision    
+        for f in self.firms:
+            f.acceptance_threshold = float(f.action_decision(explore_eps=self.explore_eps)) # have to make an acceptance threshold decision no matter what
+        
+
+    def negotiation_and_state_transition(self,t):
         '''
         '''
         def _bargaining_outcome(offer, acceptance_threshold):
@@ -305,66 +385,62 @@ class Market:
                 return -1
 
         # update mvpt based on workers' current wages, signals ready for next state
+        # if t%2 == 0:
         self.mvpt.update_mvpt() 
 
         num_negotiations = 0
         accepted_offers = [[] for f in self.firms]
+
         for f_idx,f in enumerate(self.firms):
             num_offers = len(self.negotiation_matches[f_idx])
             for w in self.negotiation_matches[f_idx]: # loop through each worker initiating negotiation
                 num_negotiations = num_negotiations + 1 # tracking
 
-                outcome = _bargaining_outcome(w.offer, f.acceptance_threshold)
+                w.bargaining_outcome = _bargaining_outcome(w.offer, f.acceptance_threshold)
+                w.last_wage = w.wage # track wage before updating
 
-                if outcome < 0: # if negotiation fails, some small probability that worker's wage gets reset.
-                    p_reset_wage = 0.01 # robustness of this parameter?
+                if w.bargaining_outcome < 0: # if negotiation fails, some small probability that worker's wage gets reset.
+                    p_reset_wage = 0.5 # robustness of this parameter?
                     reset_wage = gen.binomial(1, p_reset_wage)
                     
                     if reset_wage:
                         w.wage = float(0) # their "leisure wage" or some notion of reservation utility -- should they still be employed?
                         if w.employer != None:
-                            self.firms[w.employer].workers.remove(w) # they are unemployed
-                        w.employer = None
-
-                # reward and state transition -- sharing + offering workers covered here
-                next_state = (float(w.wage), float(self.mvpt.l_hat),float(self.mvpt.u_hat))
-                w.update_q_vals(next_state,w.offer,bargaining_outcome=outcome)  
-                w.state = next_state
-                
-                # updating market info
-                if outcome >= 0:
-                    w.wage = float(outcome) # new wage acheived
-                    accepted_offers[f_idx].append(outcome)
+                            self.firms[w.employer].workers.remove(w) 
+                        w.employer = None # they are unemployed
+                else:# successful negotiation
+                    w.wage = float(w.bargaining_outcome) # new wage acheived
+                    accepted_offers[f_idx].append(w.bargaining_outcome)
 
                     # re-employ worker
                     if w.employer != None:
                         self.firms[w.employer].workers.remove(w)
                     w.employer = f_idx
                     self.firms[f_idx].workers.append(w)
+                
+                # next state of worker determined after next posted benchmark. reward update there.
 
         
         # update benchmarks based on new employment data
         self.salary_benchmark.update_benchmarks()
 
-        # rewards and state transitions for firms and workers
-        for f_idx, f in enumerate(self.firms): # all firms have a negotiation update
-            new_median = float(min(W, key=lambda x:abs(x-np.median([w.wage for w in f.workers])))) # make sure it stays in W
-            next_state = self.salary_benchmark.get_gov_data() + (new_median,)
-            f.update_q_vals(next_state,f.acceptance_threshold, accepted_offers = accepted_offers[f_idx], num_offers = len(self.negotiation_matches[f_idx]))
+        # rewards and state transitions for firms and workers, self.salary_benchmark.get_gov_data() 
+        for idx, f in enumerate(self.firms): # all firms have a negotiation update
+            if self.MVPT:
+                next_state = f.get_individual_range() + self.salary_benchmark.get_benchmark_range() + self.mvpt.get_mvpt_range(idx)
+            else:
+                next_state = f.get_individual_range() + self.salary_benchmark.get_benchmark_range()
+            f.update_q_vals(next_state,f.acceptance_threshold, accepted_offers = accepted_offers[idx], num_offers = len(self.negotiation_matches[idx]))
             f.state = next_state
 
-            # f.acceptance_threshold = None # reset acceptance threshold
-    
-        for w in self.workers:
-            next_state = (float(w.wage), float(self.mvpt.l_hat),float(self.mvpt.u_hat))
-            if len(w.state) == 3 and w.offer == None: # didn't share
-                w.update_q_vals(next_state,"no share", sharing = True)
-                w.state = next_state # update worker's new state
-            elif  w.offer == "no offer": # shared, but didn't offer
-                w.update_q_vals(next_state,w.offer)  
-                w.state = next_state # update worker's new state
-            
-            # w.offer = None # reset offer 
+        # for w in self.workers:
+        #     next_state = (float(w.wage), float(self.mvpt.l_hat),float(self.mvpt.u_hat))
+        #     if len(w.state) == 3 and w.offer == None: # didn't share
+        #         w.update_q_vals(next_state,"no share", sharing = True)
+        #         w.state = next_state # update worker's new state
+        #     elif  w.offer == "no offer": # shared, but didn't offer
+        #         w.update_q_vals(next_state,w.offer)  
+        #         w.state = next_state # update worker's new state
         
     
         self.num_negotiations.append(num_negotiations) # tracking
@@ -373,28 +449,38 @@ class Market:
 
 class Worker:
 
-    def __init__(self, share_states, share_actions, negotiation_states, negotiation_actions, initial_wage, alpha = 0.5, explore_eps = 0.2, delta = 0.8,initial_belief_strength=0.5):
+    def __init__(self, share_states, share_actions, negotiation_states, negotiation_actions, firm_choice_states,firm_choice_actions, initial_wage, alpha = 0.5, delta = 0.8,initial_belief_strength=0.5):
 
         # environment parameters worker has access to
         self.share_states = share_states
         self.share_actions = share_actions # share or not share
         self.negotiation_states = negotiation_states
-        self.negotiation_actions = negotiation_actions # share or not share
+        self.negotiation_actions = negotiation_actions # offer choice
+        self.firm_choice_states = firm_choice_states
+        self.firm_choice_actions = firm_choice_actions
 
+        # Q-learning params
         self.alpha = alpha
-        self.explore_eps = explore_eps
         self.delta = delta
 
         # dictionary of Q vals
         share_q_vals = dict({f"({s},{a})": 0 for s in self.share_states for a in self.share_actions}) # initial q-values
         negotiation_q_vals = dict({f"({s},{a})": 0 for s in self.negotiation_states for a in self.negotiation_actions}) # initial q-values
-        self.Q_vals = share_q_vals | negotiation_q_vals# merge dictionaries
+        firm_choice_q_vals = dict({f"({s},{a})": 0 for s in self.firm_choice_states for a in self.firm_choice_actions})
+        share_and_negotiation = share_q_vals | negotiation_q_vals# merge dictionaries
+        self.Q_vals = share_and_negotiation | firm_choice_q_vals # another merge
 
         # worker characteristics
         self.state = None
         self.offer = None
+        self.share = None
+        self.firm_negotiation_choice = None
         self.wage = initial_wage
         self.employer = None
+
+        # bargaining outcome tracking
+        self.last_wage = initial_wage
+        self.bargaining_outcome = None
 
          # initial belief strength on sharing (possibly consider later)
         # for w,l,u in self.share_states:
@@ -405,20 +491,22 @@ class Worker:
         #         self.Q_vals[f"({(w,l,u)},{'share'})"] = -1*initial_belief_strength # downweight sharing if your wage is at least the upper bound of the range
         #         self.Q_vals[f"({(w,l,u)},{'no share'})"] = initial_belief_strength # upweight sharing if your wage is at least the upper bound of the range
         
-        for w,l,m,u in self.negotiation_states:
-            if w > m:
-                self.Q_vals[f"({(w,l,m,u)},{'no offer'})"] = initial_belief_strength  # prefer not to offer when wage is above median
+        # for w,l,m,u in self.negotiation_states:
+            
+        #     for o in self.negotiation_actions:
+        #         if o == 'no offer':
+        #             if w >= u:
+        #                 self.Q_vals[f"({(w,l,m,u)},{'no offer'})"] = initial_belief_strength  # prefer not to offer when wage is above upper bound
+        #             else:
+        #                 self.Q_vals[f"({(w,l,m,u)},{'no offer'})"] = -1*initial_belief_strength  # prefer to offer when wage is below upper bound
+        #         else:
+        #             if o > w:
+        #                 self.Q_vals[f"({(w,l,m,u)},{o})"] = initial_belief_strength # prefer to make larger offers
+        #             else:
+        #                  self.Q_vals[f"({(w,l,m,u)},{o})"] = -1*initial_belief_strength # prefer not to offer lower than current wage
+                
 
-            for o in self.negotiation_actions:
-                if o == "no offer":
-                    continue
-                if o > w:
-                    self.Q_vals[f"({(w,l,m,u)},{o})"] = initial_belief_strength # prefer to make larger offers
-                else:
-                    self.Q_vals[f"({(w,l,m,u)},{o})"] = -1*initial_belief_strength # prefer to not make smaller offers
-
-
-    def get_reward(self, sharing = None, bargaining_outcome = None, eps_share=1e-2):
+    def get_reward(self, sharing = None, firm_choice = False, bargaining_outcome = None, last_wage=None, eps_share=1e-2):
         '''sharing is None, True or False. bargaining_outcome is None, -1 or >0
         '''
         if sharing is not None:
@@ -426,37 +514,48 @@ class Worker:
                 return 0
             else:
                 return eps_share
+        elif firm_choice:
+            return 0
         else:
             if bargaining_outcome == None: # some benefit to sharing w/ no negotiation
                 return 0
-            elif bargaining_outcome > 0: # only if successful
-                return bargaining_outcome - self.wage
+            elif bargaining_outcome >= 0: # only if successful
+                if last_wage == None:
+                    print("Error: need to track last wage for this bargaining outcome.")
+                    return 0
+                return bargaining_outcome - last_wage
             else:
                 return bargaining_outcome
 
-    def action_decision(self, sharing = False, beta = 1.38*10**(-5)):
+    def action_decision(self, sharing = False, firm_choice = False, explore_eps = None):
 
-        explore = gen.binomial(1,self.explore_eps) # decide to explore or exploit
+        explore = gen.binomial(1,explore_eps) # decide to explore or exploit
+
+        if not sharing and not firm_choice:
+            negotiation_actions =  [a for a in self.negotiation_actions[1:] if (a>=self.state[0]) and (a<= self.state[1])]
+            negotiation_actions.append("no offer")
 
         if explore: # choose an action U.A.R.
             if sharing:
                 action = gen.choice(self.share_actions,1)[0] 
+            elif firm_choice:
+                action = gen.choice(self.firm_choice_actions,1)[0] 
             else:
-                action = gen.choice(self.negotiation_actions,1)[0]
+                action = gen.choice(negotiation_actions,1)[0]
         else:
             if sharing:
                 action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.share_actions])
                 action = self.share_actions[action_index]
+            elif firm_choice:
+                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.firm_choice_actions])
+                action = self.firm_choice[action_index]
             else:
-                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.negotiation_actions])
-                action = self.negotiation_actions[action_index]
+                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in negotiation_actions])
+                action = negotiation_actions[action_index]
         
-        # discount explore_eps
-        self.explore_eps = self.explore_eps * np.e**(-beta)
-
         return action
     
-    def update_q_vals(self, new_state, action, sharing = False, bargaining_outcome = None):
+    def update_q_vals(self, new_state, action, sharing = False, firm_choice=False, bargaining_outcome = None,last_wage=None):
         # update step: Q(s,a) = (1-alpha) Q(s,a) + alpha * (current_reward + delta*max_a Q(new_state,a))
 
         ## get rewards
@@ -465,91 +564,112 @@ class Worker:
                 reward = self.get_reward(sharing=True)
             else:
                 reward = self.get_reward(sharing=False)
+        elif firm_choice:
+            reward = self.get_reward(firm_choice = True)
+            negotiation_actions = [a for a in self.negotiation_actions[1:] if (a>= min(new_state[0],new_state[2])) and (a<= new_state[3])]#self.negotiation_actions[1:]#[a for a in self.negotiation_actions[1:] if a>= new_state[0]]
+            negotiation_actions.append("no offer")
         else:
-            reward = self.get_reward(bargaining_outcome)
-        
+            reward = self.get_reward(bargaining_outcome=bargaining_outcome,last_wage=last_wage)
+
+
         ## q-value update
-        if len(new_state) == 3: # indicates moving to a sharing state
+        if sharing: # moving to a firm choice state
+            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in self.firm_choice_actions]))
+        elif firm_choice: # moving to a negotiation state
+            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in negotiation_actions]))
+        else: # else, moving to a sharing state
             self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in self.share_actions]))
-        else: # else, moving to a negotiation state
-            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in self.negotiation_actions]))
 
     
 class Firm:
     '''implementation of firms in this market who are now also q-learning their negotiation strategy under different information conditions.'''
-    def __init__(self, share_states, share_actions, negotiation_states, negotiation_actions, alpha = 0.5, explore_eps = 0.2, delta = 0.8,initial_belief_strength=0.5):
+    def __init__(self, benchmark_states, benchmark_actions, negotiation_states, W, alpha = 0.5, delta = 0.8,initial_belief_strength=0.5):
 
         # environment parameters worker has access to
-        self.share_states = share_states
-        self.share_actions = share_actions # share or not share
+        self.benchmark_states = share_states
+        self.benchmark_actions = share_actions # share or not share
         self.negotiation_states = negotiation_states
-        # self.negotiation_actions = negotiation_actions # acceptance thresholds -- now just use one of the values 
+        self.wages = W
 
+        # Q-learning params
         self.alpha = alpha
-        self.explore_eps = explore_eps
         self.delta = delta
 
         # dictionary of Q vals
-        share_q_vals = dict({f"({s},{a})": 0 for s in self.share_states for a in self.share_actions}) # initial q-values
-        negotiation_q_vals = dict({f"({s},{a})": 0 for s in self.negotiation_states for a in s  if a >= 0}) # initial q-values
-        self.Q_vals = share_q_vals | negotiation_q_vals # merge dictionaries
+        benchmark_q_vals = dict({f"({s},{a})": 0 for s in self.benchmark_states for a in self.benchmark_actions}) # initial q-values
+        negotiation_q_vals = dict({f"({s},{a})": 0 for s in self.negotiation_states for a in s}) # initial q-values +(float(1),) if we need more competition across all settings
+        self.Q_vals = benchmark_q_vals | negotiation_q_vals # merge dictionaries
     
         # firm characteristics
         self.state = None
         self.acceptance_threshold = None
+        self.benchmark = None
         self.workers = [] # starting employees
+    
+    def get_individual_range(self):
+        '''get individal wage distribution data'''
+        bot_10 = np.percentile([w.wage for w in self.workers],10)
+        bot_90 = np.percentile([w.wage for w in self.workers],90)
+
+        bot_10_mapped =  min(self.wages, key = lambda x:abs(x-bot_10))
+        bot_90_mapped =  min(self.wages, key = lambda x:abs(x-bot_90))   
+        
+        return (float(bot_10_mapped), float(bot_90_mapped))
+    
+    def get_individual_median(self):
+        '''get individual median of wage distribution'''
+        
+        bot_50 = np.percentile([w.wage for w in self.workers],50)
+        bot_50_mapped = min(self.wages, key = lambda x:abs(x-bot_50))
+
+        return float(bot_50_mapped)
 
 
-    def get_reward(self,accepted_offers=[], num_offers=0, sharing = None, eps_share=1e-2,eps_hire=1):
+
+    def get_reward(self,accepted_offers=[], num_offers=0, benchmark = None, eps_share=1e-2,eps_hire=1):
         ''' some reward for sharing, negotiation reward larger for 1) the more offers accepted and 2) the larger the value of the offers accepted
         sharing is None, True, or False. eps_hire is supposed to penalize firms if they get no offers whatsoever (hm but this really only makes sense if firm's strategy influences supply of workers)
         '''
-        if sharing is not None:
-            if not sharing:
-                return 0
-            else:
+        if benchmark is not None:
+            if benchmark == "salary benchmark":
                 return eps_share
+            else:
+                return 0
         else:
             AT_reward = len(accepted_offers) - sum(accepted_offers) - (num_offers  - len(accepted_offers))
             return AT_reward
 
-    def action_decision(self, sharing = False, beta = 1.38*10**(-5)):
+    def action_decision(self, benchmark = False, explore_eps=None):
 
-        explore = gen.binomial(1,self.explore_eps) # decide to explore or exploit
+        explore = gen.binomial(1,explore_eps) # decide to explore or exploit
+        
+        negotiation_actions = self.state # +(float(1),) bring back for more competition
 
         if explore: # choose an action U.A.R.
-            if sharing:
-                action = gen.choice(self.share_actions,1)[0] 
+            if benchmark:
+                action = gen.choice(self.benchmark_actions,1)[0] 
             else:
-                if -1 in self.state: # don't choose -1 
-                    action = gen.choice(self.state[:-1],1)[0]
-                else:
-                    action = gen.choice(self.state,1)[0]
+                action = gen.choice(negotiation_actions,1)[0]
         else:
-            if sharing:
-                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.share_actions])
-                action = self.share_actions[action_index]
+            if benchmark:
+                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.benchmark_actions])
+                action = self.benchmark_actions[action_index]
             else:
-                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in self.state if a >= 0])
-                action = self.state[action_index]
-        
-        # discount explore_eps
-        self.explore_eps = self.explore_eps * np.e**(-beta)
+                action_index = np.argmax([self.Q_vals[f"({self.state},{a})"] for a in negotiation_actions])
+                action = negotiation_actions[action_index]
 
         return action
     
-    def update_q_vals(self, new_state, action, sharing = False, accepted_offers = [], num_offers = 0):
+    def update_q_vals(self, new_state, action, benchmark = False, accepted_offers = [], num_offers = 0):
 
         # Q(s,a) = (1-alpha) Q(s,a) + alpha * (current_reward + delta*max_a Q(new_state,a))
-        if sharing:
-            if action == "share":
-                reward = self.get_reward(sharing=True)
-            else:
-                reward = self.get_reward(sharing=False)
-            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in new_state if a >= 0]))
+        if benchmark:
+            reward = self.get_reward(benchmark=action)
+            negotiation_actions = new_state # +(float(1),) if needed
+            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in negotiation_actions]))
         else:
             reward = self.get_reward(accepted_offers=accepted_offers,num_offers=num_offers)
-            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in self.share_actions]))
+            self.Q_vals[f"({self.state},{action})"] = (1-self.alpha)*self.Q_vals[f"({self.state},{action})"] + self.alpha * (reward + self.delta * max([self.Q_vals[f"({new_state},{a})"] for a in self.benchmark_actions]))
 
 
 
@@ -559,25 +679,37 @@ if __name__ == "__main__":
     # parameters
     N_w = 100 # small number of workers to start
     N_f = 5 # small number of firms
-    k = 8 # number of intervals to break [0,1] up into
+    k = 5 # number of intervals to break [0,1] up into
     W = [float(i/k) for i in range(k+1)] # k + 1 possible wages
+    ranges = W + [-1] # -1 indicates no range given 
+
+    # setting flags
+    MVPT = False
+    posting = True
+    mixed_posts = False
 
     # states and actions
-    S_sharing_w = [(w,l,u) for w in W for l in W for u in W if l<= u] 
-    S_negotiation_w= [(w,l,m,u) for w in W for l in W for m in W for u in W if l <= m and m <= u]
-    S_sharing_f = [(l_g,u_g, m_f) for l_g in W for u_g in W for m_f in W if l_g<= u_g] # very coarse data + own data
-    S_negotiation_f = [(l_g,u_g,m_f,-1) for l_g in W for u_g in W for m_f in W if l_g<= u_g] + [(dp_10,dp_50,dp_90,m_f) for m_f in W for dp_10 in W for dp_50 in W for dp_90 in W if dp_10<= dp_50 and dp_50 <= dp_90] # use the granular benchmark (or your own median) if you choose it
-    print(f"number of firm negotiation states: {len(S_negotiation_f)}")
-    print(f"number of worker negotiation states: {len(S_negotiation_w)}")
-    A_sharing = ["share", "no share"] # action set for each worker and firm deciding whether to share wage info. Worker shares current salary, firm "plugs in" HR software
-    A_negotiation_w = ["no offer"] + W
-    A_negotiation_f = W
+    S_w_sharing = [(w,l,u) for w in W for l in W for u in W if l<= u] 
+    S_w_firm_choice = [(r1,r2,r3,r4,r5) for r1 in ranges for r2 in ranges for r3 in ranges for r4 in ranges for r5 in ranges] # r == res. price of worker: max(w,m_m) TODO -- how to make this tractable
+    S_w_negotiation = [(o_l, o_h) for o_l in W for o_h in W if o_l <= o_h] # range of offers to consider
+    A_w_sharing = ["share", "no share"] # action set for each worker and firm deciding whether to share wage info. Worker shares current salary, firm "plugs in" HR software
+    A_w_firm_choice = range(N_f) # all firm indices
+    A_w_negotiation = ["no offer"] + W # no offer + range 
+
+    S_f_benchmark = [((l_b,u_b),(l_i,u_i)) for l_b in W for u_b in W for l_i in W  for u_i in W if l_b<= u and l_i <= u_i] # salary benchmark data + individual data
+    S_f_negotiation = [(l,m,u) for l in W for u in W for m in W if l<= u] # will see lower, median, and upper bound values for one of the sources
+    A_f_benchmark = ["salary benchmark", "independent"]
+    if MVPT:
+        S_benchmark_f = [((l_b,u_b),(l_i,u_i),(l_m,u_m)) for l_b in W for u_b in W for l_i in W  for u_i in W  for l_m in W for u_m in W if l_b<= u and l_i <= u_i and l_m <= u_m] # salary benchmark data + individual data + MVPT data (probably too many states)
+        A_benchmark_f = A_benchmark_f + ["mvpt"] 
+
+    print(f"number of firm benchmark states: {len(S_benchmark_f)}")
+    print(f"number of worker firm choice states: {len(S_w_firm_choice)}")
 
     # find values to fix these at to compare with previous work
     alpha = 0.3 # more weight on present rewards
     delta = 0.9 # more patient
-    explore_eps = 1 # discounts over time
-    initial_belief_strength = 1
+    initial_belief_strength = 0.05
 
     T = 500000 # consistent with previous simulations TODO --  early stopping criteria?
     T_negotiation = 1000 # tolerance for number of time steps with  no negotiations (what is necessary here?)
@@ -610,14 +742,14 @@ if __name__ == "__main__":
     # skewed right(k-r):
     kr = [0.1/(k-2) for i in range(k-2)]+[0.9-(3/4+1/8),1/8,3/4]
     # bimodal even (b-e):
-    be = [0.4] + [0.1/2 for i in range(2)] + [0 for i in range(3)] + [0.1/2 for i in range(2)] + [0.4]
+    be = [0.4] + [0.1/2 for i in range(2)] + [0.1/2 for i in range(2)] + [0.4]
     # bimodal slightly left (b-l):
-    bl =  [0.45] + [0.1/2 for i in range(2)] + [0 for i in range(3)] + [0.1/2 for i in range(2)]   + [0.35] 
+    bl =  [0.45] + [0.1/2 for i in range(2)]  + [0.1/2 for i in range(2)] + [0.35] 
     # bimodal slightly right (b-r):
-    br =  [0.35] + [0.1/2 for i in range(2)]+ [0 for i in range(3)] + [0.1/2 for i in range(2)] + [0.45]
+    br =  [0.35] + [0.1/2 for i in range(2)]+ [0.1/2 for i in range(2)] + [0.45]
 
-    p_settings = [kr,skr,u,be, bl,br]
-    p_labels = ["k-r","s-k-r","u", "b-e", "b-l","b-r"] 
+    p_settings = [kr,skr,skl,u,be,bl,br]
+    p_labels = ["k-r","s-k-r","s-k-l","u", "b-e", "b-l","b-r"] 
     
 
     save = False
@@ -625,8 +757,7 @@ if __name__ == "__main__":
     for p_s, p_l in zip(p_settings, p_labels):
 
         print(f"distribution: {p_l}")
-
-        market = Market(N_w,N_f,S_sharing_w,S_negotiation_w, S_sharing_f, S_negotiation_f,A_sharing,A_negotiation_w, A_negotiation_f,W,p_s,alpha,delta,explore_eps,initial_belief_strength)
+        market = Market(N_w,N_f,S_w_sharing,A_w_sharing,S_w_negotiation,A_w_negotiation,S_w_firm_choice, A_w_firm_choice,S_f_benchmark,A_f_benchmark,S_f_benchmark,W,p_s,alpha,delta,initial_belief_strength)
 
         # things to track through the market
         worker_wages = [[w.wage for w in market.workers]]
@@ -646,7 +777,10 @@ if __name__ == "__main__":
             u_hat_values.append(market.mvpt.u_hat)
             true_median.append(market._get_market_median())
 
-            market.market_time_step()
+            market.market_time_step(t)
+            # print(market.workers[0].explore_eps)
+            # print(market.firms[0].explore_eps)
+
             for i,f in enumerate(market.firms):
                 firms_ATs[i].append(f.acceptance_threshold)
             for i,w in enumerate(market.workers):
@@ -669,6 +803,10 @@ if __name__ == "__main__":
             if min(all_wages) == 1:
                 print("Converged to MRPL!")
                 break
+
+            if max(all_wages) == 0:
+                print("Converged to firm capturing surplus!")
+                break
             # need something like offer == worker's wage, so they don't negotiate (negotiations stop for X time steps or  negotiations stop AND eps<threshold)
             if t >= T_negotiation and sum(market.num_negotiations[-T_negotiation:]) == 0:
                 print(f"No negotiations for {T_negotiation} time steps")
@@ -678,22 +816,40 @@ if __name__ == "__main__":
 
 
         ## analyzing, TODO -- clean up analysis.
-
+        # print(market.workers[0].explore_eps)
+        # print(market.firms[0].explore_eps)
         print(f"Final salary benchmark pool size: {len(market.salary_benchmark.data_pool)}")
         print(f"Final MVPT pool size: {len(market.mvpt.data_pool)}")
 
         for i in range(len(market.firms)):
+            print(f"Firm {i} non-zero final Q values")
+            for n in S_negotiation_f:
+                nonzero_Qs = [(n,a,market.firms[i].Q_vals[f"({n},{a})"]) for a in n +(float(1),) if a>=0 and market.firms[i].Q_vals[f"({n},{a})"] !=0]
+                if len(nonzero_Qs)>0:
+                    print(nonzero_Qs)
             plt.plot(range(len(firms_ATs[i])),firms_ATs[i])
             plt.ylim((0,1))
             plt.title(f"Firm index {i} acceptance threshold over time")
-            plt.show()
+            plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_firm_{i}_seed={seed}.png")
+            plt.clf()
 
-        for i in range(0,100,5):
-            plt.plot(range(100),worker_offers[i][-100:])
-            plt.ylim((0,1))
-            plt.title(f"Worker index {i} offer over last 100 time steps. Final employer: {market.workers[i].employer}")
-            plt.show()
+        tau = min(1000, len(worker_offers[0]))
+        for i in range(0,100,20):
+            plt.plot(range(tau),worker_offers[i][-tau:])
+            plt.ylim((-2,1))
+            plt.title(f"Worker index {i} offer over last {tau} time steps. Final employer: {market.workers[i].employer}")
+            plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_worker_{i}_seed={seed}.png")
+            plt.clf()
 
+        plt.plot(range(len(market.num_bad_offers)), market.num_bad_offers)
+        plt.title("Number of bad offers made over time")
+        plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_bad_offers_numbers_seed={seed}.png")
+        plt.clf()
+
+        plt.plot(range(len(market.num_firms_using_sal_bench)), market.num_firms_using_sal_bench)
+        plt.title("Number of firms using salary benchmark over time")
+        plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_sal_benchmark_numbers_seed={seed}.png")
+        plt.clf()
 
 
 
@@ -789,21 +945,21 @@ if __name__ == "__main__":
 
 
         # graphs
-        time_window = T
-        plt.plot(m_hat_values[:time_window], label="m_hat value (median + error)")
-        plt.plot(l_hat_values[:time_window], color="red",label="Min value in data pool")
-        plt.plot(u_hat_values[:time_window], color="purple",label="Max value in data pool")
-        plt.plot(true_median[:time_window], color="orange",linestyle="dashed",label="True median")
+        time_window = min(5000,max(len(m_hat_values)-1000,0))
+        plt.plot(m_hat_values[time_window:], label="m_hat value (median + error)")
+        plt.plot(l_hat_values[time_window:], color="red",label="Min value in data pool")
+        plt.plot(u_hat_values[time_window:], color="purple",label="Max value in data pool")
+        plt.plot(true_median[time_window:], color="orange",linestyle="dashed",label="True median")
         plt.ylim((0,1))
         plt.title(f"MVPT summary statistics values over first {time_window} steps")
         plt.xlabel("Time")
         plt.ylabel("MVPT summary statistics values")
         plt.legend()
         if save:
-            plt.savefig(f"q_learning_simulation_results/p=0.1_N={N}_k={k}_initial_distribution={p_l}_mvpt_values_seed={seed}.png")
-        plt.show()
+            plt.savefig(f"q_learning_sal_benchmarks_mvpt/p=0.01_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_mvpt_values_seed={seed}.png")
+        plt.clf()
 
-        plot_attribute_distribution_market(market,"wage",N_w,extra_counts = initial_counts_bins_market[0],extra_bins =initial_counts_bins_market[1],k=k,p=p_l,seed=seed,save=save)
+        plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,extra_counts = initial_counts_bins_market[0],extra_bins =initial_counts_bins_market[1],k=k,p=p_l,seed=seed,save=save)
 
         
         # worker attributes 
