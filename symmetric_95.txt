@@ -1,0 +1,530 @@
+Information setting: setting 1
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 441
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.7800000000000001, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 0.21999999999999986
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.18000000000000008, 0.6, 0.8
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.0333333333333334
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.8
+final percentiles: 0.0, 0.0, 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+---Safe Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+
+beta setting:slow, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.22000000000000172
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 2.5
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.999
+max proportion: 1.0
+avg. proportion: 0.9999821428571429
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.2, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 5.0
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.1, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 10.0
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.25
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.4, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 0.6
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 0.8
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.3333333333333335
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.8
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.6
+final percentiles: 0.0, 0.0, 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+---Safe Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+
+beta setting:medium, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.6666666666666667
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.6666666666666667
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.2, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 5.0
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:medium, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.25
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.2, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 0.8
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.2, 0.6, 0.8
+final percentiles: 0.0, 0.0, 0.0
+initial dispersion ratio: 1.0000000000000002
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+---Safe Workers---
+min proportion: 0.0
+max proportion: 0.0
+avg. proportion: 0.0
+
+beta setting:fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 1.0
+final percentiles: 0.0, 0.0, 0.2
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.0
+max proportion: 1.0
+avg. proportion: 0.49019607843137253
+---Safe Workers---
+min proportion: 0.0
+max proportion: 1.0
+avg. proportion: 0.4897959183673469
+
+beta setting:fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.22000000000000172
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.2, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.3333333333333335
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 0.0, 0.2, 0.2
+initial dispersion ratio: 2.5
+final dispersion ratio: 1.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.0
+max proportion: 1.0
+avg. proportion: 0.3392857142857143
+---Safe Workers---
+min proportion: 0.0
+max proportion: 1.0
+avg. proportion: 0.8409090909090909
+
+beta setting:fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.7, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.4285714285714286
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.0
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+Information setting: setting 2
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 441
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.5800000000000001, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 0.41999999999999993
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.2, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.3333333333333335
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+---Safe Workers---
+min proportion: 1.0
+max proportion: 1.0
+avg. proportion: 1.0
+
+beta setting:slow, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.8
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.7272727272727273
+---Safe Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.8035714285714286
+
+beta setting:slow, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.22000000000000172
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.7363636363636363
+---Safe Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.8333333333333334
+
+beta setting:slow, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.6666666666666667
+final dispersion ratio: 0.0
+Statistics of proportion of no offer actions in last 1000 time steps by worker type.
+---Risky Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.5094339622641509
+---Safe Workers---
+min proportion: 0.5
+max proportion: 1.0
+avg. proportion: 0.574468085106383
+
+beta setting:slow, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.

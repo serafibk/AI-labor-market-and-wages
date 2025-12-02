@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from market_outcome_analysis import get_wage_distribution_market, plot_attribute_distribution_market, get_wage_distribution_market_split_workers
 
 
-seed = 116
+seed = 42
 gen = np.random.default_rng(seed=seed)
 
 update_T = 1 # only if needed
@@ -186,6 +186,21 @@ class Market:
         # ensure at least one worker starts with MRPL
         expert_worker_idx = gen.integers(0,N_w)
         self.workers[expert_worker_idx].wage = float(1) 
+
+        # CORRELATION TEST: bottom 1-p_risky percentile safe and p_risky percent risky
+        if p_risky > 0:
+            all_wages = [w.wage for w in self.workers]
+            safe_threshold = np.percentile(all_wages,(1-p_risky)*100)
+            num_safe = int(N_w * (1-p_risky))
+            count_safe = 0
+            for w in self.workers:
+                if w.wage <=safe_threshold and count_safe < num_safe:
+                    w.type = "safe"
+                    count_safe = count_safe +1
+                else:
+                    w.type = "risky"
+            # print(count_safe)
+
         print("Agents initialized.")
 
         # initializing salary benchmark (used in all settings)
@@ -294,7 +309,7 @@ class Market:
                 f.state = next_state
             
             # update range for tracking
-            f.range = (self.state[0],self.state[1])
+            f.range = (f.state[0],f.state[2])
 
         self.firm_information_use.append((using_bench,using_independent))
         self.firm_information_source_values.append(ranges)
@@ -400,9 +415,9 @@ class Market:
                     if self.posted_ranges[w.firm_negotiation_choice][1]>offer_low:
                         offer_high = self.posted_ranges[w.firm_negotiation_choice][1]
                     else: 
-                        offer_high = float(1)# high offer is 1 
+                        offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1]))))#float(1)# high offer is 1 
                 else:
-                    offer_high = float(1) # high offer is 1
+                    offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1]))))#float(1) # high offer is 1
             elif w.type == "safe":
                 offer_low = w.wage
                 offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1])))) # high offer is one interval up, capped at 1, ignore ranges 
@@ -411,7 +426,10 @@ class Market:
             
             next_state = (offer_low, offer_high)
             if t%update_T == 0 or t==0:
-                w.update_q_vals(next_state, w.firm_negotiation_choice, firm_choice=True)
+                if self.post_ranges:
+                    w.update_q_vals(next_state, w.firm_negotiation_choice, firm_choice=True,firm_upper_bound=self.posted_ranges[w.firm_negotiation_choice][1])
+                else:
+                    w.update_q_vals(next_state, w.firm_negotiation_choice, firm_choice=True,firm_upper_bound=-1)
             w.state = next_state
 
             # offer decision
@@ -503,7 +521,7 @@ class Market:
                 next_state = (f.get_individual_range(),self.salary_benchmark.get_benchmark_range(),self.mvpt.get_mvpt_range(idx))
             else:
                 next_state = (f.get_individual_range(),self.salary_benchmark.get_benchmark_range())
-            if t%update_T ==0:
+            if t%update_T == 0:
                 f.update_q_vals(next_state,f.acceptance_threshold, accepted_offers = accepted_offers[idx], num_offers = len(self.negotiation_matches[idx]))
             f.state = next_state
 
@@ -581,7 +599,7 @@ class Worker:
         #                  self.Q_vals[f"({(w,l,m,u)},{o})"] = -1*initial_belief_strength # prefer not to offer lower than current wage
                 
 
-    def get_reward(self, sharing = None, firm_choice = False, bargaining_outcome = None, last_wage=None, eps_share=1e-2):
+    def get_reward(self, sharing = None, firm_choice = False, bargaining_outcome = None, last_wage=None, eps_share=1e-2,firm_upper_bound =None):
         '''sharing is None, True or False. bargaining_outcome is None, -1 or >0
         '''
         if sharing is not None:
@@ -590,7 +608,10 @@ class Worker:
             else:
                 return eps_share
         elif firm_choice:
-            return 0
+            if firm_upper_bound != -1:
+                return firm_upper_bound - self.wage
+            else:
+                return 0
         else:
             if bargaining_outcome == None: # some benefit to sharing w/ no negotiation
                 return 0
@@ -630,7 +651,7 @@ class Worker:
         
         return action
     
-    def update_q_vals(self, new_state, action, sharing = False, firm_choice=False, bargaining_outcome = None,last_wage=None,using_mvpt=False):
+    def update_q_vals(self, new_state, action, sharing = False, firm_choice=False, bargaining_outcome = None,last_wage=None,using_mvpt=False,firm_upper_bound =None):
         # update step: Q(s,a) = (1-alpha) Q(s,a) + alpha * (current_reward + delta*max_a Q(new_state,a))
 
         ## get rewards
@@ -640,7 +661,7 @@ class Worker:
             else:
                 reward = self.get_reward(sharing=False)
         elif firm_choice:
-            reward = self.get_reward(firm_choice = True)
+            reward = self.get_reward(firm_choice = True,firm_upper_bound = firm_upper_bound)
             negotiation_actions =  [a for a in self.negotiation_actions[1:] if (a>=self.state[0]) and (a<= self.state[1])]
             negotiation_actions.append("no offer")
         else:
@@ -684,8 +705,9 @@ class Firm:
         # firm characteristics
         self.state = None
         self.acceptance_threshold = None
-        self.range= None
+        self.range = None
         self.benchmark = None
+        self.profit = None
         self.workers = [] # starting employees
         self.bot_10 = None
         self.bot_50 = None
@@ -732,8 +754,16 @@ class Firm:
             else:
                 return 0
         else:
-            AT_reward = len(accepted_offers) - sum(accepted_offers) - (num_offers  - len(accepted_offers))
-            return AT_reward
+            if num_offers>0:
+                reward = (len(accepted_offers) - sum(accepted_offers) - (num_offers - len(accepted_offers)))/num_offers 
+                # if reward==1 and max(accepted_offers)>0:
+                #     print(accepted_offers)
+                #     print(num_offers)
+                #     exit()
+            else:
+                reward = 0
+            self.profit = reward # reward = that round's average profit 
+            return reward
 
     def action_decision(self, benchmark = False, explore_eps=None):
 
@@ -792,7 +822,7 @@ if __name__ == "__main__":
     k = 5 # number of intervals to break [0,1] up into
     W = [float(i/k) for i in range(k+1)] # k + 1 possible wages
     ranges = W + [-1] # -1 indicates no range given 
-    p_risky = 0 # indicates probability of being a risky worker. 0 => symmetric, neutral worker case
+    p_risky = 0# indicates probability of being a risky worker. 0 => symmetric, neutral worker case
     type_conditioning = False
     p_reset = 0.5 # probability of resetting wage, "riskiness" of market, robustness of this
     beta = 6.91*10**(-4) # slow 6.91*10**(-4), medium 9.21*10**(-4), fast 1.15*10**(-3)
@@ -805,8 +835,40 @@ if __name__ == "__main__":
     posting = False
     mixed_posts = False
 
-    settings = [(False, False, False), (False, True, False), (True, True, False), (True, True, True)]
-    setting_label = ["setting 1", "setting 2", "setting 3", "setting 4"]
+    settings = [(False,False, False),(False, True, False),(True, True, False), (True, True, True)] #
+    setting_label = ["setting 1", "setting 2","setting 3", "setting 4"] #"setting 2",
+
+    save = True
+    folder = "experiment_1_test_3"
+
+    # find values to fix these at to compare with previous work
+    alpha = 0.3 # more weight on present rewards
+    delta = 0.9 # more patient
+    initial_belief_strength = 0.05
+
+    T = 20000 # seems to be enough time to see "stable" behavior at the end 
+    # T_negotiation = 1000 # tolerance for number of time steps with  no negotiations (what is necessary here?)
+
+    ## initial distributions
+    # skewed left (k-l):
+    kl = [3/4,1/8,0.9-(3/4+1/8)]+[0.1/(k-2) for i in range(k-2)]
+    # slightly skewed left (s-k-l):
+    skl = [1/2,1/8,0.7-(1/2+1/8)]+[0.3/(k-2) for i in range(k-2)]
+    # uniform (u): 
+    u= [1/(k+1) for i in range(k+1)]
+    # slightly skewed right (s-k-r):
+    skr = [0.3/(k-2) for i in range(k-2)]+[1/2,1/8,0.7-(1/2+1/8)]
+    # skewed right(k-r):
+    kr = [0.1/(k-2) for i in range(k-2)]+[0.9-(3/4+1/8),1/8,3/4]
+    # bimodal even (b-e):
+    be = [0.4] + [0.1/2 for i in range(2)] + [0.1/2 for i in range(2)] + [0.4]
+    # bimodal slightly left (b-l):
+    bl =  [0.45] + [0.1/2 for i in range(2)]  + [0.1/2 for i in range(2)] + [0.35] 
+    # bimodal slightly right (b-r):
+    br =  [0.35] + [0.1/2 for i in range(2)]+ [0.1/2 for i in range(2)] + [0.45]
+
+    p_settings = [kr,skr,skl,kl,u,be,bl,br]
+    p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
 
     for (use_mvpt, posting, mixed_posts), s_label in zip(settings,setting_label):
 
@@ -825,7 +887,7 @@ if __name__ == "__main__":
             S_f_benchmark = S_f_benchmark + [((l_b,u_b),(l_i,u_i),(l_m,u_m)) for l_b in W for u_b in W for l_i in W  for u_i in W  for l_m in W for u_m in W if l_b<= u_b and l_i <= u_i and l_m <= u_m] # salary benchmark data + individual data + MVPT data (probably too many states)
             A_f_benchmark = A_f_benchmark + ["mvpt"] 
 
-        print(f"SETTING: {s_label}")
+        print(f"Information setting: {s_label}")
         print("size of worker state space")
         print(f"|S_w_sharing|= {len(S_w_sharing)}")
         print(f"|S_w_firm_choice|= {len(S_w_firm_choice)}")
@@ -834,348 +896,520 @@ if __name__ == "__main__":
         print("size of firm state space")
         print(f"|S_f_benchmark|= {len(S_f_benchmark)}")
         print(f"|S_f_negotiation|= {len(S_f_negotiation)}")
+        for beta, b_label in zip(betas, beta_labels):
+            for p_s, p_l in zip(p_settings, p_labels):
 
-        # find values to fix these at to compare with previous work
-        alpha = 0.3 # more weight on present rewards
-        delta = 0.9 # more patient
-        # initial_belief_strength = 0.05
+                print(f"beta setting:{b_label}, distribution: {p_l}")
+                market = Market(N_w,N_f,S_w_sharing,A_w_sharing,S_w_negotiation,A_w_negotiation,S_w_firm_choice, A_w_firm_choice,S_f_benchmark,A_f_benchmark,S_f_negotiation,W,p_s,alpha,delta,initial_belief_strength,p_risky=p_risky,type_conditioning=type_conditioning,p_reset=p_reset,beta=beta,use_mvpt=use_mvpt,posting=posting,mixed_posts=mixed_posts)
 
-        T = 20000 # seems to be enough time to see "stable" behavior at the end 
-        # T_negotiation = 1000 # tolerance for number of time steps with  no negotiations (what is necessary here?)
+                # things to track through the market
+                worker_wages = [[w.wage for w in market.workers]]
+                if type_conditioning:
+                    (initial_c_R,initial_b_R), (initial_c_S,initial_b_S) = get_wage_distribution_market_split_workers(market)
+                else:
+                    (initial_c, initial_b) = get_wage_distribution_market(market)
+                m_hat_values = []
+                true_median = []
 
-        ## initial distributions
-        # skewed left (k-l):
-        kl = [3/4,1/8,0.9-(3/4+1/8)]+[0.1/(k-2) for i in range(k-2)]
-        # slightly skewed left (s-k-l):
-        skl = [1/2,1/8,0.7-(1/2+1/8)]+[0.3/(k-2) for i in range(k-2)]
-        # uniform (u): 
-        u= [1/(k+1) for i in range(k+1)]
-        # slightly skewed right (s-k-r):
-        skr = [0.3/(k-2) for i in range(k-2)]+[1/2,1/8,0.7-(1/2+1/8)]
-        # skewed right(k-r):
-        kr = [0.1/(k-2) for i in range(k-2)]+[0.9-(3/4+1/8),1/8,3/4]
-        # bimodal even (b-e):
-        be = [0.4] + [0.1/2 for i in range(2)] + [0.1/2 for i in range(2)] + [0.4]
-        # bimodal slightly left (b-l):
-        bl =  [0.45] + [0.1/2 for i in range(2)]  + [0.1/2 for i in range(2)] + [0.35] 
-        # bimodal slightly right (b-r):
-        br =  [0.35] + [0.1/2 for i in range(2)]+ [0.1/2 for i in range(2)] + [0.45]
+                firms_ATs = [[]for f in market.firms]
+                firms_ranges = [[] for f in market.firms]
 
-        p_settings = [kr,skr,skl,kl,u,be,bl,br]
-        p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
-        
+                worker_offers = [[] for w in market.workers]
+                worker_firm_choice = [[] for w in market.workers]
 
-        save = True
-
-        for p_s, p_l in zip(p_settings, p_labels):
-
-            print(f"distribution: {p_l}")
-            market = Market(N_w,N_f,S_w_sharing,A_w_sharing,S_w_negotiation,A_w_negotiation,S_w_firm_choice, A_w_firm_choice,S_f_benchmark,A_f_benchmark,S_f_negotiation,W,p_s,alpha,delta,initial_belief_strength,p_risky,type_conditioning,p_reset=p_reset,beta=beta,use_mvpt=use_mvpt,posting=posting,mixed_posts=mixed_posts)
-
-            # things to track through the market
-            worker_wages = [[w.wage for w in market.workers]]
-            initial_counts_bins_market = get_wage_distribution_market(market)
-            m_hat_values = []
-            true_median = []
-
-            firms_ATs = [[]for f in market.firms]
-            firms_ranges = [[] for f in market.firms]
-
-            worker_offers = [[] for w in market.workers]
+                firm_profits = [[] for f in market.firms]
 
 
-            for t in tqdm(range(T)):
-                if use_mvpt:
-                    m_hat_values.append(market.mvpt.m_hat)
-
-                true_median.append(market._get_market_median())
-
-                market.market_time_step(t)
-
-                for i,f in enumerate(market.firms):
-                    firms_ATs[i].append(f.acceptance_threshold)
-                    firms_ranges[i].append(f.range)
-
-                for i,w in enumerate(market.workers):
-                    if w.offer == "no offer":
-                        worker_offers[i].append(-1)
-                    else:
-                        worker_offers[i].append(w.offer)
-
-                all_wages = [w.wage for w in market.workers]
-                worker_wages.append(all_wages)
-                
-                 # old "convergence" checks -- just wait the 20,000 time steps 
-                ## Convergence criteria
-                # if min(all_wages) == 1:
-                #     print("Converged to MRPL!")
-                #     break
-
-                # if max(all_wages) == 0:
-                #     print("Converged to firm capturing surplus!")
-                #     break
-            
-                # if min(all_wages) == max(all_wages):
-                #     print(f"Converged to wage {min(all_wages)}")
-                #     break
-                # # need something like offer == worker's wage, so they don't negotiate (negotiations stop for X time steps or  negotiations stop AND eps<threshold)
-                # if t >= T_negotiation and sum(market.num_negotiations[-T_negotiation:]) == 0:
-                #     print(f"No negotiations for {T_negotiation} time steps")
-                #     break
-            
-
-
-
-            ### Analyzing, TODO -- clean up analysis.
-
-            ## Overall wage analysis 
-            # Wage distribution final vs. initial
-            plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,extra_counts = initial_counts_bins_market[0],extra_bins =initial_counts_bins_market[1],k=k,p=p_l,s_l = s_label,p_reset=p_reset,seed=seed,save=save)
-
-            # Median value over time
-            if use_mvpt:
-                plt.plot(m_hat_values, label="m_hat median estimate",linestyle="dashed")
-            plt.plot(true_median, color="orange",label="True median")
-            plt.ylim((0,1))
-            plt.title(f"Median wage values over time")
-            plt.xlabel("Time")
-            plt.ylabel("Median values")
-            plt.legend()
-            if save:
-                plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_median_values_seed={seed}.png")
-            plt.clf()
-
-            # Tracking possible dispersion
-            all_wages_final = [w.wage for w in market.workers]
-            all_wages_initial = worker_wages[0]
-            bot_10 = np.percentile(all_wages_initial,10)
-            bot_50 = np.percentile(all_wages_initial,50)
-            bot_90 = np.percentile(all_wages_initial,90)
-
-            bot_10_final = np.percentile(all_wages_final,10)
-            bot_90_final = np.percentile(all_wages_final,90)
-            bot_50_final = np.percentile(all_wages_final,50)
-
-            print(f"initial percentiles: {bot_10}, {bot_50}, {bot_90}")
-            print(f"final percentiles: {bot_10_final}, {bot_50_final}, {bot_90_final}")
-            print(f"initial dispersion ratio: {(bot_90-bot_10)/bot_50}")
-            print(f"final dispersion ratio: {(bot_90_final-bot_10_final)/bot_50_final}")
-
-
-            ## Firm analysis 
-            # information use numbers
-            sal_bench_numbers = [info_use[0] for info_use in market.firm_information_use]
-            independent_numbers = [info_use[1] for info_use in market.firm_information_use]
-  
-            plt.plot(range(len(market.firm_information_use)), sal_bench_numbers,label="Num. firms using Salary Benchmark")
-            plt.plot(range(len(market.firm_information_use)), independent_numbers,label="Num. firms using Independent data")
-            if use_mvpt:
-                mvpt_numbers = [N_f - iu_s - iu_i for iu_s,iu_i in zip(sal_bench_numbers,independent_numbers)]
-                plt.plot(range(len(market.firm_information_use)), mvpt_numbers,label="Num. firms using MVPT data")
-            plt.title("Firm information use over time")
-            plt.ylim((0,N_f))
-            plt.xlabel("Time")
-            plt.ylabel("Firm counts per source")
-            plt.legend()
-            if save:
-                plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_information_source_numbers_seed={seed}.png")
-            plt.clf()
-
-            # information source values
-            sal_bench_l = [info[0][1] for info in market.firm_information_source_values]
-            sal_bench_u = [info[0][1] for info in market.firm_information_source_values]
-            ind_range_l = [[]for i in range(N_f)]
-            ind_range_u = [[]for i in range(N_f)]
-            mvpt_range_l = [[]for i in range(N_f)]
-            mvpt_range_u = [[]for i in range(N_f)]
-            for t in range(len(market.firm_information_source_values)):
-                for i in range(N_f):
-                    ind_range_l[i].append(market.firm_information_source_values[t][2*i+1][0])
-                    ind_range_u[i].append(market.firm_information_source_values[t][2*i+1][1])
+                for t in tqdm(range(T)):
                     if use_mvpt:
-                        mvpt_range_l[i].append(market.firm_information_source_values[t][2*i+2][0])
-                        mvpt_range_u[i].append(market.firm_information_source_values[t][2*i+2][1])
+                        m_hat_values.append(market.mvpt.m_hat)
 
-            for i in range(N_f):
-                plt.plot(range(len(market.firm_information_source_values)), sal_bench_l, label="Sal. bench low",color="blue")
-                plt.plot(range(len(market.firm_information_source_values)), sal_bench_u, label="Sal. bench high",color="light blue")
-                plt.plot(range(len(market.firm_information_source_values)), ind_range_l, label="Ind. low", color="red")
-                plt.plot(range(len(market.firm_information_source_values)), ind_range_u, label="Ind. high", color="light red")
+                    true_median.append(market._get_market_median())
+
+                    market.market_time_step(t)
+
+                    for i,f in enumerate(market.firms):
+                        firms_ATs[i].append(f.acceptance_threshold)
+                        firms_ranges[i].append(f.range)
+                        firm_profits[i].append(f.profit)
+
+                    for i,w in enumerate(market.workers):
+                        if w.offer == "no offer":
+                            worker_offers[i].append(-1)
+                            worker_firm_choice[i].append(-1)
+                        else:
+                            worker_offers[i].append(w.offer)
+                            worker_firm_choice[i].append(w.firm_negotiation_choice)
+
+                    all_wages = [w.wage for w in market.workers]
+                    worker_wages.append(all_wages)
+                    
+                    # old "convergence" checks -- just wait the 20,000 time steps 
+                    ## Convergence criteria
+                    # if min(all_wages) == 1:
+                    #     print("Converged to MRPL!")
+                    #     break
+
+                    # if max(all_wages) == 0:
+                    #     print("Converged to firm capturing surplus!")
+                    #     break
+                
+                    # if min(all_wages) == max(all_wages):
+                    #     print(f"Converged to wage {min(all_wages)}")
+                    #     break
+                    # # need something like offer == worker's wage, so they don't negotiate (negotiations stop for X time steps or  negotiations stop AND eps<threshold)
+                    # if t >= T_negotiation and sum(market.num_negotiations[-T_negotiation:]) == 0:
+                    #     print(f"No negotiations for {T_negotiation} time steps")
+                    #     break
+                
+
+
+
+                ### Analyzing
+
+                ## Overall wage analysis 
+                # Wage distribution final vs. initial
+                plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,initial_counts = initial_c,initial_bins =initial_b,split_workers=type_conditioning,k=k,p_l=p_l,s_l = s_label,b_l=b_label,p_reset=p_reset,seed=seed,save=save,folder=folder)
+
+                # Median value over time
+                # if use_mvpt:
+                #     plt.plot(m_hat_values, label="m_hat median estimate",linestyle="dashed")
+                # plt.plot(true_median, color="orange",label="True median")
+                # plt.ylim((0,1))
+                # plt.title(f"Median wage values over time")
+                # plt.xlabel("Time")
+                # plt.ylabel("Median values")
+                # plt.legend()
+                # if save:
+                #     plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_median_values_seed={seed}.png")
+                # plt.clf()
+
+                # Tracking possible dispersion
+                all_wages_final = [w.wage for w in market.workers]
+                all_wages_initial = worker_wages[0]
+                bot_10 = np.percentile(all_wages_initial,10)
+                bot_50 = np.percentile(all_wages_initial,50)
+                bot_90 = np.percentile(all_wages_initial,90)
+
+                bot_10_final = np.percentile(all_wages_final,10)
+                bot_90_final = np.percentile(all_wages_final,90)
+                bot_50_final = np.percentile(all_wages_final,50)
+
+                print(f"initial percentiles: {bot_10}, {bot_50}, {bot_90}")
+                print(f"final percentiles: {bot_10_final}, {bot_50_final}, {bot_90_final}")
+                if bot_50 >0:
+                    print(f"initial dispersion ratio: {(bot_90-bot_10)/bot_50}")
+                if bot_50_final >0:
+                    print(f"final dispersion ratio: {(bot_90_final-bot_10_final)/bot_50_final}")
+
+                
+
+                ## Firm analysis
+                # firm profit in last 1000 time steps  
+                tau = int(T/2)
+                for i in range(N_f):
+                    plt.plot(range(T-tau,T), firm_profits[i][T-tau:])
+                    plt.title(f"Firm {i} average profits")
+                    # plt.ylim((-1,1)) # normalize?
+                    plt.xlabel(f"Last {tau} timesteps")
+                    plt.ylabel("Firm profit")
+                    if save:
+                        plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_firm_{i}_profits_seed={seed}.png")
+                    plt.clf()
+
+                
+                # information use numbers
+                sal_bench_numbers = [info_use[0] for info_use in market.firm_information_use]
+                independent_numbers = [info_use[1] for info_use in market.firm_information_use]
+    
+                plt.plot(range(len(market.firm_information_use)), sal_bench_numbers,label="Num. firms using Salary Benchmark")
+                plt.plot(range(len(market.firm_information_use)), independent_numbers,label="Num. firms using Independent data")
                 if use_mvpt:
-                    plt.plot(range(len(market.firm_information_source_values)), mvpt_range_l, label="MVPT low", color="purple")
-                    plt.plot(range(len(market.firm_information_source_values)), mvpt_range_u, label="MVPT high", color="light purple")
-                if save:
-                    plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_information_source_values_firm{i}_seed={seed}.png")
-                plt.clf()
-            
-            
-            # find "stability" time to limit size of graph
-            stable_t = len(firms_ATs[0])
-            for t in range(T):
-                stable = 1
-                for i in range(len(N_f)):
-                    if min(firms_ATs[i][t:]) != max(firms_ATs[i][t:]):
-                        stable = 0
-                if stable:
-                    stable_t = t
-                    break
-
-            # firm decisions
-            for i in range(len(market.firms)):
-                plt.plot(range(stable_t), firms_ATs[i][:stable_t],color ="purple",label="acceptance threshold")
-                lower_bound = [r[0] for r in firms_range[i][:stable_t]]
-                upper_bound = [r[1] for r in firms_range[i][:stable_t]]
-                plt.plot(range(stable_t), lower_bound,color ="red",label="lower bound of range")
-                plt.plot(range(stable_t), upper_bound,color ="blue",label="upper bound of range")
-                plt.ylim((0,1))
-                plt.title(f"Firm index {i} acceptance threshold and range over time")
+                    mvpt_numbers = [N_f - iu_s - iu_i for iu_s,iu_i in zip(sal_bench_numbers,independent_numbers)]
+                    plt.plot(range(len(market.firm_information_use)), mvpt_numbers,label="Num. firms using MVPT data")
+                plt.title("Firm information use over time")
+                plt.ylim((0,N_f))
+                plt.xlabel("Time")
+                plt.ylabel("Firm counts per source")
                 plt.legend()
                 if save:
-                    plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_firm_{i}_seed={seed}.png")
+                    plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_information_source_numbers_seed={seed}.png")
                 plt.clf()
 
-
-            ## Worker analysis 
-            # mvpt use numbers over time
-            if use_mvpt:
-                plt.plot(range(len(market.worker_mvpt_use)), market.worker_mvpt_use)
-                plt.ylim((0,N_w))
-                plt.title("Number of workers sharing with MVPT over time")
-                if save:
-                    plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_mvpt_sharing_numbers_seed={seed}.png")
-                plt.clf()
-
-            # sample of offers over time compared to wage over time
-            for i in range(0,100,10):
-                wages = [w[i] for w in worker_wages]
-                plt.scatter(range(len(worker_offers[i])),worker_offers[i],color="blue",label="Offer")
-                plt.plot(range(len(wages)), wages, color="red",label="Current wage")
-                plt.ylim((-1,1))
-                plt.title(f"Worker index {i} offers and wages over time. Final employer: {market.workers[i].employer}")
-                if save:
-                    plt.savefig(f"q_learning_new_model_results/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_worker_{i}_seed={seed}.png")
-                plt.clf()
-
-
-
-            # if min(all_wages_final) < 1:
-            #     print("All workers DID NOT end up at MRPL.")
-            #     all_wages_less_than_1 = [w for w in all_wages_final if w <1]
-            #     all_wages_eq_1 = [w for w in all_wages_final if w ==1]
+                # information source values
+                # sal_bench_l = [info[0][1] for info in market.firm_information_source_values]
+                # sal_bench_u = [info[0][1] for info in market.firm_information_source_values]
+                # ind_range_l = [[]for i in range(N_f)]
+                # ind_range_u = [[]for i in range(N_f)]
+                # mvpt_range_l = [[]for i in range(N_f)]
+                # mvpt_range_u = [[]for i in range(N_f)]
+                # for t in range(len(market.firm_information_source_values)):
+                #     for i in range(N_f):
+                #         if use_mvpt:
+                #             ind_range_l[i].append(market.firm_information_source_values[t][2*i+1][0])
+                #             ind_range_u[i].append(market.firm_information_source_values[t][2*i+1][1])
+                #             mvpt_range_l[i].append(market.firm_information_source_values[t][2*i+2][0])
+                #             mvpt_range_u[i].append(market.firm_information_source_values[t][2*i+2][1])
+                #         else:
+                #             ind_range_l[i].append(market.firm_information_source_values[t][i+1][0])
+                #             ind_range_u[i].append(market.firm_information_source_values[t][i+1][1])
                 
-            #     all_wages_less_than_b10 = [w for w in all_wages_initial if w <=bot_10]
-            #     all_wages_less_than_b25 = [w for w in all_wages_initial if w <=bot_25]
-            #     all_wages_less_than_b50 = [w for w in all_wages_initial if w <=bot_50]
-            #     all_wages_less_than_b75 = [w for w in all_wages_initial if w <=bot_75]
-            #     all_wages_less_than_b90 = [w for w in all_wages_initial if w <=bot_90 and w > bot_75]
+                
+                # find "stability" time to limit size of graph
+                stable_t = len(firms_ATs[0])
 
-            #     wages_at_i = [[i for i in range(len(all_wages_initial)) if all_wages_initial[i] == w] for w in W]
-            #     wages_at_i_final_eq_1 = [[i for i in range(len(all_wages_final)) if all_wages_final[i] == 1 and all_wages_initial[i] == w] for w in W]
-            #     wages_at_i_final_l_1 = [[i for i in range(len(all_wages_final)) if all_wages_final[i] < 1 and all_wages_initial[i] == w] for w in W]
+                if type_conditioning:
+                    risky_ATs = [[at[0] for at in firms_ATs[i]]for i in range(N_f)]
+                    safe_ATs = [[at[1] for at in firms_ATs[i]]for i in range(N_f)]
+                    for t in range(T):
+                        stable_r = 1
+                        stable_s = 1
+                        for i in range(N_f):
+                            if min(risky_ATs[i][t:]) != max(risky_ATs[i][t:]):
+                                stable_r = 0
+                            if min(safe_ATs[i][t:]) != max(safe_ATs[i][t:]):
+                                stable_s = 0
+                        if stable_r and stable_s:
+                            stable_t = t
+                            break
+                else:
+                    for t in range(T):
+                        stable = 1
+                        for i in range(N_f):
+                            if min(firms_ATs[i][t:]) != max(firms_ATs[i][t:]):
+                                stable = 0
+                        if stable:
+                            stable_t = t
+                            break
+                    
+                
+                # for i in range(N_f):
+                #     plt.plot(range(stable_t), sal_bench_l[:stable_t], label="Sal. bench low",color="blue")
+                #     plt.plot(range(stable_t), sal_bench_u[:stable_t], label="Sal. bench high",color="cornflowerblue")
+                #     plt.plot(range(stable_t), ind_range_l[i][:stable_t], label="Ind. low", color="red")
+                #     plt.plot(range(stable_t), ind_range_u[i][:stable_t], label="Ind. high", color="lightcoral")
+                #     if use_mvpt:
+                #         plt.plot(range(stable_t), mvpt_range_l[i][:stable_t], label="MVPT low", color="purple")
+                #         plt.plot(range(stable_t), mvpt_range_u[i][:stable_t], label="MVPT high", color="mediumorchid")
+                #     plt.legend()
+                #     plt.title(f"Benchmark ranges for firm {i} until stable firm acceptance thresholds")
+                #     plt.ylim((0,1))
+                #     plt.ylabel("Values")
+                #     plt.xlabel("Time")
+                #     if save:
+                #         plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_information_source_values_firm{i}_seed={seed}.png")
+                #     plt.clf()
 
-            #     for i in range(len(W)):
-            #         if len(wages_at_i[i])>0:
-            #             print(f"P(w_f <1 | w_i = {W[i]}) = {len(wages_at_i_final_l_1[i])/len(wages_at_i[i])}")
-            #             print(f"P(w_f ==1 | w_i = {W[i]}) = {len(wages_at_i_final_eq_1[i])/len(wages_at_i[i])}")
-            #         else:
-            #             print(f"No initial wages at {W[i]}.")
+                # firm decisions
+                for i in range(len(market.firms)):
+                    if type_conditioning:
+                        plt.plot(range(stable_t), risky_ATs[i][:stable_t],color ="red",label="acceptance threshold for risky")
+                        plt.plot(range(stable_t), safe_ATs[i][:stable_t],color ="blue",label="acceptance threshold for safe")
+                    else:
+                        plt.plot(range(stable_t), firms_ATs[i][:stable_t],color ="purple",label="acceptance threshold")
+                        lower_bound = [r[0] for r in firms_ranges[i][:stable_t]]
+                        upper_bound = [r[1] for r in firms_ranges[i][:stable_t]]
+                        plt.plot(range(stable_t), lower_bound,color ="red",label="lower bound of range")
+                        plt.plot(range(stable_t), upper_bound,color ="blue",label="upper bound of range")
+                    plt.ylim((0,1))
+                    plt.title(f"Firm index {i} acceptance thresholds over time")
+                    plt.legend()
+                    if save:
+                        plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_firm_{i}_seed={seed}.png")
+                    plt.clf()
 
 
-            #     # all_wages_less_than_1_and_initial_bot_10_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_10]
-            #     # all_wages_less_than_1_and_initial_bot_25_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_25]
-            #     # all_wages_less_than_1_and_initial_bot_50_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_50] 
-            #     # all_wages_less_than_1_and_initial_bot_75_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_75] 
-            #     # all_wages_less_than_1_and_initial_bot_90_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_90 and all_wages_initial[i] > bot_75] 
-            #     # all_wages_less_than_1_and_initial_less_than_1 = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]< 1] 
-
-            #     # all_wages_eq_1_and_initial_bot_75_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] ==1 and all_wages_initial[i]<= bot_75]
-            #     # all_wages_eq_1_and_initial_bot_90_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] ==1 and all_wages_initial[i]<= bot_90 and all_wages_initial[i] > bot_75] 
-
-            #     # print(f"10th percentile={bot_10}, P(w_f <1 | w_i<=bot10) = {len(all_wages_less_than_1_and_initial_bot_10_p)/len(all_wages_less_than_b10)}")
-            #     # print(f"25th percentile={bot_25}, P(w_f <1 | w_i<=bot25) = {len(all_wages_less_than_1_and_initial_bot_25_p)/len(all_wages_less_than_b25)}")
-            #     # print(f"50th percentile={bot_50}, P(w_f <1 | w_i<=bot50) = {len(all_wages_less_than_1_and_initial_bot_50_p)/len(all_wages_less_than_b50)}")
-
-            #     # if len(all_wages_less_than_b75) >0:
-            #     #     print(f"75th percentile={bot_75}, P(w_f <1 | w_i<=bot75) = {len(all_wages_less_than_1_and_initial_bot_75_p)/len(all_wages_less_than_b75)}")
-            #     #     print(f"P(w_f==1| w_i<=bot75) = {len(all_wages_eq_1_and_initial_bot_75_p)/len(all_wages_less_than_b75)}")
-
-            #     # if len(all_wages_less_than_b90) >0:
-            #     #     print(f"90th percentile={bot_90}, P(w_f <1 | w_i<=bot90) = {len(all_wages_less_than_1_and_initial_bot_90_p)/len(all_wages_less_than_b90)}")
-            #     #     print(f"P(w_f==1| w_i<=bot90) = {len(all_wages_eq_1_and_initial_bot_90_p)/len(all_wages_less_than_b90)}")
-            # else:
-            #     print("All workers DID end up at MRPL.")
-
-            # m_hat_l_true_med = 0
-            # m_hat_g_true_med = 0
-            # m_hat_eq_true_med = 0
-            # t_last_m_l_t = 0
-            # t_last_m_g_t = 0
-            # t_last_m_eq_t = 0
-
-            # for m_hat,tm,t in zip(m_hat_values,true_median,range(T)):
-            #     if m_hat < tm:
-            #         m_hat_l_true_med  = m_hat_l_true_med  +1
-            #         t_last_m_l_t = t
-            #     elif m_hat == tm:
-            #         m_hat_eq_true_med = m_hat_eq_true_med +1
-            #         t_last_m_eq_t = t
-            #     else:
-            #         m_hat_g_true_med = m_hat_g_true_med +1
-            #         t_last_m_g_t = t
-            
-            # print("M_hat vs. true median statistics")
-            # print(f"P(m_hat < tm) = {m_hat_l_true_med / T} and time of last instance {t_last_m_l_t}")
-            # print(f"P(m_hat == tm) = {m_hat_eq_true_med / T} and time of last instance {t_last_m_eq_t}")
-            # print(f"P(m_hat > tm) = {m_hat_g_true_med / T} and time of last instance {t_last_m_g_t}")
+                ## Worker analysis 
+                # average worker surplus over last tau time steps
+                avg_worker_surplus = []
+                for t in range(T-tau,T):
+                    avg_worker_surplus.append((1/N_w) * sum(worker_wages[t]))
+                plt.plot(range(T-tau,T), avg_worker_surplus)
+                plt.title("Average Worker Surplus")
+                plt.ylim((0,1))
+                plt.xlabel(f"Last {tau} timesteps")
+                plt.ylabel("Worker Surplus")
+                if save:
+                    plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_average_worker_surplus_seed={seed}.png")
+                plt.clf()
 
 
-            # # graphs
+
+
+                # wage gap if type conditioning 
+                if type_conditioning:
+                    avg_worker_wage_risky = []
+                    avg_worker_wage_safe = []
+
+                    firm_set_risky_x = []
+                    firm_set_risky_y = []
+                    firm_set_safe_x = []
+                    firm_set_safe_y = []
+
+                    for t in range(T-tau,T):
+                        worker_wages_risky = []
+                        worker_wages_safe = []
+
+                        chosen_firms_risky = set()
+                        chosen_firms_safe = set()
+
+                        for idx, w in enumerate(market.workers):
+                            if w.type=="risky":
+                                worker_wages_risky.append(worker_wages[t][idx])
+                                if worker_firm_choice[idx][t] != -1:
+                                    chosen_firms_risky.add(worker_firm_choice[idx][t])
+                            else:
+                                worker_wages_safe.append(worker_wages[t][idx])
+                                if worker_firm_choice[idx][t] != -1:
+                                    chosen_firms_safe.add(worker_firm_choice[idx][t])
+                        avg_worker_wage_risky.append(np.mean(worker_wages_risky))
+                        avg_worker_wage_safe.append(np.mean(worker_wages_safe))
+                        for c_f in chosen_firms_risky:
+                            firm_set_risky_x.append(t)
+                            firm_set_risky_y.append(c_f)
+                        for c_f in chosen_firms_safe:
+                            firm_set_safe_x.append(t)
+                            firm_set_safe_y.append(c_f)
+                    
+                    # plot wages
+                    plt.plot(range(T-tau,T), avg_worker_wage_risky,label="Avg. Risky Worker Wages")
+                    plt.plot(range(T-tau,T), avg_worker_wage_safe,label="Avg. Safe Worker Wages")
+                    plt.title("Worker Wage Comparison")
+                    plt.ylim((0,1))
+                    plt.legend()
+                    plt.xlabel(f"Last {tau} timesteps")
+                    plt.ylabel("Average Worker Wage")
+                    if save:
+                        plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_worker_wage_comparison_seed={seed}.png")
+                    plt.clf()
+
+                    # plot firm choices
+                    plt.scatter(firm_set_risky_x,firm_set_risky_y, label="Risky Workers",marker="o",color="red")
+                    plt.scatter(firm_set_safe_x,firm_set_safe_y, label="Safe Workers",marker="x",color="blue")
+                    plt.title("Worker Firm Negotiation Choices")
+                    plt.ylim((0,4))
+                    plt.legend()
+                    plt.xlabel(f"Last {tau} timesteps")
+                    plt.ylabel("Chosen Firms")
+                    if save:
+                        plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_worker_firm_choices_seed={seed}.png")
+                    plt.clf()
+
+
+
+
+
+
+                # mvpt use numbers over time
+                if use_mvpt:
+                    plt.plot(range(len(market.worker_mvpt_use)), market.worker_mvpt_use)
+                    plt.ylim((0,N_w))
+                    plt.title("Number of workers sharing with MVPT over time")
+                    if save:
+                        plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_mvpt_sharing_numbers_seed={seed}.png")
+                    plt.clf()
+
+                # stable_t = len(worker_offers[0])
+                # for t in range(T):
+                #     stable = 1
+                #     for i in range(N_f):
+                #         if min(worker_offers[i][t:]) != max(worker_offers[i][t:]):
+                #             stable = 0
+                #     if stable:
+                #         stable_t = t
+                #         break
+
+                # # sample of offers over time compared to wage over time
+                # differentials = [[]for i in range(N_w)]
+                # for i in range(N_w):
+                #     differentials[i] = [v-w[i] if v >= 0 else -1 for v,w in zip(worker_offers[i],worker_wages)]
+
+                # # proportion of no offers in last 100 time steps by type
+                # p_no_offer_R = []
+                # p_no_offer_S = []
+                # for idx,w in enumerate(market.workers):
+                #     if w.type=="risky":
+                #         p_no_offer_R.append(sum([1 for d in differentials[idx][T-1000:] if d == -1])/1000)
+                #     else:
+                #         p_no_offer_S.append(sum([1 for d in differentials[idx][T-1000:] if d == -1])/1000)
         
+                # print("Statistics of proportion of no offer actions in last 1000 time steps by worker type.")
+                # print("---Risky Workers---")
+                # print(f"min proportion: {min(p_no_offer_R)}")
+                # print(f"max proportion: {max(p_no_offer_R)}")
+                # print(f"avg. proportion: {np.mean(p_no_offer_R)}")
+
+                # print("---Safe Workers---")
+                # print(f"min proportion: {min(p_no_offer_S)}")
+                # print(f"max proportion: {max(p_no_offer_S)}")
+                # print(f"avg. proportion: {np.mean(p_no_offer_S)}")
+                
+                # plot distribution of last time step of differential > 0 for both risky and safe workers
+                # last_higher_offer_time_step = [T for i in range(N_w)]
+                # for t in range(T):
+                #     for idx,w in enumerate(market.workers):
+                #         if last_higher_offer_time_step[idx] < T:
+                #             continue
+                #         if max(differentials[idx][t:])==0: # no more high offers
+                #             last_higher_offer_time_step[idx] = t
+                # l_h_o_t_R = []
+                # l_h_o_t_S = []
+                # for idx,w in enumerate(market.workers):
+                #     if w.type=="risky":
+                #         l_h_o_t_R.append(last_higher_offer_time_step[idx])
+                #     else:
+                #         l_h_o_t_S.append(last_higher_offer_time_step[idx])
+
+                # c_R, b_R = np.histogram(l_h_o_t_R,bins=500,range=(0,T))
+                # c_S, b_S = np.histogram(l_h_o_t_S,bins=500,range=(0,T))
+                # plt.stairs(c_R,b_R,label=f"Risky",color="red")
+                # plt.stairs(c_S,b_S,label=f"Safe",color="blue")
+                # plt.title(f"Distribution of last time step of non-zero offer of Workers throughout market")
+                # plt.legend()
+                # plt.ylim((0,N_w))
+                # plt.xlabel(f"last time step, between 0 and {T}")
+                # plt.ylabel(f"Density of last time step value throughout market")
+                # if save:
+                #     plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_last_high_offer_time_step_seed={seed}.png")
+                # plt.clf()
+                    
+
+                # for i in range(0,100,10):
+                #     # differential = [v-w[i] if v >= 0 else -1 for v,w in zip(worker_offers[i],worker_wages)]
+                #     plt.scatter(range(stable_t),differential[:stable_t],color="blue")
+                #     # plt.plot(range(len(wages)), wages, color="red",label="Current wage")
+                #     plt.ylim((-1,1))
+                #     # plt.legend()
+                #     plt.title(f"Worker index {i} offer-wage over time (or no offer). Final employer: {market.workers[i].employer}")
+                #     if save:
+                #         plt.savefig(f"{folder}/p={p_reset}_N_w={N_w}_N_f={N_f}_k={k}_initial_distribution={p_l}_{s_label}_beta={b_label}_worker_{i}_seed={seed}.png")
+                #     plt.clf()
+                
+                plt.close() # close all figures between runs
+                print() # line between runs
+
+
+                # TODO -- further analysis? more on how workers use information?
+
+
+                # if min(all_wages_final) < 1:
+                #     print("All workers DID NOT end up at MRPL.")
+                #     all_wages_less_than_1 = [w for w in all_wages_final if w <1]
+                #     all_wages_eq_1 = [w for w in all_wages_final if w ==1]
+                    
+                #     all_wages_less_than_b10 = [w for w in all_wages_initial if w <=bot_10]
+                #     all_wages_less_than_b25 = [w for w in all_wages_initial if w <=bot_25]
+                #     all_wages_less_than_b50 = [w for w in all_wages_initial if w <=bot_50]
+                #     all_wages_less_than_b75 = [w for w in all_wages_initial if w <=bot_75]
+                #     all_wages_less_than_b90 = [w for w in all_wages_initial if w <=bot_90 and w > bot_75]
+
+                #     wages_at_i = [[i for i in range(len(all_wages_initial)) if all_wages_initial[i] == w] for w in W]
+                #     wages_at_i_final_eq_1 = [[i for i in range(len(all_wages_final)) if all_wages_final[i] == 1 and all_wages_initial[i] == w] for w in W]
+                #     wages_at_i_final_l_1 = [[i for i in range(len(all_wages_final)) if all_wages_final[i] < 1 and all_wages_initial[i] == w] for w in W]
+
+                #     for i in range(len(W)):
+                #         if len(wages_at_i[i])>0:
+                #             print(f"P(w_f <1 | w_i = {W[i]}) = {len(wages_at_i_final_l_1[i])/len(wages_at_i[i])}")
+                #             print(f"P(w_f ==1 | w_i = {W[i]}) = {len(wages_at_i_final_eq_1[i])/len(wages_at_i[i])}")
+                #         else:
+                #             print(f"No initial wages at {W[i]}.")
+
+
+                #     # all_wages_less_than_1_and_initial_bot_10_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_10]
+                #     # all_wages_less_than_1_and_initial_bot_25_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_25]
+                #     # all_wages_less_than_1_and_initial_bot_50_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_50] 
+                #     # all_wages_less_than_1_and_initial_bot_75_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_75] 
+                #     # all_wages_less_than_1_and_initial_bot_90_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]<= bot_90 and all_wages_initial[i] > bot_75] 
+                #     # all_wages_less_than_1_and_initial_less_than_1 = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] <1 and all_wages_initial[i]< 1] 
+
+                #     # all_wages_eq_1_and_initial_bot_75_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] ==1 and all_wages_initial[i]<= bot_75]
+                #     # all_wages_eq_1_and_initial_bot_90_p = [all_wages_final[i] for i in range(len(all_wages_final)) if all_wages_final[i] ==1 and all_wages_initial[i]<= bot_90 and all_wages_initial[i] > bot_75] 
+
+                #     # print(f"10th percentile={bot_10}, P(w_f <1 | w_i<=bot10) = {len(all_wages_less_than_1_and_initial_bot_10_p)/len(all_wages_less_than_b10)}")
+                #     # print(f"25th percentile={bot_25}, P(w_f <1 | w_i<=bot25) = {len(all_wages_less_than_1_and_initial_bot_25_p)/len(all_wages_less_than_b25)}")
+                #     # print(f"50th percentile={bot_50}, P(w_f <1 | w_i<=bot50) = {len(all_wages_less_than_1_and_initial_bot_50_p)/len(all_wages_less_than_b50)}")
+
+                #     # if len(all_wages_less_than_b75) >0:
+                #     #     print(f"75th percentile={bot_75}, P(w_f <1 | w_i<=bot75) = {len(all_wages_less_than_1_and_initial_bot_75_p)/len(all_wages_less_than_b75)}")
+                #     #     print(f"P(w_f==1| w_i<=bot75) = {len(all_wages_eq_1_and_initial_bot_75_p)/len(all_wages_less_than_b75)}")
+
+                #     # if len(all_wages_less_than_b90) >0:
+                #     #     print(f"90th percentile={bot_90}, P(w_f <1 | w_i<=bot90) = {len(all_wages_less_than_1_and_initial_bot_90_p)/len(all_wages_less_than_b90)}")
+                #     #     print(f"P(w_f==1| w_i<=bot90) = {len(all_wages_eq_1_and_initial_bot_90_p)/len(all_wages_less_than_b90)}")
+                # else:
+                #     print("All workers DID end up at MRPL.")
+
+                # m_hat_l_true_med = 0
+                # m_hat_g_true_med = 0
+                # m_hat_eq_true_med = 0
+                # t_last_m_l_t = 0
+                # t_last_m_g_t = 0
+                # t_last_m_eq_t = 0
+
+                # for m_hat,tm,t in zip(m_hat_values,true_median,range(T)):
+                #     if m_hat < tm:
+                #         m_hat_l_true_med  = m_hat_l_true_med  +1
+                #         t_last_m_l_t = t
+                #     elif m_hat == tm:
+                #         m_hat_eq_true_med = m_hat_eq_true_med +1
+                #         t_last_m_eq_t = t
+                #     else:
+                #         m_hat_g_true_med = m_hat_g_true_med +1
+                #         t_last_m_g_t = t
+                
+                # print("M_hat vs. true median statistics")
+                # print(f"P(m_hat < tm) = {m_hat_l_true_med / T} and time of last instance {t_last_m_l_t}")
+                # print(f"P(m_hat == tm) = {m_hat_eq_true_med / T} and time of last instance {t_last_m_eq_t}")
+                # print(f"P(m_hat > tm) = {m_hat_g_true_med / T} and time of last instance {t_last_m_g_t}")
+
+
+                # # graphs
             
-            # # worker attributes 
-            # # t_last_share  = []
-            # # for i in range(N):
-            # #     workers_actions[i].reverse()
-            # #     tls = len(workers_actions[i])/2 + (len(workers_actions[i])/2 - workers_actions[i].index(1)-1)
+                
+                # # worker attributes 
+                # # t_last_share  = []
+                # # for i in range(N):
+                # #     workers_actions[i].reverse()
+                # #     tls = len(workers_actions[i])/2 + (len(workers_actions[i])/2 - workers_actions[i].index(1)-1)
 
-            # #     t_last_share.append((tls,worker_wages[0][i],worker_wages[-1][i])) # (tls, initial wage, last wage)
-            
-            # # last_share = max([t[0] for t in t_last_share])
+                # #     t_last_share.append((tls,worker_wages[0][i],worker_wages[-1][i])) # (tls, initial wage, last wage)
+                
+                # # last_share = max([t[0] for t in t_last_share])
 
-            # # ts_w_i_le_bot_75_eq_1 = [t[0] for t in t_last_share if t[1]<=bot_75 and t[2]==1]
-            # # ts_w_i_le_bot_75_l_1 = [t[0] for t in t_last_share if t[1]<=bot_75 and t[2]<1]
-            # # ts_w_i_g_bot_75_le_bot_90_eq_1 = [t[0] for t in t_last_share if t[1]>bot_75 and t[1]<=bot_90 and t[2]==1]
-            # # ts_w_i_g_bot_75_le_bot_90_l_1 = [t[0] for t in t_last_share if t[1]>bot_75 and t[1]<=bot_90 and t[2] <1]
-            # # ts_w_i_g_bot_90_eq_1 = [t[0] for t in t_last_share if t[1]>bot_90 and t[2] ==1]
-            # # ts_w_i_g_bot_90_l_1 = [t[0] for t in t_last_share if t[1]>bot_90 and t[2]<1]
+                # # ts_w_i_le_bot_75_eq_1 = [t[0] for t in t_last_share if t[1]<=bot_75 and t[2]==1]
+                # # ts_w_i_le_bot_75_l_1 = [t[0] for t in t_last_share if t[1]<=bot_75 and t[2]<1]
+                # # ts_w_i_g_bot_75_le_bot_90_eq_1 = [t[0] for t in t_last_share if t[1]>bot_75 and t[1]<=bot_90 and t[2]==1]
+                # # ts_w_i_g_bot_75_le_bot_90_l_1 = [t[0] for t in t_last_share if t[1]>bot_75 and t[1]<=bot_90 and t[2] <1]
+                # # ts_w_i_g_bot_90_eq_1 = [t[0] for t in t_last_share if t[1]>bot_90 and t[2] ==1]
+                # # ts_w_i_g_bot_90_l_1 = [t[0] for t in t_last_share if t[1]>bot_90 and t[2]<1]
 
-            # # ts_w_init_eq_i_f_eq_1 = [[t[0] for t in t_last_share if t[1] == w and t[2] == 1] for w in W]
-            # # ts_w_init_eq_i_f_l_1 = [[t[0] for t in t_last_share if t[1] == w and t[2] <1] for w in W]
+                # # ts_w_init_eq_i_f_eq_1 = [[t[0] for t in t_last_share if t[1] == w and t[2] == 1] for w in W]
+                # # ts_w_init_eq_i_f_l_1 = [[t[0] for t in t_last_share if t[1] == w and t[2] <1] for w in W]
 
-            # # colors = ["blue", "red", "black", "orange", "pink", "purple","green", "cyan", "grey", "brown","gold"]
-            # # for i in range(len(W)):
-            # #     counts_a, bins_a = np.histogram(ts_w_init_eq_i_f_eq_1[i],bins=50,range=(0,last_share))
-            # #     counts_b, bins_b = np.histogram(ts_w_init_eq_i_f_l_1[i],bins=50,range=(0,last_share))
-            # #     plt.stairs(counts_a,bins_a,label=f"initial wage = {W[i]} and final wage=1",color=colors[i])
-            # #     plt.stairs(counts_b,bins_b,label=f"initial wage = {W[i]} and final wage<1",color=colors[i],linestyle="dashed")
-            # # # counts_1a, bins_1a = np.histogram(ts_w_i_le_bot_75_eq_1,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # counts_1b, bins_1b = np.histogram(ts_w_i_le_bot_75_l_1,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # counts_2a, bins_2a = np.histogram(ts_w_i_g_bot_75_le_bot_90_eq_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # counts_2b, bins_2b = np.histogram(ts_w_i_g_bot_75_le_bot_90_l_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # counts_3a, bins_3a = np.histogram(ts_w_i_g_bot_90_eq_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # counts_3b, bins_3b = np.histogram(ts_w_i_g_bot_90_l_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
-            # # # plt.stairs(counts_2a,bins_2a,label=f"initial wage>bot75,<=bot90 and final wage=1",color="purple")
-            # # # plt.stairs(counts_2b,bins_2b,label=f"initial wage>bot75,<=bot90 and final wage<1",color="purple",linestyle="dashed")
-            # # # plt.stairs(counts_3a,bins_3a,label=f"initial wage>bot90 and final wage=1",color="blue")
-            # # # plt.stairs(counts_3b,bins_3b,label=f"initial wage>bot90 and final wage<1",color="blue",linestyle="dashed")
-            # # plt.title(f"Distribution of time of last share of Workers throughout market")
-            # # plt.legend()
-            # # plt.ylim((0,N))
-            # # plt.xlabel(f"time of last share, up to t={T}")
-            # # plt.ylabel("Density of time of last share throughout market")
-            # # if save:
-            # #     plt.savefig(f"q_learning_simulation_results/time_of_last_share/p=0.1_N={N}_k={k}_initial_distribution={p_l}_tls_distribution_seed={seed}.png")
-            # # plt.show()
+                # # colors = ["blue", "red", "black", "orange", "pink", "purple","green", "cyan", "grey", "brown","gold"]
+                # # for i in range(len(W)):
+                # #     counts_a, bins_a = np.histogram(ts_w_init_eq_i_f_eq_1[i],bins=50,range=(0,last_share))
+                # #     counts_b, bins_b = np.histogram(ts_w_init_eq_i_f_l_1[i],bins=50,range=(0,last_share))
+                # #     plt.stairs(counts_a,bins_a,label=f"initial wage = {W[i]} and final wage=1",color=colors[i])
+                # #     plt.stairs(counts_b,bins_b,label=f"initial wage = {W[i]} and final wage<1",color=colors[i],linestyle="dashed")
+                # # # counts_1a, bins_1a = np.histogram(ts_w_i_le_bot_75_eq_1,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # counts_1b, bins_1b = np.histogram(ts_w_i_le_bot_75_l_1,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # counts_2a, bins_2a = np.histogram(ts_w_i_g_bot_75_le_bot_90_eq_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # counts_2b, bins_2b = np.histogram(ts_w_i_g_bot_75_le_bot_90_l_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # counts_3a, bins_3a = np.histogram(ts_w_i_g_bot_90_eq_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # counts_3b, bins_3b = np.histogram(ts_w_i_g_bot_90_l_1 ,bins=50,range=(0,max([t[0] for t in t_last_share])))
+                # # # plt.stairs(counts_2a,bins_2a,label=f"initial wage>bot75,<=bot90 and final wage=1",color="purple")
+                # # # plt.stairs(counts_2b,bins_2b,label=f"initial wage>bot75,<=bot90 and final wage<1",color="purple",linestyle="dashed")
+                # # # plt.stairs(counts_3a,bins_3a,label=f"initial wage>bot90 and final wage=1",color="blue")
+                # # # plt.stairs(counts_3b,bins_3b,label=f"initial wage>bot90 and final wage<1",color="blue",linestyle="dashed")
+                # # plt.title(f"Distribution of time of last share of Workers throughout market")
+                # # plt.legend()
+                # # plt.ylim((0,N))
+                # # plt.xlabel(f"time of last share, up to t={T}")
+                # # plt.ylabel("Density of time of last share throughout market")
+                # # if save:
+                # #     plt.savefig(f"q_learning_simulation_results/time_of_last_share/p=0.1_N={N}_k={k}_initial_distribution={p_l}_tls_distribution_seed={seed}.png")
+                # # plt.show()
 
 
 

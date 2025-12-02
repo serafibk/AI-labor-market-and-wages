@@ -1,0 +1,240 @@
+Information setting: setting 1
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 441
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.4, 1.0, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 0.6
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.18000000000000008, 0.6, 0.8
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.0333333333333334
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.1, 0.8
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 8.0
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.2
+final percentiles: 0.2, 0.2, 0.2
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 1.6666666666666667
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 0.0, 0.0, 0.0
+initial dispersion ratio: 1.6666666666666667
+
+beta setting:slow, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 0.2, 0.2, 0.2
+initial dispersion ratio: 2.5
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 0.0, 0.0, 0.0
+initial dispersion ratio: 1.25
+
+Information setting: setting 2
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 441
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.7800000000000001, 1.0, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 0.21999999999999986
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.18000000000000008, 0.6, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 1.3666666666666667
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.2, 1.0
+final percentiles: 0.0, 0.0, 0.2
+initial dispersion ratio: 5.0
+
+beta setting:slow, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.6
+final percentiles: 0.0, 0.0, 0.2
+
+beta setting:slow, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.6, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 1.6666666666666667
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 1.0
+final percentiles: 0.0, 0.2, 0.2
+final dispersion ratio: 1.0
+
+beta setting:slow, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 1.0
+final percentiles: 0.0, 0.2, 0.2
+final dispersion ratio: 1.0
+
+beta setting:slow, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 1.0, 1.0
+final percentiles: 0.0, 0.1, 0.2
+initial dispersion ratio: 1.0
+final dispersion ratio: 2.0
+
+Information setting: setting 3
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 9702
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.4, 1.0, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 0.6
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.18000000000000008, 0.6, 0.8
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 1.0333333333333334
+final dispersion ratio: 0.0
+
+beta setting:slow, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.8200000000000017
+final percentiles: 0.0, 0.0, 0.2
+
+beta setting:slow, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.0, 0.4
+final percentiles: 0.0, 0.2, 0.2
+final dispersion ratio: 1.0
+
+beta setting:slow, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 0.0, 0.2, 0.2
+initial dispersion ratio: 2.5
+final dispersion ratio: 1.0
+
+beta setting:slow, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 0.0, 0.0, 0.0
+initial dispersion ratio: 2.5
+
+beta setting:slow, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 0.0, 0.1, 0.2
+initial dispersion ratio: 1.25
+final dispersion ratio: 2.0
+
+beta setting:slow, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 0.0, 0.2, 0.2
+initial dispersion ratio: 1.25
+final dispersion ratio: 1.0
+
+Information setting: setting 4
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 9702
+|S_f_negotiation|= 126
+beta setting:slow, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
