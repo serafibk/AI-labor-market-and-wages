@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from market_outcome_analysis import get_wage_distribution_market, plot_attribute_distribution_market, get_wage_distribution_market_split_workers
 
 
-seed = 42
+seed = 64
 gen = np.random.default_rng(seed=seed)
 
 update_T = 1 # only if needed
@@ -164,7 +164,7 @@ class Market:
 
         # explore epsilon
         self.beta = beta
-        self.explore_epsilon = 1 # start at 1 
+        self.explore_eps = 1 # start at 1 
 
         # create Workers
         print("Initializing workers...")
@@ -247,6 +247,9 @@ class Market:
             t (int): current time step, used in expectation calculations
         '''
         # parameter  update
+        # if len(self.beta) == 2:
+        #     self.explore_eps = (1*np.e**(-self.beta[0] * t),1*np.e**(-self.beta[1] * t)) # (risky,safe) explore epsilon values
+        # else:
         self.explore_eps = 1*np.e**(-self.beta * t)
 
         # phase 1 - information seeking
@@ -360,8 +363,8 @@ class Market:
 
         # worker sharing decision if using MVPT 
         if self.use_mvpt:
+            mvpt_share = 0
             for w in self.workers:
-                mvpt_share = 0
                 if t%update_T == 0 or t ==0:
                     w.share = w.action_decision(explore_eps = self.explore_eps,sharing=True)
                 
@@ -407,7 +410,7 @@ class Market:
                         offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1])))) # high offer is one interval up, capped at 1
                 else:
                     offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1])))) # high offer is one interval up, capped at 1
-            elif w.type == "risky":
+            elif w.type == "risky" or w.type == "safe":
                 offer_low = w.wage
                 if self.post_ranges:
                     if self.use_mvpt and w.share == "share":
@@ -418,9 +421,9 @@ class Market:
                         offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1]))))#float(1)# high offer is 1 
                 else:
                     offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1]))))#float(1) # high offer is 1
-            elif w.type == "safe":
-                offer_low = w.wage
-                offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1])))) # high offer is one interval up, capped at 1, ignore ranges 
+            # elif w.type == "safe":
+            #     offer_low = w.wage
+            #     offer_high = min(float(1), min(self.wages, key= lambda x: abs(x-(offer_low+self.wages[1])))) # high offer is one interval up, capped at 1, ignore ranges 
             else:
                 print(f"Error: unrecognized worker type '{w.type}'.")
             
@@ -625,6 +628,12 @@ class Worker:
 
     def action_decision(self, sharing = False, firm_choice = False, explore_eps = None):
 
+        # if len(explore_eps) == 2:
+        #     if self.type == "risky":
+        #         explore = gen.binomial(1,explore_eps[0]) # decide to explore or exploit
+        #     else:
+        #         explore = gen.binomial(1,explore_eps[1]) # decide to explore or exploit
+        # else:
         explore = gen.binomial(1,explore_eps) # decide to explore or exploit
 
         if not sharing and not firm_choice:
@@ -767,6 +776,9 @@ class Firm:
 
     def action_decision(self, benchmark = False, explore_eps=None):
 
+        # if len(explore_eps) == 2:
+        #     explore = gen.binomial(1,explore_eps[0]) # decide to explore or exploit
+        # else:
         explore = gen.binomial(1,explore_eps) # decide to explore or exploit
 
         if not benchmark:
@@ -827,8 +839,8 @@ if __name__ == "__main__":
     p_reset = 0.5 # probability of resetting wage, "riskiness" of market, robustness of this
     beta = 6.91*10**(-4) # slow 6.91*10**(-4), medium 9.21*10**(-4), fast 1.15*10**(-3)
 
-    betas = [6.91*10**(-4),9.21*10**(-4),1.15*10**(-3)]
-    beta_labels = ["slow", "medium","fast"]
+    betas = [6.91*10**(-4),1.15*10**(-3)]#9.21*10**(-4)
+    beta_labels = ["slow","fast"]#, "medium","fast"]
 
     # setting flags
     use_mvpt = False
@@ -969,7 +981,10 @@ if __name__ == "__main__":
 
                 ## Overall wage analysis 
                 # Wage distribution final vs. initial
-                plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,initial_counts = initial_c,initial_bins =initial_b,split_workers=type_conditioning,k=k,p_l=p_l,s_l = s_label,b_l=b_label,p_reset=p_reset,seed=seed,save=save,folder=folder)
+                if type_conditioning:
+                    plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,initial_counts = (initial_c_R,initial_c_S),initial_bins =(initial_b_R,initial_b_S),split_workers=type_conditioning,k=k,p_l=p_l,s_l = s_label,b_l=b_label,p_reset=p_reset,seed=seed,save=save,folder=folder)
+                else:
+                    plot_attribute_distribution_market(market,"wage",N_w=N_w,N_f=N_f,initial_counts = initial_c,initial_bins =initial_b,split_workers=type_conditioning,k=k,p_l=p_l,s_l = s_label,b_l=b_label,p_reset=p_reset,seed=seed,save=save,folder=folder)
 
                 # Median value over time
                 # if use_mvpt:
@@ -1006,7 +1021,7 @@ if __name__ == "__main__":
 
                 ## Firm analysis
                 # firm profit in last 1000 time steps  
-                tau = int(T/2)
+                tau = T
                 for i in range(N_f):
                     plt.plot(range(T-tau,T), firm_profits[i][T-tau:])
                     plt.title(f"Firm {i} average profits")
