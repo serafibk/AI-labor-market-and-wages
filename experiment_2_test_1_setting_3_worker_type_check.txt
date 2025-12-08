@@ -1,0 +1,464 @@
+Information setting: setting 3
+size of worker state space
+|S_w_sharing|= 126
+|S_w_firm_choice|= 16807
+|S_w_negotiation|= 21
+size of firm state space
+|S_f_benchmark|= 9702
+|S_f_negotiation|= 126
+beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 1
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 0
+TOTAL safe suboptimal: 0
+initial percentiles: 0.8, 1.0, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 0.19999999999999996
+final dispersion ratio: 0.0
+
+beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (0.0, 0.6)
+Posted Range: (0.0, 0.6)
+Worker 1 with wage 0.0 and offer 0.0 and type risky
+Worker 26 with wage 0.0 and offer no offer and type risky
+Worker 38 with wage 0.0 and offer 0.0 and type risky
+Worker 44 with wage 0.0 and offer no offer and type risky
+Worker 45 with wage 0.0 and offer no offer and type safe
+Worker 46 with wage 0.0 and offer no offer and type safe
+Worker 49 with wage 0.0 and offer no offer and type safe
+Worker 50 with wage 0.0 and offer no offer and type risky
+Worker 53 with wage 0.4 and offer no offer and type risky
+Worker 59 with wage 0.4 and offer no offer and type safe
+Worker 64 with wage 0.0 and offer 0.0 and type risky
+Worker 65 with wage 0.4 and offer no offer and type risky
+Worker 66 with wage 0.0 and offer no offer and type risky
+Worker 69 with wage 0.4 and offer no offer and type risky
+Worker 71 with wage 0.2 and offer no offer and type risky
+Worker 74 with wage 0.4 and offer no offer and type risky
+Worker 75 with wage 0.0 and offer 0.0 and type risky
+Worker 76 with wage 0.0 and offer no offer and type risky
+Worker 77 with wage 0.0 and offer 0.0 and type risky
+Worker 80 with wage 0.0 and offer 0.0 and type risky
+Worker 81 with wage 0.0 and offer 0.0 and type risky
+Worker 82 with wage 0.0 and offer 0.0 and type risky
+Worker 83 with wage 0.0 and offer no offer and type risky
+Worker 86 with wage 0.0 and offer no offer and type risky
+Worker 88 with wage 0.4 and offer no offer and type risky
+Worker 92 with wage 0.0 and offer no offer and type risky
+Worker 95 with wage 0.0 and offer no offer and type risky
+Worker 98 with wage 0.0 and offer 0.0 and type risky
+Worker 99 with wage 0.0 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 4
+Firm 1
+Acceptance threshold: (0.6, 0.0)
+Posted Range: (0.0, 0.6)
+Worker 14 with wage 0.0 and offer no offer and type safe
+Worker 20 with wage 0.0 and offer no offer and type safe
+Worker 27 with wage 0.0 and offer no offer and type safe
+Worker 43 with wage 0.4 and offer no offer and type safe
+Worker 48 with wage 0.0 and offer no offer and type safe
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (0.6, 0.0)
+Posted Range: (0.6, 0.6)
+Worker 0 with wage 0.0 and offer no offer and type safe
+Worker 8 with wage 0.4 and offer no offer and type safe
+Worker 18 with wage 0.0 and offer no offer and type safe
+Worker 22 with wage 0.2 and offer no offer and type safe
+Worker 35 with wage 0.2 and offer no offer and type safe
+Worker 41 with wage 0.2 and offer no offer and type safe
+Worker 87 with wage 0.0 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 1
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (0.6, 0.0)
+Posted Range: (0.0, 0.6)
+Worker 6 with wage 0.4 and offer no offer and type safe
+Worker 16 with wage 0.0 and offer no offer and type safe
+Worker 19 with wage 0.4 and offer no offer and type risky
+Worker 25 with wage 0.0 and offer no offer and type safe
+Worker 36 with wage 0.0 and offer no offer and type risky
+Worker 39 with wage 0.0 and offer no offer and type safe
+Worker 54 with wage 0.0 and offer no offer and type safe
+Worker 57 with wage 0.2 and offer no offer and type safe
+Worker 84 with wage 0.0 and offer 0.0 and type risky
+Worker 96 with wage 0.0 and offer 0.0 and type risky
+Number of risky workers with sub-optimal offers 4
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (0.6, 0.6)
+Posted Range: (0.2, 0.6)
+Worker 2 with wage 0.0 and offer no offer and type safe
+Worker 7 with wage 0.0 and offer no offer and type safe
+Worker 12 with wage 0.0 and offer no offer and type risky
+Worker 21 with wage 0.0 and offer no offer and type safe
+Worker 28 with wage 0.0 and offer no offer and type safe
+Worker 34 with wage 0.0 and offer no offer and type safe
+Worker 37 with wage 0.0 and offer no offer and type safe
+Worker 42 with wage 0.0 and offer no offer and type safe
+Number of risky workers with sub-optimal offers 1
+Number of safe workers with sub-optimal offers 7
+beta setting:slow-fast, distribution: s-k-r
+TOTAL risky suboptimal: 6
+TOTAL safe suboptimal: 11
+initial percentiles: 0.2, 0.6, 0.8
+final percentiles: 0.0, 0.4, 0.6
+initial dispersion ratio: 1.0000000000000002
+final dispersion ratio: 1.4999999999999998
+
+beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 13 with wage 0.0 and offer no offer and type safe
+Worker 28 with wage 0.4 and offer no offer and type risky
+Worker 30 with wage 0.4 and offer no offer and type risky
+Worker 44 with wage 0.4 and offer no offer and type safe
+Worker 47 with wage 0.4 and offer no offer and type safe
+Worker 52 with wage 0.4 and offer no offer and type risky
+Worker 53 with wage 0.2 and offer no offer and type safe
+Worker 55 with wage 0.0 and offer no offer and type safe
+Worker 60 with wage 0.0 and offer no offer and type safe
+Worker 63 with wage 0.4 and offer no offer and type safe
+Worker 64 with wage 0.4 and offer no offer and type safe
+Worker 66 with wage 0.4 and offer no offer and type risky
+Worker 75 with wage 0.4 and offer no offer and type risky
+Worker 77 with wage 0.4 and offer no offer and type risky
+Worker 84 with wage 0.4 and offer no offer and type risky
+Worker 85 with wage 0.4 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 8
+Number of safe workers with sub-optimal offers 3
+Firm 1
+Acceptance threshold: (0.6, 0.6)
+Posted Range: (0.0, 0.6)
+Worker 10 with wage 0.0 and offer no offer and type safe
+Worker 11 with wage 0.4 and offer no offer and type risky
+Worker 16 with wage 0.4 and offer no offer and type safe
+Worker 25 with wage 0.4 and offer no offer and type risky
+Worker 38 with wage 0.0 and offer no offer and type safe
+Worker 42 with wage 0.4 and offer no offer and type risky
+Worker 49 with wage 0.0 and offer no offer and type safe
+Worker 61 with wage 0.4 and offer no offer and type safe
+Worker 69 with wage 0.0 and offer no offer and type safe
+Worker 72 with wage 0.4 and offer no offer and type risky
+Worker 79 with wage 0.4 and offer no offer and type risky
+Worker 88 with wage 0.4 and offer no offer and type risky
+Worker 93 with wage 0.4 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 7
+Number of safe workers with sub-optimal offers 6
+Firm 2
+Acceptance threshold: (0.6, 0.6)
+Posted Range: (0.0, 0.6)
+Worker 1 with wage 0.4 and offer no offer and type safe
+Worker 2 with wage 0.0 and offer no offer and type safe
+Worker 8 with wage 0.0 and offer no offer and type safe
+Worker 15 with wage 0.4 and offer no offer and type risky
+Worker 17 with wage 0.0 and offer no offer and type safe
+Worker 22 with wage 0.4 and offer no offer and type safe
+Worker 23 with wage 0.0 and offer no offer and type safe
+Worker 58 with wage 0.0 and offer no offer and type safe
+Worker 98 with wage 0.0 and offer 0.0 and type risky
+Number of risky workers with sub-optimal offers 2
+Number of safe workers with sub-optimal offers 7
+Firm 3
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 21 with wage 0.4 and offer no offer and type safe
+Worker 32 with wage 0.0 and offer no offer and type safe
+Worker 35 with wage 0.4 and offer no offer and type safe
+Worker 40 with wage 0.2 and offer no offer and type safe
+Worker 48 with wage 0.0 and offer no offer and type safe
+Worker 59 with wage 0.0 and offer no offer and type safe
+Worker 95 with wage 0.2 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 1
+Number of safe workers with sub-optimal offers 3
+Firm 4
+Acceptance threshold: (0.6, 0.0)
+Posted Range: (0.0, 0.6)
+Worker 4 with wage 0.2 and offer no offer and type safe
+Worker 12 with wage 0.0 and offer no offer and type safe
+Worker 26 with wage 0.0 and offer no offer and type safe
+Worker 34 with wage 0.0 and offer no offer and type safe
+Worker 67 with wage 0.0 and offer no offer and type safe
+Worker 70 with wage 0.0 and offer no offer and type safe
+Worker 86 with wage 0.2 and offer no offer and type risky
+Worker 87 with wage 0.2 and offer 0.2 and type risky
+Worker 92 with wage 0.2 and offer no offer and type risky
+Worker 97 with wage 0.4 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 4
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 22
+TOTAL safe suboptimal: 19
+initial percentiles: 0.0, 0.2, 0.8
+final percentiles: 0.0, 0.4, 0.6
+initial dispersion ratio: 4.0
+final dispersion ratio: 1.4999999999999998
+
+beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 9 with wage 0.0 and offer no offer and type safe
+Worker 44 with wage 0.0 and offer no offer and type risky
+Worker 51 with wage 0.0 and offer no offer and type risky
+Worker 57 with wage 0.0 and offer no offer and type risky
+Worker 59 with wage 0.4 and offer no offer and type risky
+Worker 61 with wage 0.4 and offer no offer and type risky
+Worker 77 with wage 0.0 and offer no offer and type risky
+Worker 82 with wage 0.2 and offer no offer and type risky
+Worker 85 with wage 0.4 and offer no offer and type risky
+Worker 87 with wage 0.2 and offer no offer and type risky
+Worker 95 with wage 0.4 and offer no offer and type risky
+Worker 99 with wage 0.2 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 11
+Number of safe workers with sub-optimal offers 1
+Firm 1
+Acceptance threshold: (0.2, 0.6)
+Posted Range: (0.0, 0.6)
+Worker 21 with wage 0.0 and offer no offer and type safe
+Worker 38 with wage 0.0 and offer no offer and type safe
+Worker 41 with wage 0.2 and offer no offer and type safe
+Worker 47 with wage 0.0 and offer no offer and type safe
+Worker 54 with wage 0.2 and offer no offer and type safe
+Worker 79 with wage 0.0 and offer no offer and type risky
+Worker 97 with wage 0.0 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 2
+Number of safe workers with sub-optimal offers 5
+Firm 2
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 5 with wage 0.4 and offer no offer and type safe
+Worker 15 with wage 0.4 and offer no offer and type safe
+Worker 18 with wage 0.4 and offer no offer and type safe
+Worker 36 with wage 0.2 and offer no offer and type safe
+Worker 55 with wage 0.2 and offer no offer and type safe
+Worker 70 with wage 0.2 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 1
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 1 with wage 0.2 and offer no offer and type safe
+Worker 11 with wage 0.0 and offer no offer and type safe
+Worker 14 with wage 0.0 and offer no offer and type safe
+Worker 29 with wage 0.2 and offer no offer and type safe
+Worker 45 with wage 0.2 and offer no offer and type safe
+Worker 56 with wage 0.4 and offer no offer and type safe
+Worker 58 with wage 0.4 and offer no offer and type safe
+Worker 64 with wage 0.2 and offer no offer and type risky
+Worker 78 with wage 0.4 and offer no offer and type risky
+Worker 83 with wage 0.0 and offer no offer and type risky
+Worker 86 with wage 0.0 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 4
+Number of safe workers with sub-optimal offers 2
+Firm 4
+Acceptance threshold: (0.6, 0.2)
+Posted Range: (0.0, 0.6)
+Worker 7 with wage 0.4 and offer no offer and type safe
+Worker 16 with wage 0.0 and offer no offer and type safe
+Worker 30 with wage 0.0 and offer no offer and type safe
+Worker 32 with wage 0.0 and offer no offer and type safe
+Worker 40 with wage 0.0 and offer no offer and type safe
+Worker 92 with wage 0.4 and offer no offer and type risky
+Number of risky workers with sub-optimal offers 1
+Number of safe workers with sub-optimal offers 4
+beta setting:slow-fast, distribution: k-l
+TOTAL risky suboptimal: 19
+TOTAL safe suboptimal: 12
+initial percentiles: 0.0, 0.0, 0.4200000000000017
+final percentiles: 0.0, 0.6, 0.6
+final dispersion ratio: 1.0
+
+beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 1
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 0
+TOTAL safe suboptimal: 0
+initial percentiles: 0.0, 0.4, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 2.5
+final dispersion ratio: 0.0
+
+beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 1
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 0
+TOTAL safe suboptimal: 0
+initial percentiles: 0.0, 0.2, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 5.0
+final dispersion ratio: 0.0
+
+beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 1
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 0
+TOTAL safe suboptimal: 0
+initial percentiles: 0.0, 0.1, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 10.0
+final dispersion ratio: 0.0
+
+beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Final Firm Strategies and Ranges
+Firm 0
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 1
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 2
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 3
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+Firm 4
+Acceptance threshold: (1.0, 1.0)
+Posted Range: (1.0, 1.0)
+Number of risky workers with sub-optimal offers 0
+Number of safe workers with sub-optimal offers 0
+TOTAL risky suboptimal: 0
+TOTAL safe suboptimal: 0
+initial percentiles: 0.0, 0.8, 1.0
+final percentiles: 1.0, 1.0, 1.0
+initial dispersion ratio: 1.25
+final dispersion ratio: 0.0
+
+----FINAL RESULTS----
+Setting avg worker surpluses overall: [[1.0, 0.296, 0.392, 0.42, 1.0, 1.0, 1.0, 1.0]]
+Setting 1 average surplus: 6.108
