@@ -407,7 +407,7 @@ def plot_wage_differences_per_distribution(setting_info):
     plt.title("Comparison of distribution of average wage gap per setting.")
     plt.show()
 
-def plot_wage_differences_per_setting(setting_info,y="Average Wage",title="Comparison of distribution of average wage per setting."):
+def plot_wage_differences_per_setting(setting_info,y="Average Wage",title="Comparison of distribution of average wage per setting.", gap = False,at=False,exp="EXP2",conditions="e-r"):
     '''assume setting info is list of length 4 and each list gives info for each distribution seperately'''
     data_reorged = [[] for i in range(4)]
     for j,s in enumerate(setting_info):
@@ -416,22 +416,33 @@ def plot_wage_differences_per_setting(setting_info,y="Average Wage",title="Compa
                 data_reorged[j].append(v)
     # data_final = [d_i for d in data_reorged for d_i in d]
     plt.violinplot(data_reorged)
-    plt.xlabel("Settings")
+    # plt.xlabel("Settings")
     plt.xticks([y+1 for y in range(len(data_reorged))],
-                  labels=["Setting 1", "Setting 2", "Setting 3", "Setting 4"], rotation=45)
-    plt.ylabel(y)
-    # plt.ylim((-0.2,0.5))
-    plt.title(title)
+                  labels=["Neither", "Firm-verified", "Predicted", "Both"],rotation=45,fontsize=16)
+    plt.ylabel(y,fontsize = 16)
+    if gap:
+        plt.ylim((-0.2,0.5))
+    elif at:
+        plt.ylim((-0.5,0.5))
+    # else:
+    #     plt.ylim((-0.05,1))
+    # plt.title(title)
     plt.show()
+    # if gap:
+    #     plt.savefig(f"Formatted Final Graphs/avg_wage_gap_per_setting_violin-{exp}-{conditions}.png")
+    # elif at:
+    #     plt.savefig(f"Formatted Final Graphs/avg_at_gap_per_setting_violin-{exp}-{conditions}.png")
+    # else:
+    #     plt.savefig(f"Formatted Final Graphs/avg_wage_per_setting_violin-{exp}-{conditions}.png")
 
     # test empirical cdf hypothesis 
-    for j in range(4):
-        plt.ecdf(data_reorged[j],label=f"Setting {j+1} ECDF")
-    plt.xlabel("Average Wage")
-    plt.ylabel("P(w <= W)")
-    plt.title("Empirical CDF Comparison")
-    plt.legend()
-    plt.show()
+    # for j in range(4):
+    #     plt.ecdf(data_reorged[j],label=f"Setting {j+1} ECDF")
+    # plt.xlabel("Average Wage")
+    # plt.ylabel("P(w <= W)")
+    # plt.title("Empirical CDF Comparison")
+    # plt.legend()
+    # plt.show()
 
     return data_reorged
 
@@ -442,15 +453,16 @@ def plot_offer_differences(setting_info, type_conditioning):
     each bar shows, per distribution, per setting, avg num of no offers  + avg number of rejected offers + avg number of accepted
     '''
     if type_conditioning:
-        pos = [j for i in range(0,12,3) for j in range(i,i+2)]
-        labels = ["Setting 1 - R", "Setting 1 - S","Setting 2 - R", "Setting 2 - S","Setting 3 - R", "Setting 3 - S","Setting 4 - R", "Setting 4 - S"]
+        # pos = [j for i in range(0,12,3) for j in range(i,i+2)]
+        pos = range(8)
+        labels = ["Neither,\nType $H$", "Neither,\nType $L$","Firm-verified,\nType $H$", "Firm-verified,\nType $L$","Predicted,\nType $H$", "Predicted,\nType $L$","Both,\nType $H$", "Both,\nType $L$"]
         bottom = np.zeros(len(pos))
     else:
         pos = range(4)
-        labels = ["Setting 1","Setting 2","Setting 3", "Setting 4"]
+        labels = ["Neither","Firm-verified","Predicted", "Both"]
         bottom = np.zeros(len(labels))
 
-    offer_info = {"no-offers":[], "rejected-offers":[],"accepted-offers":[]} # each list is s1:R,S, ..., s4:R,S
+    offer_info = {"No Offer":[], "Rejected Offer":[],"Accepted Offer":[]} # each list is s1:R,S, ..., s4:R,S
 
     for s in setting_info:
         if type_conditioning:
@@ -472,31 +484,41 @@ def plot_offer_differences(setting_info, type_conditioning):
                     no.append(run["no-offer"])
                     r.append(run["rejected"])
         if type_conditioning:
-            offer_info["no-offers"].append(sum(no_R)/len(no_R))
-            offer_info["no-offers"].append(sum(no_S)/len(no_S))
-            offer_info["rejected-offers"].append((1-sum(no_R)/len(no_R)) * sum(r_R)/len(r_R))
-            offer_info["rejected-offers"].append((1-sum(no_S)/len(no_S)) * sum(r_S)/len(r_S))
-            offer_info["accepted-offers"].append((1-sum(no_R)/len(no_R)) * (1-sum(r_R)/len(r_R)))
-            offer_info["accepted-offers"].append((1-sum(no_S)/len(no_S)) * (1-sum(r_S)/len(r_S)))
+            offer_info["No Offer"].append(sum(no_R)/len(no_R))
+            offer_info["No Offer"].append(sum(no_S)/len(no_S))
+            offer_info["Rejected Offer"].append((1-sum(no_R)/len(no_R)) * sum(r_R)/len(r_R))
+            offer_info["Rejected Offer"].append((1-sum(no_S)/len(no_S)) * sum(r_S)/len(r_S))
+            offer_info["Accepted Offer"].append((1-sum(no_R)/len(no_R)) * (1-sum(r_R)/len(r_R)))
+            offer_info["Accepted Offer"].append((1-sum(no_S)/len(no_S)) * (1-sum(r_S)/len(r_S)))
         else:
-            offer_info["no-offers"].append(sum(no)/len(no))
-            offer_info["rejected-offers"].append((1-sum(no)/len(no)) * sum(r)/len(r))
-            offer_info["accepted-offers"].append((1-sum(no)/len(no)) * (1-sum(r)/len(r)))
+            offer_info["No Offer"].append(sum(no)/len(no))
+            offer_info["Rejected Offer"].append((1-sum(no)/len(no)) * sum(r)/len(r))
+            offer_info["Accepted Offer"].append((1-sum(no)/len(no)) * (1-sum(r)/len(r)))
     
-
-    for o, o_count in offer_info.items():
-        plt.bar(labels, o_count,label=o,bottom=bottom)
+    colors = ["#56B4E9","#E69F00","#009E73"]
+    hatch = ["","//","--"]
+    for i,(o, o_count) in enumerate(offer_info.items()):
+        if i >0:
+            plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i],hatch=hatch[i])
+        else:
+            plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i])
         bottom += o_count
-    plt.legend()
+        plt.xticks(pos,labels,fontsize=16,rotation=45)
+        # plt.bar_label(p,fontsize=12,rotation=45)
+    if type_conditioning:
+        plt.ylabel("Proportion of $T$\nAveraged across all worker types",fontsize=16)
+    else:
+        plt.ylabel("Proportion of $T$\nAveraged across all workers",fontsize=16)
+    plt.legend(loc="lower left")
     plt.show()
 
 def plot_benchmark_choice_comparison(setting_info, stat="Largest"):
     
     pos = range(4)
-    labels = [f"Setting 1 - {stat}",f"Setting 2 - {stat}",f"Setting 3 - {stat}",f"Setting 4 - {stat}"]
+    labels = [f"Neither",f"Firm-verified",f"Predicted",f"Both"]
     bottom = np.zeros(len(labels))
 
-    bench_info = {"identical ranges":[], f"{stat}":[],f"non-{stat}":[]} # each list is s1:R,S, ..., s4:R,S
+    bench_info = {"Identical Ranges":[], f"{stat}":[],f"Non-{stat}":[]} # each list is s1:R,S, ..., s4:R,S
 
     for s in setting_info:
         iden = []
@@ -511,20 +533,28 @@ def plot_benchmark_choice_comparison(setting_info, stat="Largest"):
                     large.append(run["largest"])
                 else:
                     wide.append(run["widest"])
-        bench_info["identical ranges"].append(sum(iden)/len(iden))
+        bench_info["Identical Ranges"].append(sum(iden)/len(iden))
         if stat == "Largest":
             bench_info["Largest"].append((1-sum(iden)/len(iden)) * sum(large)/len(large))
-            bench_info["non-Largest"].append((1-sum(iden)/len(iden)) * (1-sum(large)/len(large)))
+            bench_info["Non-Largest"].append((1-sum(iden)/len(iden)) * (1-sum(large)/len(large)))
         else:
             bench_info["Widest"].append((1-sum(iden)/len(iden)) * sum(wide)/len(wide))
-            bench_info["non-Widest"].append((1-sum(iden)/len(iden)) * (1-sum(wide)/len(wide)))
+            bench_info["Non-Widest"].append((1-sum(iden)/len(iden)) * (1-sum(wide)/len(wide)))
     
-    print(bench_info)
-    for b, b_count in bench_info.items():
-        plt.bar(labels, b_count,label=b,bottom=bottom)
+    # print(bench_info)
+    colors = ["#CC79A7","#0072B2","#F0E442"]
+    hatch = ["","**","||"]
+    for i,(b, b_count) in enumerate(bench_info.items()):
+        if i > 0:
+            plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i],hatch=hatch[i])
+        else:
+            plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i])
+        plt.xticks(pos,labels,fontsize=16,rotation=45)
+        # plt.bar_label(p,fontsize=12,rotation=45)
         bottom += b_count
-    plt.title("Comparison of Firm Benchmark Choices")
-    plt.legend()
+    # plt.title("Comparison of Firm Benchmark Choices")
+    plt.ylabel("Proportion of $T$\nAveraged across all firms",fontsize=16)
+    plt.legend(loc="lower left")
     plt.show()
 
 
@@ -604,8 +634,10 @@ beta_labels = ["slow-fast"]#, "medium","fast"]
 settings = [(False,False, False),(False, True, False),(True, True, False),(True, True, True)] # ,(False, True, False),
 setting_label = ["setting 1","setting 2","setting 3","setting 4"] # "setting 2"
 
-riskiness = [(0.75,0.25)]#(0.75,0.5),(0.25,0.5), (0.5,0.25),,(0.25,0.25),(0.75,0.5),(0.75,0.25),(0.5,0.5)
-riskiness_label = ["r-s"]#"r-r","s-r","e-s", "s-s","r-s","e-r"
+# riskiness = [(0.5,0.5)]#(0.75,0.5),(0.25,0.5), (0.5,0.25),,(0.25,0.25),(0.75,0.5),(0.75,0.25),(0.5,0.5)
+riskiness_label = ["s-r"]#"r-r","s-r","e-s", "s-s","r-s","e-r"
+exp = "EXP2"
+folder = "simulation_output_data_experiment_2_asym_betas_risky_market"
 
 p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
 
@@ -617,32 +649,34 @@ W = [float(i/k) for i in range(k+1)] # k + 1 possible wages
 ranges = W + [-1] # -1 indicates no range given 
 alpha = 0.3 # more weight on present rewards
 delta = 0.9 # more patient
-initial_belief_strength = 0.05
 p_s = [1/(k+1) for i in range(k+1)] # this parameter doesn't matter, but just for initializing market
 type_conditioning = True
+T = 20000
 
 
 # change these indices to change settings
 p_l = "u"
 N = 15
 b_label = beta_labels[0]
-setting_data_1 = [[] for i in range(len(setting_label))]
-setting_data_2 = [[] for i in range(len(setting_label))]
+setting_data_1 = [[] for i in range(len(setting_label))] # W_F
+setting_data_2 = [[] for i in range(len(setting_label))] # AT gaps
+setting_data_3 = [[] for i in range(len(setting_label))] # benchmark choice
+setting_data_4 = [[] for i in range(len(setting_label))] # W_G
+setting_data_5 = [[] for i in range(len(setting_label))] # Offer choices
 for r,r_label in enumerate(riskiness_label):
     for s,s_label in enumerate(setting_label):
         print(f"evaluating {s_label}...")
         distribution_data_1 = [[] for i in range(len(p_labels))]
         distribution_data_2 = [[] for i in range(len(p_labels))]
-        # across_all_distributions_surplus = []
-        # across_all_distributions_gap = []
+        distribution_data_3 = [[] for i in range(len(p_labels))]
+        distribution_data_4 = [[] for i in range(len(p_labels))]
+        distribution_data_5 = [[] for i in range(len(p_labels))]
+
         # set values
         use_mvpt,posting,mixed_posts  = settings[s]
         beta = betas[0]
-        p_risky, p_reset = riskiness[r]
+        # p_risky, p_reset = riskiness[r]
 
-        # dev_test_firm_profits = [[]for i in range(N_f)] # for each firm, collect t
-        # dev_test_firm_applicants = [[] for i in range(N_f)]
-        # dev_test_worker_surplus_change = []
         if type_conditioning:
             all_p_R = []
             all_p_S = []
@@ -668,10 +702,8 @@ for r,r_label in enumerate(riskiness_label):
             all_p_m_l_u = []
         for p,p_l in enumerate(p_labels):
             print(f"evaluating {p_l}...")
-            # avg_wage_gap = []
             for n in range(N):
-                # print("--Firm Deviation Test--")
-                folder = "simulation_output_data_experiment_2_asym_betas"
+
                 run_folder= f"N_w={N_w}_N_f={N_f}_k={k}_{s_label}_initial_dist={p_l}_beta={b_label}_risk={r_label}_seed={seed}_N={n}"
 
                 if use_mvpt:
@@ -681,7 +713,43 @@ for r,r_label in enumerate(riskiness_label):
                 
                 firm_info, worker_info, sal_bench_l, sal_bench_u = load_firm_worker_info(folder, run_folder, use_mvpt,type_conditioning)
                 all_wages  = get_worker_wages(worker_info,N_w)
-                # wages_R,wages_S = get_worker_wages_typed(worker_info,N_w)
+                if type_conditioning:
+                    wages_R,wages_S = get_worker_wages_typed(worker_info,N_w)
+
+                
+                firms_ATs = [firm_info[i]["AT"] for i in range(N_f)]
+
+                stable_t = len(firms_ATs[0])
+
+                if type_conditioning:
+                    risky_ATs = [[at[0] for at in firms_ATs[i]]for i in range(N_f)]
+                    safe_ATs = [[at[1] for at in firms_ATs[i]]for i in range(N_f)]
+                    for t in range(T):
+                        stable_r = 1
+                        stable_s = 1
+                        for i in range(N_f):
+                            if min(risky_ATs[i][t:]) != max(risky_ATs[i][t:]):
+                                stable_r = 0
+                            if min(safe_ATs[i][t:]) != max(safe_ATs[i][t:]):
+                                stable_s = 0
+                        if stable_r and stable_s:
+                            stable_t = t
+                            break
+                else:
+                    for t in range(T):
+                        stable = 1
+                        for i in range(N_f):
+                            if min(firms_ATs[i][t:]) != max(firms_ATs[i][t:]):
+                                stable = 0
+                        if stable:
+                            stable_t = t
+                            break
+                print(f"AT stability at {stable_t}/{T}")
+
+
+                continue
+
+
 
                 if type_conditioning:
                     AT_gaps = []
@@ -708,17 +776,17 @@ for r,r_label in enumerate(riskiness_label):
                     else:
                         r_l, u_b,l_b, u_l_u, u_l_r,p_ident, props_rejected, props_no_offer,avg_off_diff = track_worker_behavior(worker_info, firm_info, sal_bench_l,sal_bench_u, None,N_w, N_f,use_mvpt,type_conditioning)
 
-                # if type_conditioning:
-                #     all_p_R.append(sum(rejected_R)/len(rejected_R))
-                #     all_p_S.append(sum(rejected_S)/len(rejected_S))
-                #     all_p_no_R.append(sum(no_off_R)/len(no_off_R))
-                #     all_p_no_S.append(sum(no_off_S)/len(no_off_S))
-                #     all_p_od_R.append(sum(off_diff_R)/len(off_diff_R))
-                #     all_p_od_S.append(sum(off_diff_S)/len(off_diff_S))
-                # else:
-                #     all_p_rej.append(sum(props_rejected)/len(props_rejected))
-                #     all_p_no.append(sum(props_no_offer)/len(props_no_offer))
-                #     all_p_od.append(sum(avg_off_diff)/len(avg_off_diff))
+                if type_conditioning:
+                    all_p_R.append(sum(rejected_R)/len(rejected_R))
+                    all_p_S.append(sum(rejected_S)/len(rejected_S))
+                    all_p_no_R.append(sum(no_off_R)/len(no_off_R))
+                    all_p_no_S.append(sum(no_off_S)/len(no_off_S))
+                    all_p_od_R.append(sum(off_diff_R)/len(off_diff_R))
+                    all_p_od_S.append(sum(off_diff_S)/len(off_diff_S))
+                else:
+                    all_p_rej.append(sum(props_rejected)/len(props_rejected))
+                    all_p_no.append(sum(props_no_offer)/len(props_no_offer))
+                    all_p_od.append(sum(avg_off_diff)/len(avg_off_diff))
                 all_p_r_l.append(sum(r_l)/len(r_l))
                 all_p_u_b.append(sum(u_b)/len(u_b))
                 all_p_l_b.append(sum(l_b)/len(l_b))
@@ -728,24 +796,29 @@ for r,r_label in enumerate(riskiness_label):
 
 
                
-                distribution_data_1[p].append((1/N_w)*sum(all_wages))
-                distribution_data_2[p].append(sum(AT_gaps)/len(AT_gaps))
-                # distribution_data_2[p].append({"identical ranges":sum(p_ident)/len(p_ident),"largest":sum(u_l_u)/len(u_l_u),"widest":sum(u_l_r)/len(u_l_r)})
-                # distribution_data_2[p].append(sum(wages_R)/len(wages_R) - sum(wages_S)/len(wages_S))
-                # if type_conditioning:
-                #     p_no_R = sum(no_off_R)/len(no_off_R)
-                #     p_no_S = sum(no_off_S)/len(no_off_S)
-                #     p_r_R = sum(rejected_R)/len(rejected_R)
-                #     p_r_S = sum(rejected_S)/len(rejected_S)
-                #     distribution_data[p].append({"no-offer-R":p_no_R,"no-offer-S":p_no_S,"rejected-R":p_r_R,"rejected-S":p_r_S})
-                # else:
-                #     p_no = sum(props_no_offer)/len(props_no_offer)
-                #     p_r = sum(props_rejected)/len(props_rejected)
-                #     distribution_data[p].append({"no-offer":p_no,"rejected":p_r,})
+                distribution_data_1[p].append((1/N_w)*sum(all_wages)) # W_F
+                if type_conditioning:
+                    distribution_data_2[p].append(sum(AT_gaps)/len(AT_gaps)) # AT gaps
+                    distribution_data_4[p].append(sum(wages_R)/len(wages_R) - sum(wages_S)/len(wages_S))# W_G
+                distribution_data_3[p].append({"identical ranges":sum(p_ident)/len(p_ident),"largest":sum(u_l_u)/len(u_l_u),"widest":sum(u_l_r)/len(u_l_r)}) # benchmark choices
+                if type_conditioning:
+                    p_no_R = sum(no_off_R)/len(no_off_R)
+                    p_no_S = sum(no_off_S)/len(no_off_S)
+                    p_r_R = sum(rejected_R)/len(rejected_R)
+                    p_r_S = sum(rejected_S)/len(rejected_S)
+                    distribution_data_5[p].append({"no-offer-R":p_no_R,"no-offer-S":p_no_S,"rejected-R":p_r_R,"rejected-S":p_r_S}) # offer choices, typed
+                else:
+                    p_no = sum(props_no_offer)/len(props_no_offer)
+                    p_r = sum(props_rejected)/len(props_rejected)
+                    distribution_data_5[p].append({"no-offer":p_no,"rejected":p_r,})# offer choices
 
         setting_data_1[s].append(distribution_data_1)
-        setting_data_2[s].append(distribution_data_2)
-        all_at_gaps = [at_gap for all_gaps in distribution_data_2 for at_gap in all_gaps]
+        if type_conditioning:
+            setting_data_2[s].append(distribution_data_2)
+            setting_data_4[s].append(distribution_data_4)
+        setting_data_3[s].append(distribution_data_3)
+        setting_data_5[s].append(distribution_data_5)
+        # all_at_gaps = [at_gap for all_gaps in distribution_data_2 for at_gap in all_gaps]
                 # across_all_distributions_surplus.append((1/N_w)*sum(all_wages))
                 # across_all_distributions_gap.append((1/idx_R)*sum(wages_R) - (1/idx_S)*sum(wages_S))
                 
@@ -766,8 +839,8 @@ for r,r_label in enumerate(riskiness_label):
         #     print(f"Setting: {s_label}, riskiness: {r_label}, distribution: {p_l}")
         #     print(f"Average avg worker surplus: {sum(avg_worker_surplus)/len(avg_worker_surplus)}")
         # #     print(f"Average avg wage gap: {sum(avg_wage_gap)/len(avg_wage_gap)}")
-        print("--FINAL STATS--")
-        print(f"Setting: {s_label}, riskiness: {r_label}")
+        # print("--FINAL STATS--")
+        # print(f"Setting: {s_label}, riskiness: {r_label}")
         # print(f"Average avg worker surplus: {sum(across_all_distributions_surplus)/len(across_all_distributions_surplus)}")
         # if type_conditioning:
         #     print(f"average proportion of rejected offers risky: {sum(all_p_R)/len(all_p_R)}")
@@ -780,23 +853,23 @@ for r,r_label in enumerate(riskiness_label):
         #     print(f"average proportion of rejected offers: {sum(all_p_rej)/len(all_p_rej)}")
         #     print(f"average proportion of no offers: {sum(all_p_no)/len(all_p_no)}")
         #     print(f"average size of offer difference with wage: {sum(all_p_od)/len(all_p_od)}")
-        print(f"average range length: {sum(all_p_r_l)/len(all_p_r_l)}")
-        print(f"average upper bound: {sum(all_p_u_b)/len(all_p_u_b)}")
-        print(f"average lower bound: {sum(all_p_l_b)/len(all_p_l_b)}")
-        print(f"average proportion of using largest upper bound range: {sum(all_p_u_l_u)/len(all_p_u_l_u)}")
-        print(f"average proportion of using widest range: {sum(all_p_u_l_r)/len(all_p_u_l_r)}")
-        print(f"average proportion of identical sal bench and ind ranges: {sum(all_p_p_ident)/len(all_p_p_ident)}")
-        if type_conditioning:
-            print(f"average AT gap across all firms and all runs/distributions: {sum(all_at_gaps)/len(all_at_gaps)}")
-        if use_mvpt:
-            print(f"average proportion of mvpt with widest range: {sum(all_p_m_w_r)/len(all_p_m_w_r)}")
-            print(f"average proportion of mvpt with lowest upper bound: {sum(all_p_m_l_u)/len(all_p_m_l_u)}")
+        # print(f"average range length: {sum(all_p_r_l)/len(all_p_r_l)}")
+        # print(f"average upper bound: {sum(all_p_u_b)/len(all_p_u_b)}")
+        # print(f"average lower bound: {sum(all_p_l_b)/len(all_p_l_b)}")
+        # print(f"average proportion of using largest upper bound range: {sum(all_p_u_l_u)/len(all_p_u_l_u)}")
+        # print(f"average proportion of using widest range: {sum(all_p_u_l_r)/len(all_p_u_l_r)}")
+        # print(f"average proportion of identical sal bench and ind ranges: {sum(all_p_p_ident)/len(all_p_p_ident)}")
+        # if type_conditioning:
+        #     print(f"average AT gap across all firms and all runs/distributions: {sum(all_at_gaps)/len(all_at_gaps)}")
+        # if use_mvpt:
+        #     print(f"average proportion of mvpt with widest range: {sum(all_p_m_w_r)/len(all_p_m_w_r)}")
+        #     print(f"average proportion of mvpt with lowest upper bound: {sum(all_p_m_l_u)/len(all_p_m_l_u)}")
             # if type_conditioning:
             #     print(f"average proportion of mvpt over estimates risky: {sum(all_p_m_o_e_R)/len(all_p_m_o_e_R)}")
             #     print(f"average proportion of mvpt over estimates safe: {sum(all_p_m_o_e_S)/len(all_p_m_o_e_S)}")
             # else:
             #     print(f"average proportion of mvpt over estimates: {sum(all_p_m_o_e)/len(all_p_m_o_e)}")
-        print()
+        # print()
         
         # # print(f"Average avg wage gap: {sum(across_all_distributions_gap)/len(across_all_distributions_gap)}")
         # print(f"Average worker surplus change after deviation: {sum(dev_test_worker_surplus_change)/len(dev_test_worker_surplus_change)}")
@@ -836,14 +909,14 @@ for r,r_label in enumerate(riskiness_label):
         # plt.ylim((0,N_w))
         # plt.show()
 
-# data_reorged = plot_wage_differences_per_setting(setting_data_1)
-# plot_benchmark_choice_comparison(setting_data_2,stat="Largest")
-# plot_benchmark_choice_comparison(setting_data_2,stat="Widest")
-# data_reorged = plot_wage_differences_per_setting(setting_data_2,y="Average Wage Gap",title="Comparison of distribution of average wage gap per setting.")
+data_reorged = plot_wage_differences_per_setting(setting_data_1,y=r"$W_F$",exp=exp,conditions=riskiness_label[0]) # W_F
+if type_conditioning:
+    data_reorged = plot_wage_differences_per_setting(setting_data_2,y=r"$AT_G$",at=True,exp=exp,conditions=riskiness_label[0]) # AT gaps
+    data_reorged = plot_wage_differences_per_setting(setting_data_4,y=r"$W_G$",gap=True,exp=exp,conditions=riskiness_label[0]) # W_G
+plot_benchmark_choice_comparison(setting_data_3,stat="Widest") # benchmark choice 
+plot_offer_differences(setting_data_5,type_conditioning) # offer choice 
+
 # setting_comparison_statistics(data_reorged)
-# plot_offer_differences(setting_data,type_conditioning)
-
-
 
 
 ## Extra analysis old code
