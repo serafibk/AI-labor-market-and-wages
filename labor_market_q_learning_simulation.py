@@ -1,5 +1,5 @@
 '''
-This file is meant to implement a simple epsilon-greedy Q-learning dynamic programming algoirthm 
+This file implements our market model and a simple epsilon-greedy Q-learning algorithm to simulate learned strategies.
 '''
 import numpy as np
 import math
@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 import pickle
 from pathlib import Path
 
-from market_outcome_analysis import get_wage_distribution_market, plot_attribute_distribution_market, get_wage_distribution_market_split_workers
+from market_outcome_helpers import get_wage_distribution_market, plot_attribute_distribution_market, get_wage_distribution_market_split_workers
 
 
 seed = 42
@@ -73,7 +73,7 @@ class MVPT:
                 continue # can't update this firm 
             l_hat_f = np.percentile([w.wage for w in pool], 10)
             u_hat_f = np.percentile([w.wage for w in pool], 90)
-            self.l_hat[idx] = min(self.wages, key = lambda x:abs(x-l_hat_f)) # map to closest value
+            self.l_hat[idx] =  # map to closest value
             self.u_hat[idx] = min(self.wages, key = lambda x:abs(x-u_hat_f)) # map to closest value
 
         # update m_hat from all of the wages
@@ -279,7 +279,6 @@ class Market:
         ''' firms first choose a benchmark, then workers choose a firm to negotiate with 
         '''
         # fim seeking 
-
         # tracking info 
         using_bench = 0
         using_independent = 0
@@ -356,7 +355,9 @@ class Market:
             
         else: # no posted ranges, workers have no information 
             for w in self.workers:
-                next_state = (-1,-1,-1,-1,-1) # state shows that worker knows nothing before choosing a firm  
+                next_state = () # state shows that worker knows nothing before choosing a firm  
+                for i in range(len(self.firms)):
+                    next_state = next_state + (-1,)
         
                 if t>0: # need to update q vals from negotiation outcomes after the first time step
                     w.update_q_vals(next_state,w.offer,bargaining_outcome=w.bargaining_outcome,last_wage = w.last_wage,using_mvpt=self.use_mvpt,evaluate=self.eval)
@@ -819,7 +820,7 @@ if __name__ == "__main__":
     alpha = 0.3 # more weight on present rewards
     delta = 0.9 # more patient
 
-    T = 500000#20000 # seems to be enough time to see "stable" behavior at the end 
+    T = 20000 # seems to be enough time to see "stable" behavior at the end -- in most cases, but really this could be more robust.
 
     ## initial distributions
     # skewed left (k-l):
@@ -842,11 +843,26 @@ if __name__ == "__main__":
     p_settings = [kr,skr,skl,kl,u,be,bl,br]
     p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
 
+    # for p in p_settings:
+    #     example_wage_distribution = [gen.choice(W,p=p) for i in range(N_w)]
+    #     # counts, bins = np.histogram(example_wage_distribution, bins=len(W))
+    #     # plt.stairs(counts, bins)
+    #     plt.hist(example_wage_distribution, bins=[w for w in W+[1.2]],align="left")
+    #     plt.xticks([w for w in W], fontsize=16)
+    #     plt.xlabel("Initial Wage Value",fontsize=16)
+    #     plt.ylabel("Number of Workers",fontsize=16)
+    #     plt.ylim((0,80))
+    #     plt.show()
 
-    N = 10 # trials to run to average over
 
-    setting_average_worker_surplus = [[[[] for p in range(8)] for s in range(4)] for r in range(2)]
-    setting_wage_gap = [[[[] for p in range(8)] for s in range(4)] for r in range(2)]
+
+
+    # exit()
+
+    N = 2 # trials to run to average over
+
+    setting_average_worker_surplus = [[[[] for p in range(8)] for s in range(4)] for r in range(1)]
+    setting_wage_gap = [[[[] for p in range(8)] for s in range(4)] for r in range(1)]
 
     for n in range(N):
         print(f"RUN: {n}/{N-1}")
@@ -854,7 +870,7 @@ if __name__ == "__main__":
             for s, (use_mvpt, posting, mixed_posts), s_label in zip(range(4),settings,setting_label):
                 # states and actions
                 S_w_sharing = [(w,l,u) for w in W for l in W for u in W if l<= u] 
-                S_w_firm_choice = [(r1,r2,r3,r4,r5) for r1 in ranges for r2 in ranges for r3 in ranges for r4 in ranges for r5 in ranges] # r == res. price of worker: max(w,m_m) TODO -- how to make this tractable
+                S_w_firm_choice = [(r1,r2,r3,r4,r5) for r1 in ranges for r2 in ranges for r3 in ranges for r4 in ranges for r5 in ranges]#[(r1,r2,r3,r4,r5) for r1 in ranges for r2 in ranges for r3 in ranges for r4 in ranges for r5 in ranges] # r == res. price of worker: max(w,m_m) TODO -- how to make this tractable
                 S_w_negotiation = [(o_l, o_h) for o_l in W for o_h in W if o_l <= o_h] # range of offers to consider
                 A_w_sharing = ["share", "no share"] # action set for each worker and firm deciding whether to share wage info. Worker shares current salary, firm "plugs in" HR software
                 A_w_firm_choice = range(N_f) # all firm indices
@@ -1015,32 +1031,33 @@ if __name__ == "__main__":
                         
                         ### Saving Data
                         print("Saving data...")
+                        tau = 20000
                         # create folder
                         run_folder = f"N_w={N_w}_N_f={N_f}_k={k}_{s_label}_initial_dist={p_l}_beta={b_label}_risk={r_label}_seed={seed}_N={n}"
                         Path(f"{s_folder}/{run_folder}").mkdir(parents=True,exist_ok=True)
 
                         # dump data
                         with open(f"{s_folder}/{run_folder}/median_values.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/sal_bench_l.pkl", 'wb') as pkl_fl2, open(f"{s_folder}/{run_folder}/sal_bench_u.pkl", 'wb') as pkl_fl3:
-                            pickle.dump(true_median,file = pkl_fl1)
-                            pickle.dump(sal_bench_l, file = pkl_fl2)
-                            pickle.dump(sal_bench_u, file = pkl_fl3)
+                            pickle.dump(true_median[-tau:],file = pkl_fl1)
+                            pickle.dump(sal_bench_l[-tau:], file = pkl_fl2)
+                            pickle.dump(sal_bench_u[-tau:], file = pkl_fl3)
                         if use_mvpt:
                             with open(f"{s_folder}/{run_folder}/mvpt_values.pkl",'wb') as pkl_fl:
-                                pickle.dump(m_hat_values,file = pkl_fl)
+                                pickle.dump(m_hat_values[-tau:],file = pkl_fl)
                         
                         for idx_f in range(len(market.firms)):
                             with open(f"{s_folder}/{run_folder}/firm_{idx_f}_ATs.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/firm_{idx_f}_profits.pkl", 'wb') as pkl_fl2, open(f"{s_folder}/{run_folder}/firm_{idx_f}_benchmarks.pkl", 'wb') as pkl_fl3:
-                                pickle.dump(firms_ATs[idx_f], file = pkl_fl1)
-                                pickle.dump(firm_profits[idx_f], file = pkl_fl2)
-                                pickle.dump(firms_bm[idx_f], file = pkl_fl3)
+                                pickle.dump(firms_ATs[idx_f][-tau:], file = pkl_fl1)
+                                pickle.dump(firm_profits[idx_f][-tau:], file = pkl_fl2)
+                                pickle.dump(firms_bm[idx_f][-tau:], file = pkl_fl3)
                             with open(f"{s_folder}/{run_folder}/ind_bench_l_{idx_f}.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/ind_bench_u_{idx_f}.pkl", 'wb') as pkl_fl2:# open(f"{s_folder}/{run_folder}/q_vals_firm_{idx_f}.pkl", 'wb') as pkl_fl3:
-                                pickle.dump(ind_range_l[idx_f], file = pkl_fl1)
-                                pickle.dump(ind_range_u[idx_f], file = pkl_fl2)
+                                pickle.dump(ind_range_l[idx_f][-tau:], file = pkl_fl1)
+                                pickle.dump(ind_range_u[idx_f][-tau:], file = pkl_fl2)
                                 # pickle.dump(market.firms[idx_f].Q_vals, file=pkl_fl3) don't save q-vals for now!
                             if use_mvpt:
                                 with open(f"{s_folder}/{run_folder}/mvpt_bench_l_{idx_f}.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/mvpt_bench_u_{idx_f}.pkl", 'wb') as pkl_fl2:
-                                    pickle.dump(mvpt_range_l[idx_f], file = pkl_fl1)
-                                    pickle.dump(mvpt_range_u[idx_f], file = pkl_fl2)
+                                    pickle.dump(mvpt_range_l[idx_f][-tau:], file = pkl_fl1)
+                                    pickle.dump(mvpt_range_u[idx_f][-tau:], file = pkl_fl2)
                             
                             
                         # don't save q-vals until I have a good test for them
@@ -1058,24 +1075,24 @@ if __name__ == "__main__":
                         if type_conditioning:
                             for idx_w in range(len(worker_offers_R)):
                                 with open(f"{s_folder}/{run_folder}/worker_R_{idx_w}_offer.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/worker_R_{idx_w}_firm_choice.pkl", 'wb') as pkl_fl2, open(f"{s_folder}/{run_folder}/worker_R_{idx_w}_wage.pkl", 'wb') as pkl_fl3, open(f"{s_folder}/{run_folder}/worker_R_{idx_w}_sharing.pkl", 'wb') as pkl_fl4:
-                                    pickle.dump(worker_offers_R[idx_w], file=pkl_fl1)
-                                    pickle.dump(worker_firm_choice_R[idx_w], file=pkl_fl2)
-                                    pickle.dump(worker_wages_R[idx_w], file=pkl_fl3)
-                                    pickle.dump(worker_sharing_R[idx_w], file=pkl_fl4)
+                                    pickle.dump(worker_offers_R[idx_w][-tau:], file=pkl_fl1)
+                                    pickle.dump(worker_firm_choice_R[idx_w][-tau:], file=pkl_fl2)
+                                    pickle.dump(worker_wages_R[idx_w][-tau:], file=pkl_fl3)
+                                    pickle.dump(worker_sharing_R[idx_w][-tau:], file=pkl_fl4)
                             
                             for idx_w in range(len(worker_offers_S)):
                                with open(f"{s_folder}/{run_folder}/worker_S_{idx_w}_offer.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/worker_S_{idx_w}_firm_choice.pkl", 'wb') as pkl_fl2, open(f"{s_folder}/{run_folder}/worker_S_{idx_w}_wage.pkl", 'wb') as pkl_fl3, open(f"{s_folder}/{run_folder}/worker_S_{idx_w}_sharing.pkl", 'wb') as pkl_fl4:
-                                    pickle.dump(worker_offers_S[idx_w], file=pkl_fl1)
-                                    pickle.dump(worker_firm_choice_S[idx_w], file=pkl_fl2)
-                                    pickle.dump(worker_wages_S[idx_w], file=pkl_fl3)
-                                    pickle.dump(worker_sharing_S[idx_w], file=pkl_fl4)
+                                    pickle.dump(worker_offers_S[idx_w][-tau:], file=pkl_fl1)
+                                    pickle.dump(worker_firm_choice_S[idx_w][-tau:], file=pkl_fl2)
+                                    pickle.dump(worker_wages_S[idx_w][-tau:], file=pkl_fl3)
+                                    pickle.dump(worker_sharing_S[idx_w][-tau:], file=pkl_fl4)
 
                         else:
                             for idx_w in range(len(market.workers)):
                                 with open(f"{s_folder}/{run_folder}/worker_{idx_w}_offer.pkl", 'wb') as pkl_fl1, open(f"{s_folder}/{run_folder}/worker_{idx_w}_firm_choice.pkl", 'wb') as pkl_fl2, open(f"{s_folder}/{run_folder}/worker_{idx_w}_wage.pkl", 'wb') as pkl_fl3:
-                                    pickle.dump(worker_offers[idx_w], file=pkl_fl1)
-                                    pickle.dump(worker_firm_choice[idx_w], file=pkl_fl2)
-                                    pickle.dump(worker_wages[idx_w], file=pkl_fl3)
+                                    pickle.dump(worker_offers[idx_w][-tau:], file=pkl_fl1)
+                                    pickle.dump(worker_firm_choice[idx_w][-tau:], file=pkl_fl2)
+                                    pickle.dump(worker_wages[idx_w][-tau:], file=pkl_fl3)
 
                         print("Data saved.")
                         print() # line between runs
@@ -1088,7 +1105,7 @@ if __name__ == "__main__":
     # print(f"Setting avg worker surpluses overall: {setting_average_worker_surplus}")
 
 
-    for r in range(2):
+    for r in range(1):
         for s in range(4):
             print(f"riskiness {r}, setting {s+1}")
             print(f"Average worker surplus -- across all distributions {sum([sum(ws) for ws in setting_average_worker_surplus[r][s]])/(N*8)}")
