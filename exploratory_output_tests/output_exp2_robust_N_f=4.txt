@@ -1,0 +1,659 @@
+RUN: 0/1
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+RUN: 1/1
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 1, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 2, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 3, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: s-k-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: s-k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: k-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: u
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-e
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-l
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+--Setting Details--
+information setting: setting 4, market setting: e-r, beta setting:slow-fast, distribution: b-r
+Initializing workers...
+Initializing firms...
+Agents initialized.
+Saving data...
+Data saved.
+
+----FINAL RESULTS----
+riskiness 0, setting 1
+Average worker surplus -- across all distributions 0.168375
+Average wage gap -- across all wage distributions 0.012750000000000001
+Broken down by initial distribution
+Initial dist k-r
+Average worker surplus 0.1
+Average wage gap 0.0
+
+Initial dist s-k-r
+Average worker surplus 0.2
+Average wage gap 0.0
+
+Initial dist s-k-l
+Average worker surplus 0.1
+Average wage gap 0.0
+
+Initial dist k-l
+Average worker surplus 0.2
+Average wage gap 0.0
+
+Initial dist u
+Average worker surplus 0.17800000000000002
+Average wage gap 0.044
+
+Initial dist b-e
+Average worker surplus 0.2
+Average wage gap 0.0
+
+Initial dist b-l
+Average worker surplus 0.2
+Average wage gap 0.0
+
+Initial dist b-r
+Average worker surplus 0.169
+Average wage gap 0.058
+
+riskiness 0, setting 2
+Average worker surplus -- across all distributions 0.752625
+Average wage gap -- across all wage distributions -0.003749999999999998
+Broken down by initial distribution
+Initial dist k-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist s-k-r
+Average worker surplus 0.48
+Average wage gap 0.004000000000000031
+
+Initial dist s-k-l
+Average worker surplus 0.251
+Average wage gap -0.029999999999999985
+
+Initial dist k-l
+Average worker surplus 0.653
+Average wage gap 0.009999999999999981
+
+Initial dist u
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-e
+Average worker surplus 0.637
+Average wage gap -0.014000000000000012
+
+Initial dist b-l
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+riskiness 0, setting 3
+Average worker surplus -- across all distributions 0.83625
+Average wage gap -- across all wage distributions 0.03349999999999999
+Broken down by initial distribution
+Initial dist k-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist s-k-r
+Average worker surplus 0.702
+Average wage gap 0.08399999999999999
+
+Initial dist s-k-l
+Average worker surplus 0.782
+Average wage gap 0.07599999999999998
+
+Initial dist k-l
+Average worker surplus 0.384
+Average wage gap 0.03199999999999997
+
+Initial dist u
+Average worker surplus 0.8220000000000001
+Average wage gap 0.07599999999999996
+
+Initial dist b-e
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-l
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+riskiness 0, setting 4
+Average worker surplus -- across all distributions 0.878125
+Average wage gap -- across all wage distributions 0.02325
+Broken down by initial distribution
+Initial dist k-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist s-k-r
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist s-k-l
+Average worker surplus 0.712
+Average wage gap 0.08000000000000002
+
+Initial dist k-l
+Average worker surplus 0.313
+Average wage gap 0.106
+
+Initial dist u
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-e
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-l
+Average worker surplus 1.0
+Average wage gap 0.0
+
+Initial dist b-r
+Average worker surplus 1.0
+Average wage gap 0.0
+

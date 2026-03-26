@@ -1,0 +1,144 @@
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: k-r
+Average avg worker surplus: 0.39975000000000005
+Average avg wage gap: 0.0010000000000000009
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: s-k-r
+Average avg worker surplus: 0.4375
+Average avg wage gap: 2.0816681711721685e-17
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: s-k-l
+Average avg worker surplus: 0.39987500000000004
+Average avg wage gap: -0.00016666666666666566
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: k-l
+Average avg worker surplus: 0.312375
+Average avg wage gap: -0.00016666666666666566
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: u
+Average avg worker surplus: 0.399625
+Average avg wage gap: 0.00016666666666666913
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: b-e
+Average avg worker surplus: 0.41200000000000003
+Average avg wage gap: 1.0408340855860843e-17
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: b-l
+Average avg worker surplus: 0.412125
+Average avg wage gap: 0.0008333333333333422
+--INTERIM STATS--
+Setting: setting 1, riskiness: r-s, distribution: b-r
+Average avg worker surplus: 0.387375
+Average avg wage gap: -0.00016666666666666566
+--FINAL STATS--
+Setting: setting 1, riskiness: r-s
+Average avg worker surplus: 0.395078125
+Average avg wage gap: 0.0001875000000000058
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: s-k-r
+Average avg worker surplus: 0.913375
+Average avg wage gap: 0.006499999999999992
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: s-k-l
+Average avg worker surplus: 0.983
+Average avg wage gap: 0.0020000000000000018
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: k-l
+Average avg worker surplus: 0.5337500000000001
+Average avg wage gap: -0.01366666666666665
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: u
+Average avg worker surplus: 0.98275
+Average avg wage gap: 0.00033333333333333826
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: b-e
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: b-l
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 2, riskiness: r-s, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 2, riskiness: r-s
+Average avg worker surplus: 0.926609375
+Average avg wage gap: -0.0006041666666666647
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: s-k-r
+Average avg worker surplus: 0.9273750000000001
+Average avg wage gap: 0.018500000000000023
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: s-k-l
+Average avg worker surplus: 0.93875
+Average avg wage gap: 0.020333333333333335
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: k-l
+Average avg worker surplus: 0.603625
+Average avg wage gap: 0.02750000000000001
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: u
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: b-e
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: b-l
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 3, riskiness: r-s, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 3, riskiness: r-s
+Average avg worker surplus: 0.93371875
+Average avg wage gap: 0.008291666666666671
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: s-k-r
+Average avg worker surplus: 0.9382666666666667
+Average avg wage gap: 0.002311111111111138
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: s-k-l
+Average avg worker surplus: 0.9705333333333334
+Average avg wage gap: -0.0001777777777777656
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: k-l
+Average avg worker surplus: 0.6913333333333334
+Average avg wage gap: 0.016533333333333355
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: u
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: b-e
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: b-l
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--INTERIM STATS--
+Setting: setting 4, riskiness: r-s, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 4, riskiness: r-s
+Average avg worker surplus: 0.9500166666666666
+Average avg wage gap: 0.002333333333333341

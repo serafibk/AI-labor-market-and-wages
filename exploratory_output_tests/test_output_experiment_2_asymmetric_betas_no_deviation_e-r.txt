@@ -1,0 +1,656 @@
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: k-r
+Average avg worker surplus: 0.16587500000000002
+Average avg wage gap: 0.0042499999999999994
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: s-k-r
+Average avg worker surplus: 0.167875
+Average avg wage gap: 0.01425
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: s-k-l
+Average avg worker surplus: 0.180125
+Average avg wage gap: 0.03775
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: k-l
+Average avg worker surplus: 0.153875
+Average avg wage gap: -0.0007500000000000015
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: u
+Average avg worker surplus: 0.17925000000000002
+Average avg wage gap: 0.016
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: b-e
+Average avg worker surplus: 0.16037500000000002
+Average avg wage gap: 0.00425
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: b-l
+Average avg worker surplus: 0.183375
+Average avg wage gap: 0.028750000000000005
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 1, riskiness: e-r, distribution: b-r
+Average avg worker surplus: 0.178875
+Average avg wage gap: 0.01675
+--FINAL STATS--
+Setting: setting 1, riskiness: e-r
+Average avg worker surplus: 0.171203125
+Average avg wage gap: 0.01515625
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: s-k-r
+Average avg worker surplus: 0.62675
+Average avg wage gap: 0.00800000000000001
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: s-k-l
+Average avg worker surplus: 0.6637500000000001
+Average avg wage gap: 0.00849999999999999
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: k-l
+Average avg worker surplus: 0.46725
+Average avg wage gap: 0.008500000000000004
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: u
+Average avg worker surplus: 0.93675
+Average avg wage gap: 0.0030000000000000027
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: b-e
+Average avg worker surplus: 0.9555
+Average avg wage gap: -0.0005000000000000004
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: b-l
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 2, riskiness: e-r, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 2, riskiness: e-r
+Average avg worker surplus: 0.83125
+Average avg wage gap: 0.003437500000000001
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: s-k-r
+Average avg worker surplus: 0.677875
+Average avg wage gap: 0.08825000000000002
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: s-k-l
+Average avg worker surplus: 0.55475
+Average avg wage gap: 0.08150000000000002
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: k-l
+Average avg worker surplus: 0.16062500000000002
+Average avg wage gap: 0.014250000000000004
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: u
+Average avg worker surplus: 0.85725
+Average avg wage gap: 0.027
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: b-e
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: b-l
+Average avg worker surplus: 0.90875
+Average avg wage gap: 0.010499999999999999
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 3, riskiness: e-r, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 3, riskiness: e-r
+Average avg worker surplus: 0.76990625
+Average avg wage gap: 0.027687500000000004
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: k-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: s-k-r
+Average avg worker surplus: 0.690875
+Average avg wage gap: 0.055249999999999994
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: s-k-l
+Average avg worker surplus: 0.833875
+Average avg wage gap: 0.020749999999999998
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: k-l
+Average avg worker surplus: 0.317
+Average avg wage gap: 0.05400000000000001
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: u
+Average avg worker surplus: 0.979125
+Average avg wage gap: 0.008750000000000008
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: b-e
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: b-l
+Average avg worker surplus: 0.964625
+Average avg wage gap: 0.006249999999999999
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--Worker Belief Test--
+--INTERIM STATS--
+Setting: setting 4, riskiness: e-r, distribution: b-r
+Average avg worker surplus: 1.0
+Average avg wage gap: 0.0
+--FINAL STATS--
+Setting: setting 4, riskiness: e-r
+Average avg worker surplus: 0.8481875
+Average avg wage gap: 0.018125000000000002
