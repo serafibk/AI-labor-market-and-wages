@@ -15,6 +15,7 @@ average lower bound: 0.38597176525492943
 average proportion of using largest upper bound range: 0.8956024098136856
 average proportion of using widest range: 0.7175412649477405
 average proportion of identical sal bench and ind ranges: 0.8284830074837075
+average AT gap across all firms and all runs/distributions: 0.0
 
 evaluating setting 2...
 evaluating k-r...
@@ -33,6 +34,7 @@ average lower bound: 0.9362677800556695
 average proportion of using largest upper bound range: 0.9602094465846073
 average proportion of using widest range: 0.520332356182381
 average proportion of identical sal bench and ind ranges: 0.9902045935630114
+average AT gap across all firms and all runs/distributions: 0.004333333333333333
 
 evaluating setting 3...
 evaluating k-r...
@@ -51,6 +53,7 @@ average lower bound: 0.9303482174108705
 average proportion of using largest upper bound range: 0.9358196393276431
 average proportion of using widest range: 0.4031134487366011
 average proportion of identical sal bench and ind ranges: 0.9241349567478374
+average AT gap across all firms and all runs/distributions: -0.0003333333333333336
 average proportion of mvpt with widest range: 0.04373985365934963
 average proportion of mvpt with lowest upper bound: 8.600430021501075e-05
 
@@ -71,5 +74,15 @@ average lower bound: 0.9537366368318416
 average proportion of using largest upper bound range: 0.9287944498688745
 average proportion of using widest range: 0.4207364604108633
 average proportion of identical sal bench and ind ranges: 0.9585530109838826
+average AT gap across all firms and all runs/distributions: -0.0006666666666666668
 average proportion of mvpt with widest range: 0.004263796523159491
 average proportion of mvpt with lowest upper bound: 7.54204376885511e-05
+
+Describing wage gap Setting 1
+DescribeResult(nobs=120, minmax=(0.0, 0.0), mean=0.0, variance=0.0, skewness=nan, kurtosis=nan)
+Describing wage gap Setting 2
+DescribeResult(nobs=120, minmax=(0.0, 0.12000000000000002), mean=0.004333333333333333, variance=0.00037098039215686273, skewness=4.828248037957202, kurtosis=23.380005201263454)
+Describing wage gap Setting 3
+DescribeResult(nobs=120, minmax=(-0.12000000000000002, 0.04), mean=-0.0003333333333333336, variance=0.00014778711484593837, skewness=-7.432484952453477, kurtosis=78.61576044065825)
+Describing wage gap Setting 4
+DescribeResult(nobs=120, minmax=(-0.040000000000000015, 0.0), mean=-0.0006666666666666668, variance=2.644257703081232e-05, skewness=-7.550956836887787, kurtosis=55.01694915254237)

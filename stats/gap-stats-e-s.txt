@@ -74,3 +74,11 @@ average proportion of identical sal bench and ind ranges: 0.9286654332716636
 average proportion of mvpt with widest range: 0.009881327399703318
 average proportion of mvpt with lowest upper bound: 7.742053769355135e-05
 
+Describing wage gap Setting 1
+DescribeResult(nobs=120, minmax=(-0.0040000000000000036, 0.008000000000000007), mean=0.00010000000000000009, variance=2.006722689075634e-06, skewness=1.4968436298718721, kurtosis=11.090477513194108)
+Describing wage gap Setting 2
+DescribeResult(nobs=120, minmax=(-0.039999999999999925, 0.020000000000000018), mean=-0.001366666666666666, variance=4.826778711484586e-05, skewness=-3.3019487907227956, kurtosis=14.961510371955992)
+Describing wage gap Setting 3
+DescribeResult(nobs=120, minmax=(-0.008000000000000007, 0.09600000000000009), mean=0.005700000000000005, variance=0.00030753949579831984, skewness=3.4913554601188874, kurtosis=11.825430428251975)
+Describing wage gap Setting 4
+DescribeResult(nobs=120, minmax=(-0.03200000000000003, 0.08000000000000007), mean=0.0022333333333333315, variance=0.00013601232492997203, skewness=3.8472426720386528, kurtosis=21.020370113918336)

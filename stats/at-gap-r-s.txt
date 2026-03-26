@@ -1,4 +1,21 @@
-tau = 19999, safe market conditions
+evaluating setting 1...
+evaluating k-r...
+evaluating s-k-r...
+evaluating s-k-l...
+evaluating k-l...
+evaluating u...
+evaluating b-e...
+evaluating b-l...
+evaluating b-r...
+--FINAL STATS--
+Setting: setting 1, riskiness: r-s
+average range length: 0.014620997716552496
+average upper bound: 0.3943433838358585
+average lower bound: 0.37972238611930603
+average proportion of using largest upper bound range: 0.9322289502037425
+average proportion of using widest range: 0.6922970032227945
+average proportion of identical sal bench and ind ranges: 0.8732214944080537
+average AT gap across all firms and all runs/distributions: 0.0
 
 evaluating setting 2...
 evaluating k-r...
@@ -11,18 +28,13 @@ evaluating b-l...
 evaluating b-r...
 --FINAL STATS--
 Setting: setting 2, riskiness: r-s
-**average proportion of rejected offers risky: 0.035677260102387705
-**average proportion of rejected offers safe: 0.039250375983177536
-**average proportion of no offers risky: 0.8484602674578173
-**average proportion of no offers safe: 0.8345646615664116
-average size of offer difference risky: 0.014631776987682516
-average size of offer difference safe: 0.017853606094002508
-**average range length: 0.033348550760871384
+average range length: 0.033348550760871384
 average upper bound: 0.9399519642648799
 average lower bound: 0.9066034135040085
 average proportion of using largest upper bound range: 0.956188511939825
 average proportion of using widest range: 0.5241110931311301
 average proportion of identical sal bench and ind ranges: 0.9809742153774355
+average AT gap across all firms and all runs/distributions: 0.003666666666666667
 
 evaluating setting 3...
 evaluating k-r...
@@ -35,22 +47,15 @@ evaluating b-l...
 evaluating b-r...
 --FINAL STATS--
 Setting: setting 3, riskiness: r-s
-**average proportion of rejected offers risky: 0.014903673213815827
-**average proportion of rejected offers safe: 0.032530452350370116
-**average proportion of no offers risky: 0.14477684439777544
-**average proportion of no offers safe: 0.19467643382169106
-average size of offer difference risky: 0.006262688740377007
-average size of offer difference safe: 0.014780663888453817
-**average range length: 0.00809937163524843
+average range length: 0.00809937163524843
 average upper bound: 0.9432653632681635
 average lower bound: 0.935165991632915
 average proportion of using largest upper bound range: 0.9268263814966465
 average proportion of using widest range: 0.4071980693111711
 average proportion of identical sal bench and ind ranges: 0.9301583412503959
+average AT gap across all firms and all runs/distributions: 0.0023333333333333335
 average proportion of mvpt with widest range: 0.03128414754071037
 average proportion of mvpt with lowest upper bound: 9.500475023751189e-05
-**average proportion of mvpt over estimates risky: 0.0019615314099038286
-**average proportion of mvpt over estimates safe: 0.0034024701235061752
 
 evaluating setting 4...
 evaluating k-r...
@@ -63,19 +68,21 @@ evaluating b-l...
 evaluating b-r...
 --FINAL STATS--
 Setting: setting 4, riskiness: r-s
-**average proportion of rejected offers risky: 0.013304395977386632
-**average proportion of rejected offers safe: 0.029016883625743835
-**average proportion of no offers risky: 0.1342085493163547
-**average proportion of no offers safe: 0.18115359101288397
-average size of offer difference risky: 0.005595800242396534
-average size of offer difference safe: 0.012827978337546382
-**average range length: 0.006015750787539378
+average range length: 0.006015750787539378
 average upper bound: 0.9532981315732453
 average lower bound: 0.947282380785706
 average proportion of using largest upper bound range: 0.9453694613813867
 average proportion of using widest range: 0.40661588620389183
 average proportion of identical sal bench and ind ranges: 0.9285892627964731
+average AT gap across all firms and all runs/distributions: 0.0016666666666666674
 average proportion of mvpt with widest range: 0.005565444938913613
 average proportion of mvpt with lowest upper bound: 0.00011842258779605647
-**average proportion of mvpt over estimates risky: 0.0025461884205321378
-**average proportion of mvpt over estimates safe: 0.006395486440988716
+
+Describing wage gap Setting 1
+DescribeResult(nobs=120, minmax=(0.0, 0.0), mean=0.0, variance=0.0, skewness=nan, kurtosis=nan)
+Describing wage gap Setting 2
+DescribeResult(nobs=120, minmax=(-0.07999999999999999, 0.15999999999999998), mean=0.003666666666666667, variance=0.0005645938375350141, skewness=2.872764005680179, kurtosis=20.86723650780903)
+Describing wage gap Setting 3
+DescribeResult(nobs=120, minmax=(0.0, 0.12000000000000004), mean=0.0023333333333333335, variance=0.0002499719887955183, skewness=7.067955575358026, kurtosis=49.26687736734384)
+Describing wage gap Setting 4
+DescribeResult(nobs=120, minmax=(-0.04, 0.08000000000000003), mean=0.0016666666666666674, variance=0.00017198879551820752, skewness=5.122224904958058, kurtosis=30.22268671285635)
