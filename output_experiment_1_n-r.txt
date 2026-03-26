@@ -1,0 +1,161 @@
+evaluating setting 1...
+evaluating k-r...
+evaluating s-k-r...
+evaluating s-k-l...
+evaluating k-l...
+evaluating u...
+evaluating b-e...
+evaluating b-l...
+evaluating b-r...
+--FINAL STATS--
+Setting: setting 1, riskiness: n-r
+average range length: 0.0077918229244795575
+average upper bound: 0.15349890827874726
+average lower bound: 0.14570708535426774
+average proportion of using largest upper bound range: 0.821717317504012
+average proportion of using widest range: 0.5525352633352386
+average proportion of identical sal bench and ind ranges: 0.9860142173775356
+
+evaluating setting 2...
+evaluating k-r...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: k-r
+Average avg worker surplus: 1.0
+evaluating s-k-r...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: s-k-r
+Average avg worker surplus: 0.4456
+evaluating s-k-l...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: s-k-l
+Average avg worker surplus: 0.48586666666666667
+evaluating k-l...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: k-l
+Average avg worker surplus: 0.24133333333333334
+evaluating u...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: u
+Average avg worker surplus: 0.9070666666666667
+evaluating b-e...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: b-e
+Average avg worker surplus: 0.9182666666666666
+evaluating b-l...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: b-l
+Average avg worker surplus: 0.8758666666666667
+evaluating b-r...
+--INTERIM STATS--
+Setting: setting 2, riskiness: n-r, distribution: b-r
+Average avg worker surplus: 0.8445333333333332
+--FINAL STATS--
+Setting: setting 2, riskiness: n-r
+Average avg worker surplus: 0.7148166666666668
+average proportion of rejected offers: 0.053198563543813054
+average proportion of no offers: 0.8445521567745053
+average size of offer difference with wage: 0.02474417554333195
+average range length: 0.06895431438238579
+average upper bound: 0.7467866226644665
+average lower bound: 0.6778323082820809
+average proportion of using largest upper bound range: 0.9194137363461125
+average proportion of using widest range: 0.556546480127508
+average proportion of identical sal bench and ind ranges: 0.9717006683667517
+
+evaluating setting 3...
+evaluating k-r...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: k-r
+Average avg worker surplus: 1.0
+evaluating s-k-r...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: s-k-r
+Average avg worker surplus: 0.446
+evaluating s-k-l...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: s-k-l
+Average avg worker surplus: 0.38333333333333336
+evaluating k-l...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: k-l
+Average avg worker surplus: 0.18293333333333334
+evaluating u...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: u
+Average avg worker surplus: 0.7363999999999999
+evaluating b-e...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: b-e
+Average avg worker surplus: 1.0
+evaluating b-l...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: b-l
+Average avg worker surplus: 1.0
+evaluating b-r...
+--INTERIM STATS--
+Setting: setting 3, riskiness: n-r, distribution: b-r
+Average avg worker surplus: 1.0
+--FINAL STATS--
+Setting: setting 3, riskiness: n-r
+Average avg worker surplus: 0.7185833333333334
+average proportion of rejected offers: 0.05069089097934727
+average proportion of no offers: 0.30486854342717135
+average size of offer difference with wage: 0.021655003841655793
+average range length: 0.058510725536276814
+average upper bound: 0.7500892377952231
+average lower bound: 0.6915785122589463
+average proportion of using largest upper bound range: 0.9503563740474168
+average proportion of using widest range: 0.43381623594277696
+average proportion of identical sal bench and ind ranges: 0.7062989816157474
+average proportion of mvpt with widest range: 0.13536001800090006
+average proportion of mvpt with lowest upper bound: 0.000317099188292748
+average proportion of mvpt over estimates: 0.020273213660683034
+
+evaluating setting 4...
+evaluating k-r...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: k-r
+Average avg worker surplus: 1.0
+evaluating s-k-r...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: s-k-r
+Average avg worker surplus: 0.7568
+evaluating s-k-l...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: s-k-l
+Average avg worker surplus: 0.8045333333333333
+evaluating k-l...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: k-l
+Average avg worker surplus: 0.2634666666666667
+evaluating u...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: u
+Average avg worker surplus: 0.8590666666666666
+evaluating b-e...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: b-e
+Average avg worker surplus: 1.0
+evaluating b-l...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: b-l
+Average avg worker surplus: 0.9548
+evaluating b-r...
+--INTERIM STATS--
+Setting: setting 4, riskiness: n-r, distribution: b-r
+Average avg worker surplus: 0.9569333333333333
+--FINAL STATS--
+Setting: setting 4, riskiness: n-r
+Average avg worker surplus: 0.82445
+average proportion of rejected offers: 0.0433960512169157
+average proportion of no offers: 0.26817861726419656
+average size of offer difference with wage: 0.020513047127689293
+average range length: 0.04623659516309149
+average upper bound: 0.8483226661333066
+average lower bound: 0.8020860709702152
+average proportion of using largest upper bound range: 0.9455656156360771
+average proportion of using widest range: 0.43332955334277246
+average proportion of identical sal bench and ind ranges: 0.7551308398753271
+average proportion of mvpt with widest range: 0.07713210660533026
+average proportion of mvpt with lowest upper bound: 0.0003089321132723303
+average proportion of mvpt over estimates: 0.023154670233511677
