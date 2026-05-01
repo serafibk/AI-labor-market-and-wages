@@ -82,3 +82,92 @@ Describing wage gap Setting 3
 DescribeResult(nobs=120, minmax=(-0.008000000000000007, 0.09600000000000009), mean=0.005700000000000005, variance=0.00030753949579831984, skewness=3.4913554601188874, kurtosis=11.825430428251975)
 Describing wage gap Setting 4
 DescribeResult(nobs=120, minmax=(-0.03200000000000003, 0.08000000000000007), mean=0.0022333333333333315, variance=0.00013601232492997203, skewness=3.8472426720386528, kurtosis=21.020370113918336)
+
+
+K-S two sample test
+Comparison of Setting 2 with Setting 1
+KstestResult(statistic=0.075, pvalue=0.5102667466898191, statistic_location=-0.007999999999999896, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 3
+KstestResult(statistic=0.13333333333333333, pvalue=0.11874748791712945, statistic_location=0.0, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 4
+KstestResult(statistic=0.09166666666666666, pvalue=0.36584597634073346, statistic_location=0.0, statistic_sign=-1)
+
+=> values in setting 2 are not significantly less than those in the other settings
+
+final absolute value test
+Mann-Whitney U two sample test -- WG
+Comparison of Setting 1 with Setting 2
+MannwhitneyuResult(statistic=7016.0, pvalue=0.2634950234040766)
+
+Comparison of Setting 1 with Setting 3
+MannwhitneyuResult(statistic=6602.5, pvalue=0.030101333716842944) ** 
+
+Comparison of Setting 1 with Setting 4
+MannwhitneyuResult(statistic=6611.0, pvalue=0.03196697759327975) ** 
+
+Comparison of Setting 2 with Setting 1
+MannwhitneyuResult(statistic=7384.0, pvalue=0.7376296678227395)
+
+Comparison of Setting 2 with Setting 3
+MannwhitneyuResult(statistic=6794.0, pvalue=0.10682119414808389)
+
+Comparison of Setting 2 with Setting 4
+MannwhitneyuResult(statistic=6837.5, pvalue=0.13345452510849826)
+
+Comparison of Setting 3 with Setting 1
+MannwhitneyuResult(statistic=7797.5, pvalue=0.9701128219705073)
+
+Comparison of Setting 3 with Setting 2
+MannwhitneyuResult(statistic=7606.0, pvalue=0.8937423681218516)
+
+Comparison of Setting 3 with Setting 4
+MannwhitneyuResult(statistic=7261.5, pvalue=0.5704912490095984)
+
+Comparison of Setting 4 with Setting 1
+MannwhitneyuResult(statistic=7789.0, pvalue=0.9682581242024322)
+
+Comparison of Setting 4 with Setting 2
+MannwhitneyuResult(statistic=7562.5, pvalue=0.8672049805843247)
+
+Comparison of Setting 4 with Setting 3
+MannwhitneyuResult(statistic=7138.5, pvalue=0.4306340843879059)
+
+old absolute value test
+K-S two sample test
+Comparison of Setting 2 with Setting 2
+KstestResult(statistic=0.09166666666666666, pvalue=0.36584597634073346, statistic_location=0.0040000000000000036, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 3
+KstestResult(statistic=0.15833333333333333, pvalue=0.04937199915902212, statistic_location=0.0040000000000000036, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 4
+KstestResult(statistic=0.15, pvalue=0.06728144983435368, statistic_location=0.0040000000000000036, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.039999999999999925, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 3
+KstestResult(statistic=0.06666666666666667, pvalue=0.587717949312381, statistic_location=0.0040000000000000036, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 4
+KstestResult(statistic=0.058333333333333334, pvalue=0.6657336063007502, statistic_location=0.0040000000000000036, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.09600000000000009, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 2
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.09600000000000009, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 4
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.0, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.08000000000000007, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 2
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=0.019999999999999907, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 3
+KstestResult(statistic=0.041666666666666664, pvalue=0.8125910883313964, statistic_location=0.015999999999999903, statistic_sign=-1)

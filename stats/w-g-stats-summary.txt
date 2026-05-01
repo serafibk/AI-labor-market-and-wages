@@ -1,0 +1,29 @@
+Using the Mann-Whitney U test on the empiricial distribution of |W_G| in order to test if one survival function of the distribution (opposite of CDF) stochastically dominates another.
+
+null hypothesis: setting i and j result in the same distirbution of absolute wage gap values
+alternative hypothesis: setting j results in a wage gap distribution that is stochastically greater than that of setting i
+
+interpretation:
+Comparison of setting i with setting j => if test(setting i, setting j, alternative="less") results in p<0.05 => setting j results in a wage gap distribution that is (significantly) stochastically greater than that of setting i
+
+Market condition: e-r
+Significance result: Setting 3 is stochastically greater than both Settings 1 and 2
+
+Market condition: r-s 
+Significance result: Setting 2 and 3 are each stochastically greater than Setting 1
+
+Market condition: r-r
+Significance result: Setting 1 is stochastically less than all other settings. Setting 3 is also stochastically greater than both Settings 2 and 4.
+
+Market condition: s-r
+Significance result: Setting 3 is stochastically greater than all other settings.
+
+Market condition: s-s 
+Significance result: Setting 3 is stochastically greater than all other settings.
+
+Market condition: e-s
+Significance result: Setting 3 and 4 are stochastically greater than Setting 1.
+
+(comparing settings 2, 3, and 4 only): Setting 2 is significantly less than Setting 3 in 4/6 market conditions and Setting 4 is significantly less than Setting 3 in 3/6 market conditions.
+
+Takeaway: Markets with firm-posted salary ranges have smaller wage gaps than those with only salary prediction tools, and gaps are slightly more likely in Setting 4 than 2. When there are gaps, it is more likely to be in favor of type H workers (means and skews are always positive for setting 3, and in 5/6 conditions for setting 4, including the condition where setting 2 is less than 3 but 4 is not less than 3)

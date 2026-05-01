@@ -82,3 +82,57 @@ Describing wage gap Setting 3
 DescribeResult(nobs=120, minmax=(-0.010666666666666672, 0.3786666666666666), mean=0.05964444444444445, variance=0.00956652798008092, skewness=1.5513635586904, kurtosis=1.190546459673019)
 Describing wage gap Setting 4
 DescribeResult(nobs=120, minmax=(-0.06399999999999999, 0.2773333333333333), mean=0.03562222222222222, variance=0.005023168876439463, skewness=1.8545999299906077, kurtosis=2.451188094519912)
+
+
+K-S two sample test
+Comparison of Setting 2 with Setting 1
+KstestResult(statistic=0.075, pvalue=0.5102667466898191, statistic_location=-0.0026666666666666783, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 3
+KstestResult(statistic=0.3, pvalue=1.8072628772411947e-05, statistic_location=0.061333333333333295, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 4
+KstestResult(statistic=0.23333333333333334, pvalue=0.0014073651783021355, statistic_location=0.061333333333333295, statistic_sign=-1)
+
+=> Values in Setting 2 tend to be less than those in setting 3 and 4
+
+final absolute value tests
+
+Mann-Whitney U two sample test -- WG
+Comparison of Setting 1 with Setting 2
+MannwhitneyuResult(statistic=5791.0, pvalue=7.823918202298102e-05) **
+
+Comparison of Setting 1 with Setting 3
+MannwhitneyuResult(statistic=4847.5, pvalue=3.569954752985285e-09) **
+
+Comparison of Setting 1 with Setting 4
+MannwhitneyuResult(statistic=5785.5, pvalue=4.87757392215637e-05) **
+
+Comparison of Setting 2 with Setting 1
+MannwhitneyuResult(statistic=8609.0, pvalue=0.9999226000980861)
+
+Comparison of Setting 2 with Setting 3
+MannwhitneyuResult(statistic=5790.5, pvalue=0.0010478618486140557) ** 
+
+Comparison of Setting 2 with Setting 4
+MannwhitneyuResult(statistic=6835.0, pvalue=0.19811467466362087)
+
+Comparison of Setting 3 with Setting 1
+MannwhitneyuResult(statistic=9552.5, pvalue=0.999999996481955)
+
+Comparison of Setting 3 with Setting 2
+MannwhitneyuResult(statistic=8609.5, pvalue=0.9989597861142279)
+
+Comparison of Setting 3 with Setting 4
+MannwhitneyuResult(statistic=8138.0, pvalue=0.9808789426059423)
+
+Comparison of Setting 4 with Setting 1
+MannwhitneyuResult(statistic=8614.5, pvalue=0.9999517760317317)
+
+Comparison of Setting 4 with Setting 2
+MannwhitneyuResult(statistic=7565.0, pvalue=0.8025325896482652)
+
+Comparison of Setting 4 with Setting 3
+MannwhitneyuResult(statistic=6262.0, pvalue=0.01922419887791892) **
+
+

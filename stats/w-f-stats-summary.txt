@@ -1,0 +1,35 @@
+Using the Mann-Whitney U test on the empiricial distribution of W_F in order to test if one survival function of the distribution (opposite of CDF) stochastically dominates another.
+
+null hypothesis: setting i and j result in the same distirbution of average final wage values
+alternative hypothesis: setting j results in a wage distribution that is stochastically greater than that of setting i
+
+interpretation:
+Comparison of setting i with setting j => if test(setting j, setting i, alternative="less") results in p<0.05 => setting i results in a wage distribution that is (significantly) stochastically greater than that of setting j
+
+In all conditions: Settings 2, 3, and 4 are stochastically greater than Setting 1. Additional significance results per setting detailed below.
+
+Market condition: n-r
+Significance result: Setting 4 is stochastically greater than both Setting 2 and 3.
+
+Market condition: n-s 
+Significance result: No additional results.
+
+Market condition: e-r
+Significance result: Setting 4 is stochastically greater than Setting 3.
+
+Market condition: r-s 
+Significance result: No additional results.
+
+Market condition: r-r
+Significance result: Setting 4 is stochastically greater than Setting 3.
+
+Market condition: s-r
+Significance result: Settings 2 and 4 are both stochastically greater than Setting 3.
+
+Market condition: s-s 
+Significance result: No additional results.
+
+Market condition: e-s
+Significance result: No additional results.
+
+Takeaway: Markets with firm-posted salary ranges are more likely to lead to higher wages than those without, and Setting 4 is the best in terms of leading to higher average wages. 

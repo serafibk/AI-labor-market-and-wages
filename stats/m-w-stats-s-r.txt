@@ -74,6 +74,107 @@ average proportion of identical sal bench and ind ranges: 0.7592987982732471
 average proportion of mvpt with widest range: 0.17901486741003717
 average proportion of mvpt with lowest upper bound: 0.00026526326316315816
 
+
+
+Mann-Whitney U two sample test
+Comparison of Setting 2 with Setting 1
+MannwhitneyuResult(statistic=761.5, pvalue=7.69472465405651e-37) **
+
+Comparison of Setting 2 with Setting 3
+MannwhitneyuResult(statistic=6191.0, pvalue=0.010047716899533841) **
+
+Comparison of Setting 2 with Setting 4
+MannwhitneyuResult(statistic=7083.0, pvalue=0.38718093688036254)
+
+Comparison of Setting 4 with Setting 1
+MannwhitneyuResult(statistic=218.0, pvalue=1.0051227407889675e-42) **
+
+Comparison of Setting 4 with Setting 2
+MannwhitneyuResult(statistic=7317.0, pvalue=0.6137608949834205)
+
+Comparison of Setting 4 with Setting 3
+MannwhitneyuResult(statistic=6239.5, pvalue=0.014541489101920086) **
+
+extra tests
+
+Describing wage gap Setting 1
+DescribeResult(nobs=120, minmax=(0.0, 0.2), mean=0.17220000000000002, variance=0.003338850420168067, skewness=-2.237621469425045, kurtosis=3.8280630591726084)
+Describing wage gap Setting 2
+DescribeResult(nobs=120, minmax=(0.064, 1.0), mean=0.8417666666666667, variance=0.08948760896358546, skewness=-1.5074001132093107, kurtosis=0.6026705061478865)
+Describing wage gap Setting 3
+DescribeResult(nobs=120, minmax=(0.0, 1.0), mean=0.7454833333333333, variance=0.1258677980392157, skewness=-0.7980994601634098, kurtosis=-1.1245497090382368)
+Describing wage gap Setting 4
+DescribeResult(nobs=120, minmax=(0.1, 1.0), mean=0.842, variance=0.0771046050420168, skewness=-1.3096716321311725, kurtosis=0.0013279758124626895)
+Mann-Whitney U two sample test
+Comparison of Setting 2 with Setting 1
+MannwhitneyuResult(statistic=761.5, pvalue=7.69472465405651e-37) **
+
+Comparison of Setting 2 with Setting 3
+MannwhitneyuResult(statistic=6191.0, pvalue=0.010047716899533841) **
+
+Comparison of Setting 2 with Setting 4
+MannwhitneyuResult(statistic=7083.0, pvalue=0.38718093688036254)
+
+Comparison of Setting 3 with Setting 1
+MannwhitneyuResult(statistic=1095.5, pvalue=1.576230662710342e-32) **
+
+Comparison of Setting 3 with Setting 2
+MannwhitneyuResult(statistic=8209.0, pvalue=0.9900138062058187)
+
+Comparison of Setting 3 with Setting 4
+MannwhitneyuResult(statistic=8160.5, pvalue=0.9855421254615013)
+
+Comparison of Setting 4 with Setting 1
+MannwhitneyuResult(statistic=218.0, pvalue=1.0051227407889675e-42) **
+
+Comparison of Setting 4 with Setting 2
+MannwhitneyuResult(statistic=7317.0, pvalue=0.6137608949834205)
+
+Comparison of Setting 4 with Setting 3
+MannwhitneyuResult(statistic=6239.5, pvalue=0.014541489101920086) **
+
+
+
+
+
+K-S two sample test
+Comparison of Setting 1 with Setting 2
+KstestResult(statistic=0.9416666666666667, pvalue=9.164707755544997e-59, statistic_location=0.2, statistic_sign=-1)
+
+Comparison of Setting 1 with Setting 3
+KstestResult(statistic=0.9166666666666666, pvalue=1.5894322111415835e-54, statistic_location=0.2, statistic_sign=-1)
+
+Comparison of Setting 1 with Setting 4
+KstestResult(statistic=0.9833333333333333, pvalue=3.1549910805213735e-67, statistic_location=0.2, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=1.0, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 3
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=1.0, statistic_sign=-1)
+
+Comparison of Setting 2 with Setting 4
+KstestResult(statistic=0.058333333333333334, pvalue=0.6657336063007502, statistic_location=0.31, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=1.0, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 2
+KstestResult(statistic=0.16666666666666666, pvalue=0.03561837082186596, statistic_location=0.46199999999999997, statistic_sign=-1)
+
+Comparison of Setting 3 with Setting 4
+KstestResult(statistic=0.15, pvalue=0.06728144983435368, statistic_location=0.272, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 1
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=1.0, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 2
+KstestResult(statistic=0.058333333333333334, pvalue=0.6657336063007502, statistic_location=0.446, statistic_sign=-1)
+
+Comparison of Setting 4 with Setting 3
+KstestResult(statistic=0.0, pvalue=1.0, statistic_location=1.0, statistic_sign=-1)
+
+
 K-S two sample test
 Comparison of Setting 2 with Setting 1
 KstestResult(statistic=0.9416666666666667, pvalue=9.164707755544997e-59, statistic_location=0.2, statistic_sign=1)
@@ -92,23 +193,4 @@ KstestResult(statistic=0.058333333333333334, pvalue=0.6657336063007502, statisti
 
 Comparison of Setting 4 with Setting 3
 KstestResult(statistic=0.15, pvalue=0.06728144983435368, statistic_location=0.272, statistic_sign=1)
-
-Mann-Whitney U two sample test
-Comparison of Setting 2 with Setting 1
-MannwhitneyuResult(statistic=761.5, pvalue=7.69472465405651e-37)
-
-Comparison of Setting 2 with Setting 3
-MannwhitneyuResult(statistic=6191.0, pvalue=0.010047716899533841)
-
-Comparison of Setting 2 with Setting 4
-MannwhitneyuResult(statistic=7083.0, pvalue=0.38718093688036254)
-
-Comparison of Setting 4 with Setting 1
-MannwhitneyuResult(statistic=218.0, pvalue=1.0051227407889675e-42)
-
-Comparison of Setting 4 with Setting 2
-MannwhitneyuResult(statistic=7317.0, pvalue=0.6137608949834205)
-
-Comparison of Setting 4 with Setting 3
-MannwhitneyuResult(statistic=6239.5, pvalue=0.014541489101920086)
 
