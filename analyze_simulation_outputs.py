@@ -6,6 +6,9 @@ import numpy as np
 import matplotlib.pyplot as plt
 from scipy import stats
 
+import matplotlib
+matplotlib.use('MacOSX')
+
 
 def load_firm_worker_info(folder, run_folder, use_mvpt, type_conditioning):
     """Loading saved simulation data for firms and workers"""
@@ -187,7 +190,7 @@ def worker_belief_test(folder, run_folder,worker_info, firm_info):
             min_val = min(min_val, firm_info[idx_f]["mvpt-range"][0])
             max_val = max(max_val, firm_info[idx_f]["mvpt-range"][1])
         else:
-            print(f"Error, invalid benchmark: {firm_info[idx_f]["benchmark"]}.")
+            print(f"Error, invalid benchmark: {firm_info[idx_f]['benchmark']}.")
     
     sharing_incorrect_R = 0
     sharing_incorrect_S = 0
@@ -421,28 +424,28 @@ def plot_wage_differences_per_setting(setting_info,y="Average Wage",title="Compa
     plt.violinplot(data_reorged)
     # plt.xlabel("Settings")
     plt.xticks([y+1 for y in range(len(data_reorged))],
-                  labels=["Neither", "Firm-verified", "Predicted", "Both"],rotation=45,fontsize=16)
-    plt.ylabel(y,fontsize = 16)
+                  labels=["Neither", "Firm-posted", "Predicted","Both"],rotation=45,fontsize=18) #
+    plt.ylabel(y,fontsize = 25)
     if gap:
         plt.ylim((-0.2,0.5))
     elif at:
         plt.ylim((-0.5,0.5))
-    # plt.show()
-    if gap:
-        plt.savefig(f"Formatted Final Graphs/avg_wage_gap_per_setting_violin-{exp}-{conditions}.png")
-    elif at:
-        plt.savefig(f"Formatted Final Graphs/avg_at_gap_per_setting_violin-{exp}-{conditions}.png")
-    else:
-        plt.savefig(f"Formatted Final Graphs/avg_wage_per_setting_violin-{exp}-{conditions}.png")
+    plt.show()
+    # if gap:
+    #     plt.savefig(f"Formatted Final Graphs/avg_wage_gap_per_setting_violin-{exp}-{conditions}.png")
+    # elif at:
+    #     plt.savefig(f"Formatted Final Graphs/avg_at_gap_per_setting_violin-{exp}-{conditions}.png")
+    # else:
+    #     plt.savefig(f"Formatted Final Graphs/avg_wage_per_setting_violin-{exp}-{conditions}.png")
 
     # test empirical cdf hypothesis 
-    for j in range(4):
-        plt.ecdf(data_reorged[j],label=f"Setting {j+1} ECDF")
-    plt.xlabel("Average Wage")
-    plt.ylabel("P(w <= W)")
-    plt.title("Empirical CDF Comparison")
-    plt.legend()
-    plt.show()
+    # for j in range(4):
+    #     plt.ecdf(data_reorged[j],label=f"Setting {j+1} ECDF")
+    # plt.xlabel("Average Wage")
+    # plt.ylabel("P(w <= W)")
+    # plt.title("Empirical CDF Comparison")
+    # plt.legend()
+    # plt.show()
 
     return data_reorged
 
@@ -455,11 +458,11 @@ def plot_offer_differences(setting_info, type_conditioning):
     if type_conditioning:
         # pos = [j for i in range(0,12,3) for j in range(i,i+2)]
         pos = range(8)
-        labels = ["Neither,\nType $H$", "Neither,\nType $L$","Firm-verified,\nType $H$", "Firm-verified,\nType $L$","Predicted,\nType $H$", "Predicted,\nType $L$","Both,\nType $H$", "Both,\nType $L$"]
+        labels = ["Neither,\nType $H$", "Neither,\nType $L$","Firm-posted,\nType $H$", "Firm-posted,\nType $L$","Predicted,\nType $H$", "Predicted,\nType $L$","Both,\nType $H$", "Both,\nType $L$"]
         bottom = np.zeros(len(pos))
     else:
         pos = range(4)
-        labels = ["Neither","Firm-verified","Predicted", "Both"]
+        labels = ["Neither","Firm-posted","Predicted", "Both"]
         bottom = np.zeros(len(labels))
 
     offer_info = {"No Offer":[], "Rejected Offer":[],"Accepted Offer":[]} # each list is s1:R,S, ..., s4:R,S
@@ -499,23 +502,30 @@ def plot_offer_differences(setting_info, type_conditioning):
     hatch = ["","//","--"]
     for i,(o, o_count) in enumerate(offer_info.items()):
         if i >0:
-            plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i],hatch=hatch[i])
+            bars = plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i],hatch=hatch[i])
+            # if i ==2:
+            #     for bar in bars:
+            #         yval = bar.get_height()
+            #         plt.text(bar.get_x(), 1.01, f"{round(yval,4)}")
         else:
-            plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i])
+            bars = plt.bar(labels, o_count,label=o,bottom=bottom,color=colors[i])
+            # for bar in bars:
+            #     yval = bar.get_height()
+            #     plt.text(bar.get_x(), yval - .02, f"{round(yval,4)}")
         bottom += o_count
-        plt.xticks(pos,labels,fontsize=16,rotation=45)
+        plt.xticks(pos,labels,fontsize=18,rotation=45)
         # plt.bar_label(p,fontsize=12,rotation=45)
     if type_conditioning:
-        plt.ylabel("Proportion of $T$\nAveraged across all worker types",fontsize=16)
+        plt.ylabel("Proportion of $T$\nAveraged across each worker type",fontsize=18)
     else:
-        plt.ylabel("Proportion of $T$\nAveraged across all workers",fontsize=16)
-    plt.legend(loc="lower left")
+        plt.ylabel("Proportion of $T$\nAveraged across all workers",fontsize=18)
+    plt.legend(loc="lower left",fontsize=18)
     plt.show()
 
 def plot_benchmark_choice_comparison(setting_info, stat="Largest"):
     
     pos = range(4)
-    labels = [f"Neither",f"Firm-verified",f"Predicted",f"Both"]
+    labels = [f"Neither",f"Firm-posted",f"Predicted",f"Both"]
     bottom = np.zeros(len(labels))
 
     bench_info = {"Identical Ranges":[], f"{stat}":[],f"Non-{stat}":[]} # each list is s1:R,S, ..., s4:R,S
@@ -546,15 +556,22 @@ def plot_benchmark_choice_comparison(setting_info, stat="Largest"):
     hatch = ["","**","||"]
     for i,(b, b_count) in enumerate(bench_info.items()):
         if i > 0:
-            plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i],hatch=hatch[i])
+            bars = plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i],hatch=hatch[i])
+            # if i ==2:
+            #     for bar in bars:
+            #         yval = bar.get_height()
+            #         plt.text(bar.get_x(), 1.01, f"{round(yval,4)}")
         else:
-            plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i])
-        plt.xticks(pos,labels,fontsize=16,rotation=45)
+            bars = plt.bar(labels, b_count,label=b,bottom=bottom,color=colors[i])
+            # for bar in bars:
+            #     yval = bar.get_height()
+            #     plt.text(bar.get_x(), yval - .02, f"{round(yval,4)}")
+        plt.xticks(pos,labels,fontsize=18,rotation=45)
         # plt.bar_label(p,fontsize=12,rotation=45)
         bottom += b_count
     # plt.title("Comparison of Firm Benchmark Choices")
-    plt.ylabel("Proportion of $T$\nAveraged across all firms",fontsize=16)
-    plt.legend(loc="lower left")
+    plt.ylabel("Proportion of $T$\nAveraged across all firms",fontsize=18)
+    plt.legend(loc="lower left",fontsize=18)
     plt.show()
 
 
@@ -566,20 +583,63 @@ def setting_comparison_statistics(data_reorged):
         print(stats.describe(data_reorged[j]))
 
     
-    print("Mann-Whitney U two sample test")
+    print("Mann-Whitney U two sample test -- WG")
+    for i in range(4):
+        if i == 0:
+            continue
+        print(f"Comparison of Setting {1} with Setting {i+1}")
+        print(stats.mannwhitneyu(data_reorged[0],data_reorged[i],alternative="less"))
+        print()
+
     for i in range(4):
         if i == 1:
             continue
         print(f"Comparison of Setting {2} with Setting {i+1}")
-        print(stats.mannwhitneyu(data_reorged[i],data_reorged[1],alternative="less"))
+        print(stats.mannwhitneyu(data_reorged[1],data_reorged[i],alternative="less"))
+        print()
+    
+    for i in range(4):
+        if i == 2:
+            continue
+        print(f"Comparison of Setting {3} with Setting {i+1}")
+        print(stats.mannwhitneyu(data_reorged[2],data_reorged[i],alternative="less"))
         print()
     
     for i in range(4):
         if i == 3:
             continue
         print(f"Comparison of Setting {4} with Setting {i+1}")
-        print(stats.mannwhitneyu(data_reorged[i],data_reorged[3],alternative="less"))
+        print(stats.mannwhitneyu(data_reorged[3],data_reorged[i],alternative="less"))
         print()  
+
+    # print("K-S two sample test")
+    # for i in range(4):
+    #     if i == 0:
+    #         continue
+    #     print(f"Comparison of Setting 1 with Setting {i+1}")
+    #     print(stats.kstest(data_reorged[i],data_reorged[0],alternative="less"))
+    #     print()
+
+    # for i in range(4):
+    #     if i == 1:
+    #         continue
+    #     print(f"Comparison of Setting 2 with Setting {i+1}")
+    #     print(stats.kstest(data_reorged[i],data_reorged[1],alternative="less"))
+    #     print()
+    
+    # for i in range(4):
+    #     if i == 2:
+    #         continue
+    #     print(f"Comparison of Setting 3 with Setting {i+1}")
+    #     print(stats.kstest(data_reorged[i],data_reorged[2],alternative="less"))
+    #     print()
+    
+    # for i in range(4):
+    #     if i == 3:
+    #         continue
+    #     print(f"Comparison of Setting 4 with Setting {i+1}")
+    #     print(stats.kstest(data_reorged[i],data_reorged[3],alternative="less"))
+    #     print()
 
 
 def get_worker_wages_typed(worker_info,N_w):
@@ -603,29 +663,31 @@ def get_worker_wages(worker_info,N_w):
 
 seed=42
 
-betas = [(6.91*10**(-4))]#,1.15*10**(-3))]#med - 9.21*10**(-4)(6.91*10**(-4),1.15*10**(-3))
-beta_labels = ["slow-fast"]#, "medium","fast"]
+betas = [(6.91*10**(-4),1.15*10**(-3))]#med - 9.21*10**(-4)(6.91*10**(-4),1.15*10**(-3))
+beta_labels = ["slow"]#, "medium","fast"]
 
 settings = [(False,False, False),(False, True, False),(True, True, False),(True, True, True)] # ,(False, True, False),
 setting_label = ["setting 1","setting 2","setting 3","setting 4"] # "setting 2"
 
 # riskiness = [(0.5,0.5)]#(0.75,0.5),(0.25,0.5), (0.5,0.25),,(0.25,0.25),(0.75,0.5),(0.75,0.25),(0.5,0.5)
-riskiness_label = ["s-r"]#"r-r","s-r","e-s", "s-s","r-s","e-r"
-exp = "EXP2"
-folder = "simulation_output_data_experiment_2_asym_betas_risky_market"
+riskiness_label = ["r"]# (risky)"r-r","s-r", (safe)"e-s", "s-s",(initial)"r-s","e-r"
+exp = "EXP1"
+folder = "bls_final_pos_eps_homogenous"
 
-p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
+# p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
+# p_labels = ["IT","Rtl","Bus","Manu","Ed","Fin","Hlth","Rest"]
+p_labels = ["IT","Rtl","Bus","Manu","Ed","Fin","Hlth","Rest"]
 
 # fixed across settings 
 N_w = 100 # small number of workers to start
 N_f = 5 # small number of firms
 k = 5 # number of intervals to break [0,1] up into
 W = [float(i/k) for i in range(k+1)] # k + 1 possible wages
-ranges = W + [-1] # -1 indicates no range given 
+ranges = W + [-1.0] # -1 indicates no range given 
 alpha = 0.3 # more weight on present rewards
 delta = 0.9 # more patient
 p_s = [1/(k+1) for i in range(k+1)] # this parameter doesn't matter, but just for initializing market
-type_conditioning = True
+type_conditioning = False
 T = 20000
 
 
@@ -633,12 +695,12 @@ T = 20000
 p_l = "u"
 N = 15
 b_label = beta_labels[0]
-setting_data_1 = [[] for i in range(len(setting_label))] # W_F
-setting_data_2 = [[] for i in range(len(setting_label))] # AT gaps
-setting_data_3 = [[] for i in range(len(setting_label))] # benchmark choice
-setting_data_4 = [[] for i in range(len(setting_label))] # W_G
-setting_data_5 = [[] for i in range(len(setting_label))] # Offer choices
 for r,r_label in enumerate(riskiness_label):
+    setting_data_1 = [[] for i in range(len(setting_label))] # W_F
+    setting_data_2 = [[] for i in range(len(setting_label))] # AT gaps
+    setting_data_3 = [[] for i in range(len(setting_label))] # benchmark choice
+    setting_data_4 = [[] for i in range(len(setting_label))] # W_G
+    setting_data_5 = [[] for i in range(len(setting_label))] # Offer choices
     for s,s_label in enumerate(setting_label):
         print(f"evaluating {s_label}...")
         distribution_data_1 = [[] for i in range(len(p_labels))]
@@ -685,6 +747,9 @@ for r,r_label in enumerate(riskiness_label):
                     with open(f"{folder}/{run_folder}/mvpt_values.pkl","rb") as pkl_fl1, open(f"{folder}/{run_folder}/median_values.pkl","rb") as pkl_fl2:
                         mvpt_values = list(pickle.load(pkl_fl1))
                         medians = list(pickle.load(pkl_fl2))
+                        # plt.plot(mvpt_values)
+                        # plt.plot(medians)
+                        # plt.show()
                 
                 firm_info, worker_info, sal_bench_l, sal_bench_u = load_firm_worker_info(folder, run_folder, use_mvpt,type_conditioning)
                 all_wages  = get_worker_wages(worker_info,N_w)
@@ -694,35 +759,33 @@ for r,r_label in enumerate(riskiness_label):
                 
                 firms_ATs = [firm_info[i]["AT"] for i in range(N_f)]
 
-                stable_t = len(firms_ATs[0])
+                # stable_t = len(firms_ATs[0])
 
-                if type_conditioning:
-                    risky_ATs = [[at[0] for at in firms_ATs[i]]for i in range(N_f)]
-                    safe_ATs = [[at[1] for at in firms_ATs[i]]for i in range(N_f)]
-                    for t in range(T):
-                        stable_r = 1
-                        stable_s = 1
-                        for i in range(N_f):
-                            if min(risky_ATs[i][t:]) != max(risky_ATs[i][t:]):
-                                stable_r = 0
-                            if min(safe_ATs[i][t:]) != max(safe_ATs[i][t:]):
-                                stable_s = 0
-                        if stable_r and stable_s:
-                            stable_t = t
-                            break
-                else:
-                    for t in range(T):
-                        stable = 1
-                        for i in range(N_f):
-                            if min(firms_ATs[i][t:]) != max(firms_ATs[i][t:]):
-                                stable = 0
-                        if stable:
-                            stable_t = t
-                            break
-                print(f"AT stability at {stable_t}/{T}")
+                # if type_conditioning:
+                #     risky_ATs = [[at[0] for at in firms_ATs[i]]for i in range(N_f)]
+                #     safe_ATs = [[at[1] for at in firms_ATs[i]]for i in range(N_f)]
+                #     for t in range(T):
+                #         stable_r = 1
+                #         stable_s = 1
+                #         for i in range(N_f):
+                #             if min(risky_ATs[i][t:]) != max(risky_ATs[i][t:]):
+                #                 stable_r = 0
+                #             if min(safe_ATs[i][t:]) != max(safe_ATs[i][t:]):
+                #                 stable_s = 0
+                #         if stable_r and stable_s:
+                #             stable_t = t
+                #             break
+                # else:
+                # for t in range(T):
+                #     stable = 1
+                #     for i in range(N_f):
+                #         if min(firms_ATs[i][t:]) != max(firms_ATs[i][t:]):
+                #             stable = 0
+                #     if stable:
+                #         stable_t = t
+                #         break
+                # print(f"AT stability at {stable_t}/{T}")
 
-
-                continue
 
 
 
@@ -799,14 +862,15 @@ for r,r_label in enumerate(riskiness_label):
                 
 
 
-data_reorged = plot_wage_differences_per_setting(setting_data_1,y=r"$W_F$",exp=exp,conditions=riskiness_label[0]) # W_F
-if type_conditioning:
-    data_reorged = plot_wage_differences_per_setting(setting_data_2,y=r"$AT_G$",at=True,exp=exp,conditions=riskiness_label[0]) # AT gaps
-    data_reorged = plot_wage_differences_per_setting(setting_data_4,y=r"$W_G$",gap=True,exp=exp,conditions=riskiness_label[0]) # W_G
-plot_benchmark_choice_comparison(setting_data_3,stat="Widest") # benchmark choice 
-plot_offer_differences(setting_data_5,type_conditioning) # offer choice 
+    data_reorged = plot_wage_differences_per_setting(setting_data_1,y=r"$W_F$",exp=exp,conditions=riskiness_label[0]) # W_F
+    # setting_comparison_statistics(data_reorged)
+    if type_conditioning:
+        data_reorged = plot_wage_differences_per_setting(setting_data_2,y=r"$AT_G$",at=True,exp=exp,conditions=riskiness_label[0]) # AT gaps
+        data_reorged = plot_wage_differences_per_setting(setting_data_4,y=r"$W_G$",gap=True,exp=exp,conditions=riskiness_label[0]) # W_G
+    plot_benchmark_choice_comparison(setting_data_3,stat="Widest") # benchmark choice 
+    plot_offer_differences(setting_data_5,type_conditioning) # offer choice 
 
-# setting_comparison_statistics(data_reorged)
+    # setting_comparison_statistics(data_reorged)
 
 
 

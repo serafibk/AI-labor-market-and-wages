@@ -252,7 +252,6 @@ class Market:
                     w.type="risky"
 
             print(f"Agents initialized with wage ratio {np.percentile(male_wages,50)/np.percentile(female_wages,50)}.")
-        # print(f"Agents initialized with wage ratio {np.percentile(male_wages,50)/np.percentile(female_wages,50)}.")
 
         # initializing salary benchmark (used in all settings)
         initial_firm_pool = set()
@@ -614,7 +613,7 @@ class Worker:
         self.last_wage = initial_wage
         self.bargaining_outcome = None
 
-    def get_reward(self, sharing = None, firm_choice = False, bargaining_outcome = None, last_wage=None, eps_share=1e-2,firm_upper_bound =None):
+    def get_reward(self, sharing = None, firm_choice = False, bargaining_outcome = None, last_wage=None, eps_share=-1e-2,firm_upper_bound =None):
         '''sharing is None, True or False. bargaining_outcome is None, -1 or >0
         '''
         if sharing is not None:
@@ -781,7 +780,7 @@ class Firm:
         self.bot_90 = float(bot_90_mapped)
 
 
-    def get_reward(self,accepted_offers=[], num_offers=0, benchmark = None, eps_share=1e-2,eps_hire=1):
+    def get_reward(self,accepted_offers=[], num_offers=0, benchmark = None, eps_share=-1e-2,eps_hire=1):
         ''' some reward for sharing, negotiation reward larger for 1) the more offers accepted and 2) the larger the value of the offers accepted
         sharing is None, True, or False. eps_hire is supposed to penalize firms if they get no offers whatsoever (hm but this really only makes sense if firm's strategy influences supply of workers)
         '''
@@ -931,15 +930,15 @@ if __name__ == "__main__":
     T = 20000  
 
     # params to sweep over 
-    betas = [6.91*10**(-4)]#9.21*10**(-4)(6.91*10**(-4),1.15*10**(-3))
-    beta_labels = ["slow"]#, "medium","fast"]
+    betas = [6.91*10**(-4),(6.91*10**(-4),1.15*10**(-3))]#9.21*10**(-4)(6.91*10**(-4),1.15*10**(-3))
+    beta_labels = ["slow","slow-fast"]#, "medium","fast"]
 
     settings = [(False,False, False),(False, True, False),(True, True, False), (True, True, True)] #
     setting_label = ["setting 1", "setting 2","setting 3","setting 4"] # 
 
-    riskiness = [0.25]#,(0,0.5)
-    riskiness_label = ["s"]#,"n-r"
-    type_conditioning = False # manually set this
+    riskiness = [0.5]#,(0,0.5)
+    riskiness_label = ["r"]#,"n-r"
+    type_conditionings = [False,True] # manually set this
 
     ## initial distributions -- generated from BLS data using explore_bls_wages.py
     # Information Security Analysts
@@ -972,44 +971,10 @@ if __name__ == "__main__":
     p_med_ratio = [1.151,1.078,1.116,1.779,1.045,1.905,1.071,1.149]
     p_labels = ["IT","Rtl","Bus","Manu","Ed","Fin","Hlth","Rest"]
 
-    ## SYNTHETIC RANGES
-    # skewed left (k-l):
-    # kl = [3/4,1/8,0.9-(3/4+1/8)]+[0.1/(k-2) for i in range(k-2)]
-    # # slightly skewed left (s-k-l):
-    # skl = [1/2,1/8,0.7-(1/2+1/8)]+[0.3/(k-2) for i in range(k-2)]
-    # # uniform (u): 
-    # u= [1/(k+1) for i in range(k+1)]
-    # # slightly skewed right (s-k-r):
-    # skr = [0.3/(k-2) for i in range(k-2)]+[1/2,1/8,0.7-(1/2+1/8)]
-    # # skewed right(k-r):
-    # kr = [0.1/(k-2) for i in range(k-2)]+[0.9-(3/4+1/8),1/8,3/4]
-    # # bimodal even (b-e):
-    # be = [0.4] + [0.1/2 for i in range(2)] + [0.1/2 for i in range(2)] + [0.4]
-    # # bimodal slightly left (b-l):
-    # bl =  [0.45] + [0.1/2 for i in range(2)]  + [0.1/2 for i in range(2)] + [0.35] 
-    # # bimodal slightly right (b-r):
-    # br =  [0.35] + [0.1/2 for i in range(2)]+ [0.1/2 for i in range(2)] + [0.45]
-    # p_labels = ["k-r","s-k-r","s-k-l","k-l","u", "b-e", "b-l","b-r"] 
-    # p_settings = [kr,skr,skl,kl,u,be,bl,br]
-
-    # for p in p_settings:
-    #     example_wage_distribution = [gen.choice(W,p=p) for i in range(N_w)]
-    #     # counts, bins = np.histogram(example_wage_distribution, bins=len(W))
-    #     # plt.stairs(counts, bins)
-    #     plt.hist(example_wage_distribution, bins=[w for w in W+[1.2]],align="left")
-    #     plt.xticks([w for w in W], fontsize=16)
-    #     plt.xlabel("Initial Wage Value",fontsize=16)
-    #     plt.ylabel("Number of Workers",fontsize=16)
-    #     plt.ylim((0,80))
-    #     plt.show()
-    
-    # exit()
 
     # output
     save = True
-    # folder = "experiment_2_test_6"
-    # s_folder = "simulation_output_robustness_tests"
-    s_folder = "bls_final_pos_eps_homogenous_safe"
+    s_folder = "great_lakes_test"
 
 
     N = 15 # trials to run to average over
@@ -1036,7 +1001,7 @@ if __name__ == "__main__":
                     S_f_benchmark = S_f_benchmark + [((l_b,u_b),(l_i,u_i),(l_m,u_m)) for l_b in W for u_b in W for l_i in W  for u_i in W  for l_m in W for u_m in W if l_b<= u_b and l_i <= u_i and l_m <= u_m] # salary benchmark data + individual data + MVPT data (probably too many states)
                     A_f_benchmark = A_f_benchmark + ["mvpt"] 
 
-                for beta, b_label in zip(betas, beta_labels):
+                for beta, b_label, type_conditioning in zip(betas, beta_labels,type_conditionings):
                     for p, p_s, p_n, p_m, p_l in zip(range(8),p_settings, p_num_types, p_med_ratio, p_labels):
                         print("--Setting Details--")
                         print(f"information setting: {s_label}, market setting: {r_label}, beta setting:{b_label}, distribution: {p_l}")
